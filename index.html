@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+Htw1Jb1t8DuvxxYTHFoM1Ysx393qjZlixO52xP51o4=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -660,6 +660,11 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .share-link{display:flex;gap:8px;margin:4px 0 6px}
 .share-link input{flex:1;min-width:0}
 
+/* ---------- voice in the equalizer ---------- */
+.eq-voice{margin-top:12px;display:grid;gap:8px}
+.eq-voice-hint{color:var(--muted);font-size:13px}
+.eq-dlg.eq-off .eq-voice{opacity:.5}
+
 /* ---------- game mode ---------- */
 .game-box{margin-top:6px}
 .game-box.mix-off #gmDuckRow,.game-box.mix-off #gmLevel{opacity:.5}
@@ -834,6 +839,15 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <canvas class="eq-curve" id="eqCurve" aria-hidden="true"></canvas>
   <div class="eq-presets" id="eqPresets" role="group" aria-label="Preajustes"></div>
   <div class="eq-bands" id="eqBands"></div>
+  <div class="eq-voice" id="eqVoice">
+    <div class="mix-row"><label for="eqVoiceR">Subir voz</label><output id="eqVoiceOut">Normal</output></div>
+    <input type="range" id="eqVoiceR" min="0" max="10" step="1" value="0" aria-describedby="eqVoiceHint">
+    <small class="eq-voice-hint" id="eqVoiceHint">Resalta la voz del cantante sin subir los instrumentos de los lados.</small>
+    <div class="mix-opt">
+      <div><b>Que la voz no se pierda con los bajos</b><small id="eqVoiceNote"></small></div>
+      <button type="button" class="switch" id="eqVoiceAuto" role="switch" aria-checked="true" aria-label="Que la voz no se pierda con los bajos"></button>
+    </div>
+  </div>
   <div class="eq-foot">
     <small>Si suena distorsionado al subir bandas, baja el preamplificador (PRE).</small>
     <div class="dlg-act"><button type="button" class="pill" id="eqReset">Restablecer</button><button type="button" class="add-top" data-act="eq-close">Listo</button></div>
@@ -1054,6 +1068,8 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 
 <script>
 (() => {
+// Security: Hum never runs inside another site's frame (that is how click-tricks work)
+if (window.top !== window.self){ try { window.top.location.replace(location.href); } catch {} document.documentElement.innerHTML = ""; return; }
 /* ---------- icons ---------- */
 const P = {
   play:"M8 5v14l11-7z",
@@ -1274,6 +1290,9 @@ let ctx = null, master, analyser, noiseBuf, bus = null, timer = null, startTime 
 let audio = new Audio(); audio.preload = "auto";
 const deckB = new Audio(); deckB.preload = "auto";
 const keep = new Audio(); keep.loop = true; keep.src = URL.createObjectURL(silentWav(8));
+// plan B for phones whose screen-off stops the sound engine: a plain player (no equalizer) the phone always lets play
+const bgEl = new Audio(); bgEl.preload = "auto";
+let bgOn = false, bgUnlocked = false;
 function silentWav(sec){
   const rate = 8000, n = rate * sec, b = new ArrayBuffer(44 + n), v = new DataView(b);
   const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
@@ -1384,7 +1403,7 @@ function pump(){
   }
   if (ctx.currentTime >= startTime + tr.dur) next(true);
 }
-function pos(){ const t = cur(); if (!t) return 0; if (t.user) return audio.currentTime || 0; if (!ctx || !bus) return S.pausedPos; return clamp(ctx.currentTime - startTime, 0, t.dur); }
+function pos(){ const t = cur(); if (!t) return 0; if (t.user) return (bgOn ? bgEl : audio).currentTime || 0; if (!ctx || !bus) return S.pausedPos; return clamp(ctx.currentTime - startTime, 0, t.dur); }
 function killBus(){
   if (bus && ctx){ const old = bus; old.out.gain.setTargetAtTime(0, ctx.currentTime, .015); setTimeout(() => { try { old.out.disconnect(); old.fb.disconnect(); } catch {} }, 500); }
   bus = null;
@@ -1402,7 +1421,7 @@ function playFail(e){
   if (e && e.name === "NotAllowedError"){ // the browser wants a tap first (for example after the screen was locked)
     // with the screen off, stay "playing": the next song starts as soon as the phone allows it
     // (opening the app, or ▶ on the lock screen) instead of the whole queue stopping
-    if (document.hidden){ S.resumeOnShow = true; return; }
+    if (document.hidden){ if (!startBg()) S.resumeOnShow = true; return; }
     S.playing = false; clearInterval(timer); paint(); toast("Toca ▶ para seguir escuchando."); return;
   }
   const src = audio.currentSrc || audio.src;
@@ -1428,6 +1447,12 @@ function loadAt(sec){
       if (audio.dataset.id !== t.id){ audio.pause(); audio.removeAttribute("src"); audio.load(); audio.dataset.id = ""; }
       needFile(t, sec); return;
     }
+    if (bgOn){ // screen off with the plain player: the next songs keep going there
+      if (bgEl.dataset.id !== t.id){ bgEl.src = songUrl(t); bgEl.dataset.id = t.id; }
+      try { bgEl.currentTime = sec; } catch {}
+      if (S.playing) bgEl.play().catch(() => { S.resumeOnShow = true; });
+      return;
+    }
     if (audio.dataset.id !== t.id){ t.failSrc = null; audio.src = songUrl(t); audio.dataset.id = t.id; }
     try { audio.currentTime = sec; } catch {}
     if (S.playing) audio.play().catch(playFail);
@@ -1445,10 +1470,14 @@ async function play(){
   const t = cur(); if (!t) return;
   const fresh = ensureCtx();
   S.playing = true;
+  if (fresh) watchCtx();
+  unlockBg();
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {} // iPhone: music, not a sound effect
   // start the sound right away, while the tap still counts: phones (iPhone above all) block it if we wait first
   if (t.user){
     keep.pause();
-    if (audio.dataset.id !== t.id || !t.rec.blob) loadAt(0); else audio.play().catch(playFail);
+    if (bgOn && bgEl.dataset.id === t.id) bgEl.play().catch(() => {});
+    else if (audio.dataset.id !== t.id || !t.rec.blob) loadAt(0); else audio.play().catch(playFail);
     if (mix) mix.from.play().catch(() => {});
   } else {
     keep.play().catch(() => {});
@@ -1460,7 +1489,7 @@ async function play(){
   pump();
 }
 function pause(){
-  S.playing = false; clearInterval(timer); audio.pause(); keep.pause(); if (mix) mix.from.pause();
+  S.playing = false; clearInterval(timer); audio.pause(); keep.pause(); bgEl.pause(); if (mix) mix.from.pause();
   if (ctx) ctx.suspend().catch(() => {});
   paint();
 }
@@ -1509,6 +1538,7 @@ function setShuffle(on){
 }
 function applyVol(){
   if (master) master.gain.setTargetAtTime(S.muted ? 0 : S.vol * S.vol, ctx.currentTime, .02);
+  bgVol();
   const v = $("#vol"); v.value = Math.round((S.muted ? 0 : S.vol) * 100); v.style.setProperty("--pct", v.value + "%");
   $("#muteBtn").innerHTML = ic(S.muted || S.vol === 0 ? "mute" : "vol");
   $("#muteBtn").setAttribute("aria-label", S.muted ? "Activar sonido" : "Silenciar");
@@ -1705,7 +1735,7 @@ async function addFiles(files, target){
 async function removeSong(id, opts = {}){
   const t = BYID[id]; if (!t || !t.user) return;
   const wasCur = cur() && cur().id === id, wasPlaying = S.playing;
-  if (wasCur){ cancelMix(); audio.pause(); audio.removeAttribute("src"); audio.load(); audio.dataset.id = ""; S.playing = false; clearInterval(timer); }
+  if (wasCur){ cancelMix(); audio.pause(); audio.removeAttribute("src"); audio.load(); audio.dataset.id = ""; bgOn = false; bgEl.pause(); bgEl.dataset.id = ""; S.playing = false; clearInterval(timer); }
   const qi = S.queue.indexOf(id);
   S.queue = S.queue.filter(x => x !== id); S.ctxList = S.ctxList.filter(x => x !== id);
   if (qi > -1 && qi < S.qi) S.qi--;
@@ -1942,6 +1972,8 @@ S.eq = {
   bands: eqSaved && Array.isArray(eqSaved.bands) && eqSaved.bands.length === 10 ? eqSaved.bands.map(v => clamp(+v || 0, -12, 12)) : EQ_PRESETS["Plano"].slice(),
   preset: (eqSaved && eqSaved.preset) || "Plano",
   auto: !!(eqSaved && eqSaved.auto),
+  voice: eqSaved && isFinite(eqSaved.voice) ? clamp(Math.round(+eqSaved.voice), 0, 10) : 0,
+  voiceAuto: !(eqSaved && eqSaved.voiceAuto === false),
   level: (eqSaved && ["suave", "normal", "fuerte"].includes(eqSaved.level)) ? eqSaved.level : "normal"
 };
 let eqNodes = null, rc = null, rcFilters = null;
@@ -1951,18 +1983,50 @@ function makeEqFilters(c){
 function buildEq(){
   const filters = makeEqFilters(ctx), pre = ctx.createGain();
   filters.reduce((a, b) => { a.connect(b); return b; });
-  filters[9].connect(pre);
-  eqNodes = { filters, pre, input: filters[0], output: pre };
+  // voice: a voice is almost always in the middle of the mix, so only what is the same on both sides (the
+  // center) gets lifted, and only in the range of a voice. Instruments panned to the sides stay as they are.
+  const mud = ctx.createBiquadFilter(); mud.type = "peaking"; mud.frequency.value = 320; mud.Q.value = .9; // the boomy part that covers voices
+  filters[9].connect(mud); mud.connect(pre);
+  const sum = ctx.createGain(), split = ctx.createChannelSplitter(2), mid = ctx.createGain();
+  const vf = (type, fr, q, g) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = fr; b.Q.value = q; if (g) b.gain.value = g; return b; };
+  const vHp = vf("highpass", 220, .6), vLp = vf("lowpass", 5200, .6), vPk = vf("peaking", 2600, .8, 3), vG = ctx.createGain();
+  mid.channelCount = 1; mid.channelCountMode = "explicit"; mid.gain.value = .5; vG.gain.value = 0;
+  pre.connect(sum); pre.connect(split); split.connect(mid, 0); split.connect(mid, 1);
+  mid.connect(vHp); vHp.connect(vLp); vLp.connect(vPk); vPk.connect(vG); vG.connect(sum);
+  eqNodes = { filters, pre, mud, vG, input: filters[0], output: sum };
   applyEq(true);
   return eqNodes;
 }
-const eqFlat = () => S.eq.bands.every(v => v === 0) && S.eq.pre === 0;
+const eqFlat = () => S.eq.bands.every(v => v === 0) && S.eq.pre === 0 && !S.eq.voice;
+// how much the voice is lifted: what you chose, plus a little more by itself when the bass is turned up
+function voiceDb(){
+  if (!S.eq.on) return { lift: 0, mud: 0, auto: 0 };
+  const bass = (Math.max(0, S.eq.bands[0]) + Math.max(0, S.eq.bands[1]) + Math.max(0, S.eq.bands[2]) * .6) / 2.6 + Math.max(0, S.eq.pre) * .3;
+  const auto = S.eq.voiceAuto ? clamp((bass - 2) * .55, 0, 5) : 0;
+  const lift = clamp(S.eq.voice + auto, 0, 12);
+  const mud = -clamp((S.eq.voiceAuto ? Math.max(0, bass - 2) * .35 : 0) + S.eq.voice * .2, 0, 4);
+  return { lift, mud, auto };
+}
+function renderVoiceUI(){
+  const r = $("#eqVoiceR"); if (!r) return;
+  r.value = S.eq.voice; r.style.setProperty("--pct", S.eq.voice * 10 + "%");
+  const v = voiceDb();
+  $("#eqVoiceOut").textContent = S.eq.voice ? `+${S.eq.voice} dB` : "Normal";
+  $("#eqVoiceAuto").setAttribute("aria-checked", S.eq.voiceAuto);
+  $("#eqVoiceNote").textContent = !S.eq.on ? "El ecualizador está desactivado."
+    : v.auto > .4 ? `Tienes los bajos subidos: la voz se aclara sola ${v.auto.toFixed(1).replace(".0", "")} dB más.`
+    : "Cuando subes los bajos, la voz se aclara sola para que no quede tapada.";
+}
 function applyEq(silent){
   if (eqNodes){
     const t = ctx.currentTime;
     eqNodes.filters.forEach((f, i) => f.gain.setTargetAtTime(S.eq.on ? S.eq.bands[i] : 0, t, .015));
     eqNodes.pre.gain.setTargetAtTime(S.eq.on ? Math.pow(10, S.eq.pre / 20) : 1, t, .015);
+    const v = voiceDb();
+    eqNodes.vG.gain.setTargetAtTime(v.lift > 0 ? Math.pow(10, v.lift / 20) - 1 : 0, t, .05);
+    eqNodes.mud.gain.setTargetAtTime(v.mud, t, .05);
   }
+  renderVoiceUI();
   if (!silent) store.set("eq", S.eq);
   const active = S.eq.on && !eqFlat();
   const b = $("#eqBtn"); if (b){ b.classList.toggle("on", active); b.setAttribute("aria-pressed", active); }
@@ -2015,6 +2079,12 @@ function drawEq(){
   if (rcFilters){
     const mag = new Float32Array(N), ph = new Float32Array(N);
     rcFilters.forEach((f, i) => { f.gain.value = S.eq.on ? S.eq.bands[i] : 0; f.getFrequencyResponse(freqs, mag, ph); for (let k = 0; k < N; k++) total[k] += 20 * Math.log10(mag[k] || 1e-6); });
+    const v = voiceDb();
+    if (v.lift || v.mud){
+      if (!rcFilters.voice){ const m = rc.createBiquadFilter(), p = rc.createBiquadFilter(); m.type = p.type = "peaking"; m.frequency.value = 320; m.Q.value = .9; p.frequency.value = 1800; p.Q.value = .45; rcFilters.voice = [m, p]; }
+      const [m, p] = rcFilters.voice; m.gain.value = v.mud; p.gain.value = v.lift;
+      [m, p].forEach(f => { f.getFrequencyResponse(freqs, mag, ph); for (let k = 0; k < N; k++) total[k] += 20 * Math.log10(mag[k] || 1e-6); });
+    }
   }
   const acc = tok("--accent");
   x.beginPath(); for (let k = 0; k < N; k++){ const px = fx(freqs[k]), py = fy(total[k]); k ? x.lineTo(px, py) : x.moveTo(px, py); }
@@ -2299,7 +2369,7 @@ async function mixTick(){
     if (x >= 1){ audio.playbackRate = fxRate(); glide = null; }
     paintTempo();
   }
-  if (mix || mixBusy || !S.mix.on || !S.playing) return;
+  if (bgOn || mix || mixBusy || !S.mix.on || !S.playing) return;
   const t = cur(); if (!t || !t.user || !(t.dur > 0)) return;
   const remain = (t.dur - audio.currentTime) / (audio.playbackRate || 1);
   if (remain > S.mix.secs + .15 || remain < 1.2) return;
@@ -2317,7 +2387,7 @@ setInterval(mixTick, 100);
 let endAt = -1, endStuck = 0;
 setInterval(() => {
   const t = cur();
-  if (!S.playing || !t || !t.user || mix || mixBusy || !t.rec.blob || audio.dataset.id !== t.id){ endStuck = 0; return; }
+  if (!S.playing || !t || !t.user || bgOn || mix || mixBusy || !t.rec.blob || audio.dataset.id !== t.id){ endStuck = 0; return; }
   if (audio.ended){ endStuck = 0; next(true); return; }
   const d = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : t.dur;
   if (d > 0 && d - audio.currentTime < 1.5){
@@ -2325,6 +2395,69 @@ setInterval(() => {
     if (endStuck >= 3){ endStuck = 0; next(true); }
   } else endStuck = 0;
 }, 1000);
+/* ---------- screen off on phones: the music keeps going ----------
+   Some phones (iPhone above all, and some Android ones) stop the app's sound engine when the screen turns off,
+   which used to pause the song. If that happens, the song carries on from the same second in a plain player the
+   phone always lets play (the equalizer and effects rest while the screen is off), and the full sound comes back
+   when you return to the app. */
+const bgCan = () => isMobile && !desk;
+const bgVol = () => { bgEl.volume = S.muted ? 0 : clamp(S.vol * S.vol, 0, 1); };
+function unlockBg(){ // runs on a tap: phones only let a player start later if it already played once from a tap
+  if (bgUnlocked || bgOn || !bgCan()) return;
+  bgUnlocked = true; bgEl.muted = true; bgEl.src = keep.src;
+  bgEl.play().then(() => { if (!bgOn){ bgEl.pause(); } bgEl.muted = false; }).catch(() => { bgUnlocked = false; bgEl.muted = false; });
+}
+function startBg(){
+  const t = cur();
+  if (bgOn || !bgCan() || !S.playing || !document.hidden || !t || !t.user || !t.rec.blob) return false;
+  const at = audio.dataset.id === t.id ? audio.currentTime || 0 : 0;
+  cancelMix(); bgOn = true;
+  bgEl.muted = false; bgEl.src = songUrl(t); bgEl.dataset.id = t.id;
+  try { bgEl.currentTime = at; } catch {}
+  const r = fxRate(); bgEl.preservesPitch = bgEl.mozPreservesPitch = bgEl.webkitPreservesPitch = S.fx.mode === "off"; bgEl.defaultPlaybackRate = bgEl.playbackRate = r;
+  bgVol(); audio.pause();
+  bgEl.play().catch(() => { bgOn = false; S.resumeOnShow = true; });
+  return true;
+}
+function backFromBg(){ // back in the app: the full sound (equalizer, effects) takes over from the same second
+  if (!bgOn) return;
+  const t = cur();
+  if (!t || !t.user || !S.playing){ bgOn = false; bgEl.pause(); return; }
+  if (ctx && ctx.state !== "running") ctx.resume().catch(() => {});
+  if (audio.dataset.id !== t.id){ t.failSrc = null; audio.src = songUrl(t); audio.dataset.id = t.id; }
+  try { audio.currentTime = bgEl.currentTime || 0; } catch {}
+  audio.play().then(() => {
+    if (!bgOn) return;
+    try { if (Math.abs(audio.currentTime - bgEl.currentTime) > .25) audio.currentTime = bgEl.currentTime; } catch {}
+    bgOn = false; bgEl.pause();
+  }).catch(() => {}); // the phone wants a tap first: the plain player keeps going until then
+}
+bgEl.addEventListener("ended", () => { if (bgOn && S.playing) next(true); });
+bgEl.addEventListener("error", () => { if (bgOn && S.playing && bgEl.getAttribute("src") && bgEl.src !== keep.src){ bgOn = false; playFail({ name: "MediaError" }); } });
+// signs that the phone stopped the sound right as the screen went off (later pauses, like an incoming call, are left alone)
+let bgHidAt = 0; const justOff = ms => performance.now() - bgHidAt < ms;
+document.addEventListener("visibilitychange", () => { if (document.hidden) bgHidAt = performance.now(); });
+function watchCtx(){
+  if (!ctx || !ctx.addEventListener) return;
+  ctx.addEventListener("statechange", () => {
+    if (!document.hidden || !S.playing || ctx.state === "running" || !justOff(4000)) return;
+    ctx.resume().catch(() => {});
+    setTimeout(() => { if (document.hidden && S.playing && ctx.state !== "running") startBg(); }, 700);
+  });
+}
+[audio, deckB].forEach(el => el.addEventListener("pause", () => {
+  if (!document.hidden || !bgCan() || !justOff(4000)) return;
+  setTimeout(() => { const t = cur(); if (el === audio && document.hidden && S.playing && !bgOn && audio.paused && !audio.ended && t && audio.dataset.id === t.id) startBg(); }, 400);
+}));
+let bgLastT = -1, bgStall = 0;
+setInterval(() => { // the song is "playing" but its time stands still
+  const t = cur();
+  if (!document.hidden || !justOff(20000) || !S.playing || bgOn || !bgCan() || !t || !t.user || mix || audio.dataset.id !== t.id || audio.paused){ bgStall = 0; bgLastT = -1; return; }
+  const ct = audio.currentTime, d = isFinite(audio.duration) ? audio.duration : t.dur;
+  bgStall = ct === bgLastT && d - ct > 2 ? bgStall + 1 : 0; bgLastT = ct;
+  if (bgStall >= 3){ bgStall = 0; startBg(); }
+}, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && bgOn) backFromBg(); });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden || !S.resumeOnShow) return;
   S.resumeOnShow = false;
@@ -3003,15 +3136,30 @@ async function doSync(){
   }
 }
 // something changed on another device: bring it here (returns true if the library changed)
+const safeId = id => typeof id === "string" && /^[\w.-]{1,120}$/.test(id);
+const safeImg = u => typeof u === "string" && /^(data:image\/(png|jpe?g|webp|gif);base64,[a-z0-9+/=]+|blob:[\w:/.-]+)$/i.test(u) ? u : "";
+const safeCover = u => safeImg(u) || (typeof u === "string" && /^https:\/\/[\w.-]+\.(scdn\.co|spotifycdn\.com)\/[\w/.-]+$/.test(u) ? u : "");
+const str = (v, n) => typeof v === "string" ? v.slice(0, n) : v == null ? "" : String(v).slice(0, n);
+function cleanPl(d){ // a playlist that came from the sync file: only plain text, numbers and images made by the app
+  const items = (Array.isArray(d.items) ? d.items : []).slice(0, 5000).filter(it => it && typeof it === "object").map(it => ({ ...it,
+    title: str(it.title, 300), album: str(it.album, 300), artists: (Array.isArray(it.artists) ? it.artists : []).slice(0, 20).map(a => str(a, 150)),
+    dur: clamp(+it.dur || 0, 0, 86400), cover: safeCover(it.cover),
+    link: safeId(it.link) ? it.link : null, sid: typeof it.sid === "string" && /^\w{1,64}$/.test(it.sid) ? it.sid : null,
+    url: typeof it.url === "string" && /^https:\/\/open\.spotify\.com\/track\/\w+$/.test(it.url) ? it.url : "" }));
+  return { ...d, title: str(d.title, 200), desc: str(d.desc, 600), owner: str(d.owner, 120), hue: isFinite(+d.hue) ? Math.round(+d.hue) % 360 : 200,
+    cover: safeCover(d.cover), genCover: safeImg(d.genCover), sharedFrom: typeof d.sharedFrom === "string" && /^[\w-]{10,200}$/.test(d.sharedFrom) ? d.sharedFrom : undefined,
+    shareId: typeof d.shareId === "string" && /^[\w-]{10,200}$/.test(d.shareId) ? d.shareId : undefined, items };
+}
 async function applyRemote(it){
   const i = it.key.indexOf(":"), kind = it.key.slice(0, i), id = it.key.slice(i + 1);
+  if (!safeId(id)) return false; // not something the app wrote
   if (kind === "song"){
     const t = BYID[id];
     if (it.deleted){ if (t && t.user && !((t.rec.u || 0) > it.updated)){ await removeSong(id, { remote: true }); return true; } return false; }
     if (t && t.user){
       const rec = t.rec; let ch = false;
       if (it.updated > (rec.u || 0) && it.data){
-        SONG_FIELDS.forEach(k => { if (k in it.data) rec[k] = it.data[k]; });
+        SONG_FIELDS.forEach(k => { if (k in it.data) rec[k] = ["title", "artist", "album", "name"].includes(k) ? str(it.data[k], 400) : it.data[k]; });
         rec.u = it.updated; t.title = rec.title; t.artist = rec.artist; t.album.title = rec.album || "Mis canciones"; ch = true;
       }
       if (it.parts && rec.cloud !== it.parts){ rec.cloud = it.parts; ch = true; }
@@ -3021,9 +3169,9 @@ async function applyRemote(it){
       return ch;
     }
     if (t) return false;
-    const d = it.data || {};
+    const d = it.data && typeof it.data === "object" ? it.data : {};
     const rec = { ...songData(d), id, u: it.updated, cloud: it.parts, blob: null, pic: null, lyrScan: true, owner: S.acct && S.acct.email,
-      title: d.title || "Canción", artist: d.artist || "Artista desconocido", added: d.added || Date.now(), name: d.name || "" };
+      title: str(d.title, 300) || "Canción", artist: str(d.artist, 300) || "Artista desconocido", album: str(d.album, 300), added: +d.added || Date.now(), name: str(d.name, 400) };
     await putRec(rec); addUserTrack(rec);
     return true;
   }
@@ -3034,8 +3182,8 @@ async function applyRemote(it){
       return false;
     }
     if (p && (p.u || 0) >= it.updated) return false;
-    const d = it.data || {};
-    const rec = { ...d, id, u: it.updated, items: Array.isArray(d.items) ? d.items : [], acct: S.acct && S.acct.email };
+    const d = cleanPl(it.data && typeof it.data === "object" ? it.data : {});
+    const rec = { ...d, id, u: it.updated, items: d.items, acct: S.acct && S.acct.email };
     addImported(rec); savePl(rec);
     return true;
   }
@@ -4507,7 +4655,7 @@ async function openShared(fid){
     const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media&key=${GKEY}`);
     if (!r.ok) throw new Error(r.status);
     const j = await r.json(); if (!j || !Array.isArray(j.items)) throw new Error("bad");
-    const items = j.items.slice(0, 2000).map(it => ({ sid: null, url: "", title: String(it.title || "").slice(0, 200), artists: (it.artists || []).slice(0, 10).map(a => String(a).slice(0, 100)), album: String(it.album || "").slice(0, 200), dur: +it.dur || 0, cover: "", link: null }));
+    const items = j.items.slice(0, 2000).map(it => ({ sid: null, url: "", title: String(it.title || "").slice(0, 200), artists: (it.artists || []).slice(0, 10).map(a => String(a).slice(0, 100)), album: String(it.album || "").slice(0, 200), dur: clamp(+it.dur || 0, 0, 86400), cover: "", link: null }));
     const old = IMP_ORDER.map(id => IMPORTED[id]).find(p => p.sharedFrom === fid);
     if (old){ old.title = String(j.title || old.title).slice(0, 100); old.desc = String(j.desc || "").slice(0, 300); old.items = items; old.owner = String(j.by || "").slice(0, 80); touchPl(old); renderLib(); if (S.view.id === old.id) rerender(); return old.id; }
     const now = Date.now();
@@ -4674,7 +4822,7 @@ function rows(list, ctxId, opts = {}){
     <div class="tl-head" aria-hidden="true"><span class="c-n">#</span><span>Título</span><span class="c-album">${opts.album === false ? "" : "Álbum"}</span><span></span><span></span><span class="c-dur">Dur.</span>${extra ? "<span></span>" : ""}</div>
     ${list.map((id, i) => { const t = BYID[id]; return `<div class="row${t.user && !t.rec.blob ? " cloud-only" : ""}${opts.sel && S.sel.has(id) ? " picked" : ""}" role="listitem" tabindex="0" data-row="${id}" data-list="${ctxId}"${opts.sel ? ` aria-selected="${S.sel.has(id)}"` : ""}>
       <span class="c-n"><span class="n">${i + 1}</span><span class="eq"><i></i><i></i><i></i></span><span class="pi">${ic("play")}</span></span>
-      <span class="c-title">${opts.cover === false ? "" : `<img src="${cover(t)}" alt="" width="40" height="40">`}<span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span></span>
+      <span class="c-title">${opts.cover === false ? "" : `<img src="${esc(cover(t))}" alt="" width="40" height="40">`}<span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span></span>
       <span class="c-album">${opts.album === false ? "" : esc(t.album.title)}</span>
       <button class="apl" data-apl="${id}" aria-label="Añadir ${esc(t.title)} a una playlist">${ic("plAdd")}</button>
       <button class="like" data-like="${id}"></button>
@@ -4805,7 +4953,7 @@ function paint(){
   const up = [];
   for (let k = 1; k <= 6; k++){ let i = S.qi + k; if (i >= S.queue.length){ if (S.repeat !== "all") break; i %= S.queue.length; } if (i === S.qi) break; up.push(i); }
   $("#upnext").innerHTML = up.length ? up.map(i => { const u = BYID[S.queue[i]];
-    return `<li tabindex="0" data-qi="${i}"><img src="${cover(u)}" alt="" width="40" height="40"><span><b>${esc(u.title)}</b><small>${esc(u.artist)}</small></span><span class="d">${fmt(u.dur)}</span></li>`; }).join("")
+    return `<li tabindex="0" data-qi="${i}"><img src="${esc(cover(u))}" alt="" width="40" height="40"><span><b>${esc(u.title)}</b><small>${esc(u.artist)}</small></span><span class="d">${fmt(u.dur)}</span></li>`; }).join("")
     : `<li style="cursor:default;grid-template-columns:1fr;color:var(--muted)">Es la última canción de la cola.</li>`;
   paintMarks(); paintMediaSession(); paintMini(); deskState(); trackChanged(t);
 }
@@ -5022,6 +5170,8 @@ $("#eqBands").addEventListener("dblclick", e => {
 });
 $("#eqSwitch").addEventListener("click", () => { S.eq.on = !S.eq.on; applyEq(); renderEqUI(); });
 $("#eqAutoSw").addEventListener("click", () => setAuto(!S.eq.auto));
+$("#eqVoiceR").addEventListener("input", e => { S.eq.voice = clamp(+e.target.value || 0, 0, 10); applyEq(); drawEq(); });
+$("#eqVoiceAuto").addEventListener("click", () => { S.eq.voiceAuto = !S.eq.voiceAuto; applyEq(); drawEq(); });
 $("#mixSw").addEventListener("click", () => { S.mix.on = !S.mix.on; saveMix(); });
 $("#sndBoost").addEventListener("click", () => { S.snd.boost = !S.snd.boost; applyBoost(); saveSnd(); });
 $("#fpPP").onclick = toggle;
@@ -5034,7 +5184,7 @@ fpSeek.addEventListener("input", () => { S.fpDragging = true; const t = cur(); f
 fpSeek.addEventListener("change", () => { const t = cur(); loadAt(fpSeek.value / 1000 * t.dur); S.fpDragging = false; paint(); });
 $("#mixSync").addEventListener("click", () => { S.mix.sync = !S.mix.sync; saveMix(); });
 $("#mixSecs").addEventListener("input", e => { S.mix.secs = +e.target.value; saveMix(); });
-$("#eqReset").addEventListener("click", () => { S.eq.auto = false; S.eq.bands = EQ_PRESETS["Plano"].slice(); S.eq.pre = 0; S.eq.preset = "Plano"; applyEq(); renderEqUI(); });
+$("#eqReset").addEventListener("click", () => { S.eq.auto = false; S.eq.bands = EQ_PRESETS["Plano"].slice(); S.eq.pre = 0; S.eq.voice = 0; S.eq.preset = "Plano"; applyEq(); renderEqUI(); });
 window.addEventListener("resize", () => { drawEq(); if (!isPhone() && S.drawer){ S.drawer = false; applySide(); } });
 document.addEventListener("error", e => { const im = e.target; if (im && im.tagName === "IMG" && im.dataset.fb && im.src !== im.dataset.fb) im.src = im.dataset.fb; }, true);
 getList.ok = id => !!(PL[id] || IMPORTED[id] || ALBUM[id]);
