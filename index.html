@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -643,6 +643,23 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .wrap-empty b{display:block;font:800 26px/1.2 var(--f-display);margin-bottom:8px}
 @media (max-width:760px){ .b-right #fxBtn{display:none} .wrap-hero img{width:92px;height:92px} .wrap-hero b{font-size:21px} }
 
+/* ---------- manage library, pick songs, share ---------- */
+.lib-del{display:flex;flex-direction:column;gap:2px;margin:12px 0 4px}
+.lib-del-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.lib-del-row:last-child{border-bottom:0}
+.lib-del-row div{flex:1;min-width:0}
+.lib-del-row b{display:block}
+.lib-del-row small{display:block;color:var(--muted);font-size:13px}
+.lib-del-row .pill[disabled],.sel-bar .pill[disabled]{opacity:.4;cursor:default}
+.sel-bar{position:sticky;top:66px;z-index:4;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin:0 0 8px;border-radius:12px;background:var(--raise);box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.sel-bar b{flex:1;min-width:120px}
+.sel-bar .add-top{margin-left:0;height:36px}
+.tl.selecting .row{cursor:pointer}
+.tl.selecting .row.picked{background:hsl(42 85% 52% / .16);box-shadow:inset 3px 0 0 var(--accent)}
+.tl.selecting .row.picked .c-title b{color:var(--accent)}
+.share-link{display:flex;gap:8px;margin:4px 0 6px}
+.share-link input{flex:1;min-width:0}
+
 /* ---------- narrower screens ---------- */
 @media (max-width:1100px){
   .app,.app:not(.np-open){grid-template-columns:clamp(200px,24vw,260px) minmax(0,1fr);grid-template-areas:"side main" "bar bar"}
@@ -913,7 +930,9 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <form id="impForm" novalidate>
     <h2 id="impH">Importar playlist</h2>
     <p>Carga el archivo CSV que sacaste de Spotify, o pega la lista con una canción por línea: <b>Artista - Canción</b>. La lista se guarda en la app para siempre, y cada canción suena en cuanto añades su archivo de audio.</p>
-    <label for="impFile">Archivo CSV o de texto</label>
+    <label for="impLink">¿Te pasaron un enlace de Hum? Pégalo aquí</label>
+    <div class="share-link"><input id="impLink" type="text" autocomplete="off" placeholder="https://…/hum-player/#lista=…"><button type="button" class="pill" data-act="imp-link">Abrir</button></div>
+    <label for="impFile" class="mt">Archivo CSV o de texto</label>
     <input id="impFile" type="file" accept=".csv,.tsv,.txt,text/csv,text/plain">
     <label for="impText" class="mt">O pega la lista</label>
     <textarea id="impText" rows="5" placeholder="Rosalía - Despechá&#10;Bad Bunny - Tití Me Preguntó&#10;Karol G - Provenza"></textarea>
@@ -980,6 +999,12 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <div class="dlg-act"><button type="button" class="add-top" data-act="fx-close">Listo</button></div>
 </dialog>
 <section class="wrap" id="wrap" hidden aria-label="Hum Wrapped: tu mes en música"></section>
+<dialog class="dlg" id="libDlg" aria-labelledby="libH2">
+  <h2 id="libH2">Gestionar biblioteca</h2>
+  <div id="libBody"></div>
+  <div class="dlg-act"><button type="button" class="add-top" data-act="lib-close">Listo</button></div>
+</dialog>
+<dialog class="dlg" id="shareDlg" aria-labelledby="shareH"><div id="shareBody"></div></dialog>
 <dialog class="dlg" id="acctDlg" aria-labelledby="acctH"><div id="acctBody"></div></dialog>
 <dialog class="dlg" id="plDlg" aria-labelledby="plH">
   <form id="plForm" novalidate>
@@ -1204,7 +1229,7 @@ function baseList(id){
   if (id === "hum") return { id, kind: "Playlist", title: S.humList.title, desc: "", hue: 42, cover: S.humList.tracks.length ? cover(BYID[S.humList.tracks[0]]) : FB, tracks: S.humList.tracks.filter(x => BYID[x]), by: "Hum" };
   if (PL[id]){
     const p = PL[id];
-    const tracks = id === "liked" ? [...S.liked].filter(x => BYID[x]).reverse() : id === "mine" ? USER.slice().reverse() : p.tracks;
+    const tracks = id === "liked" ? [...S.liked].filter(x => BYID[x] && (BYID[x].user || !demoOff())).reverse() : id === "mine" ? USER.slice().reverse() : p.tracks;
     return { id, kind: "Playlist", title: p.title, desc: p.desc, hue: p.hue, cover: p.cover, tracks, by: "hum" };
   }
   if (IMPORTED[id]){
@@ -1512,6 +1537,7 @@ function addUserTrack(rec){
   if (!rec.lyrScan) queueLyrScan(rec);
   if (!rec.feel && rec.blob) queueFeel(rec);
   if (!rec.melody && rec.blob) queueMelody(rec);
+  if (!rec.genreScan && rec.blob) queueGenre(rec);
   return t;
 }
 function probe(file){
@@ -1555,6 +1581,7 @@ async function readTags(file){
     if (id === "TIT2") out.title = txt(d);
     else if (id === "TPE1") out.artist = txt(d);
     else if (id === "TALB") out.album = txt(d);
+    else if (id === "TCON"){ let g = txt(d); const m = g.match(/^\(?(\d{1,3})\)?\s*(.*)$/); if (m) g = m[2] || ID3G[+m[1]] || ""; out.genre = g.slice(0, 60); }
     else if (id === "USLT" && !out.lyrics){ // lyrics saved inside the file
       const enc = d[0], i = skipStr(d, 4, enc);
       out.lyrics = decodeStr(d.subarray(i), enc).replace(/\0+$/g, "").trim();
@@ -1633,7 +1660,7 @@ async function addFiles(files, target){
       const nm = fromName(f.name);
       const rec = { id: "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), name: f.name,
         title: tags.title || nm.title, artist: tags.artist || nm.artist || "Artista desconocido", album: tags.album || "",
-        dur, type: f.type || MIME[EXT(f.name)] || "", size: f.size, added: Date.now() + (addCount++), u: Date.now(), blob: f, pic: tags.pic || null, lyrScan: true };
+        dur, type: f.type || MIME[EXT(f.name)] || "", size: f.size, added: Date.now() + (addCount++), u: Date.now(), genre: tags.genre || "", genreScan: true, blob: f, pic: tags.pic || null, lyrScan: true };
       const L = lyricsFromTags(tags) || (lrcMap.has(baseKey(f.name)) ? lyricsFromText(lrcMap.get(baseKey(f.name)), "lrc") : null);
       if (L){ rec.lyrics = L; withLyrics++; }
       try { await idbReq("readwrite", s => s.put(rec)); } catch { S.saveFailed = true; }
@@ -1670,7 +1697,7 @@ async function removeSong(id, opts = {}){
   try { await idbReq("readwrite", s => s.delete(id)); } catch {}
   if (wasCur){ loadAt(0); if (wasPlaying) play(); }
   const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y; renderLib(); paint();
-  if (!opts.remote){ trashFile(t.rec.cloud); tomb("song:" + id); toast(`Quitada de Mis canciones: ${t.title}`); }
+  if (!opts.remote){ trashFile(t.rec.cloud); tomb("song:" + id); if (!opts.quiet) toast(`Quitada de Mis canciones: ${t.title}`); }
 }
 const dropzone = () => `<div class="dropzone"><b>Añade tu música</b>
   <span>Arrastra aquí tus archivos de audio o elígelos desde tu dispositivo. Funciona con MP3, M4A, WAV, OGG y FLAC.</span>
@@ -1699,6 +1726,7 @@ function matchOf(it){
     if (!a || a === "artista desconocido" || !arts.length || arts.some(x => a.includes(x) || x.includes(a))) return t.id;
   }
   for (const id of USER){ const f = norm(BYID[id].rec.name); if (f.includes(ti) && arts.some(x => f.includes(x))) return id; }
+  if (!demoOff()){ const d = TRACKS.find(t => norm(t.title) === ti && (!arts.length || arts.some(x => norm(t.artist).includes(x)))); if (d) return d.id; } // the app's example songs
   return null;
 }
 function savePl(p){
@@ -1722,7 +1750,7 @@ function renderImported(id){
   const armed = S.delArm === id;
   return `<header class="hero" style="--h:${l.hue}">
       ${coverEd(l, p.genCover)}
-      <div class="hero-txt"><div class="eyebrow">${p.spotifyId ? "Playlist de Spotify" : "Playlist importada"}</div><h1>${esc(p.title)}</h1>${p.desc ? `<p>${esc(p.desc)}</p>` : ""}
+      <div class="hero-txt"><div class="eyebrow">${p.sharedFrom ? `Compartida contigo${p.owner ? " por " + esc(p.owner) : ""}` : p.spotifyId ? "Playlist de Spotify" : "Playlist importada"}</div><h1>${esc(p.title)}</h1>${p.desc ? `<p>${esc(p.desc)}</p>` : ""}
         <div class="meta"><b>${esc(p.owner || "Tú")}</b> · ${nc(n)}</div></div>
     </header>
     <div class="actions" style="--h:${l.hue}">
@@ -2413,13 +2441,13 @@ function renderLyrics(){
   if (!L || !L.plain){
     body.innerHTML = `<div class="lyr-empty"><b>Esta canción aún no tiene letra</b>
       <p>Aparece sola si tu archivo la trae incluida, o si añades un archivo .lrc con el mismo nombre que la canción. También puedes buscarla en internet, copiarla y pegarla aquí.</p>${search}</div>`;
-    foot.innerHTML = `<button type="button" class="add-top" data-act="lyr-edit">${ic("add")}<span>Pegar o escribir letra</span></button>`;
+    foot.innerHTML = `<button type="button" class="pill" data-act="lyr-net">${ic("search")}Buscar en internet</button><button type="button" class="add-top" data-act="lyr-edit">${ic("add")}<span>Pegar o escribir letra</span></button>`;
     return;
   }
   body.innerHTML = L.synced
     ? `<ol class="lyr-lines synced">${L.synced.map((l, i) => `<li data-li="${i}" data-lt="${l.t}">${esc(l.text) || "♪"}</li>`).join("")}</ol>`
     : `<ol class="lyr-lines">${L.plain.split("\n").map(l => `<li>${esc(l) || "&nbsp;"}</li>`).join("")}</ol>`;
-  const from = L.src === "archivo" ? "Incluida en tu archivo. " : L.src === "lrc" ? "De tu archivo .lrc. " : "";
+  const from = L.src === "archivo" ? "Incluida en tu archivo. " : L.src === "lrc" ? "De tu archivo .lrc. " : L.src === "internet" ? "De internet (LRCLIB). " : "";
   foot.innerHTML = `${L.synced ? `<small>${from}Sincronizada: toca una línea para ir a ese momento.</small>` : `<small>${from}Con tiempos [mm:ss] se resaltaría al ritmo.</small>`}
     <span class="lyr-acts"><button type="button" class="pill" data-act="lyr-edit">Editar</button><button type="button" class="pill danger" data-act="lyr-del">Quitar</button></span>`;
 }
@@ -2553,7 +2581,15 @@ function queueAi(t, first){
   first ? aiQueue.unshift(t) : aiQueue.push(t); runAiQueue();
 }
 function runAiQueue(){ if (asrState.id) return; const t = aiQueue.shift(); if (t && BYID[t.id] && !t.rec.lyrics) transcribe(t); }
-function maybeAutoAi(t){ if (S.aiAuto && t && t.user && t.rec.blob && !t.rec.lyrics && !t.rec.aiTried) queueAi(t); }
+function maybeAutoAi(t){
+  if (!t || !t.user || t.rec.lyrics) return;
+  // first look it up on the internet (instant, no listening needed); the AI only if that finds nothing
+  if (!netTried.has(t.id) && t.rec.lyrNet !== "none" && navigator.onLine){
+    lyricsOnline(t).then(L => { if (!L && S.aiAuto && t.rec.blob && !t.rec.lyrics && !t.rec.aiTried) queueAi(t); });
+    return;
+  }
+  if (S.aiAuto && t.rec.blob && !t.rec.aiTried) queueAi(t);
+}
 
 /* ---------- big view: cover, controls and, below, the lyrics ---------- */
 let fpFor = null;
@@ -2567,13 +2603,13 @@ function renderFpLyrics(){
     box.innerHTML = head + (L.synced
       ? `<ol class="lyr-lines synced">${L.synced.map((l, i) => `<li data-li="${i}" data-lt="${l.t}">${esc(l.text) || "♪"}</li>`).join("")}</ol>`
       : `<ol class="lyr-lines">${L.plain.split("\n").map(l => `<li>${esc(l) || "&nbsp;"}</li>`).join("")}</ol>`)
-      + `<div class="fp-lyr-foot">${L.src === "ia" ? "<small>Escrita por la IA al escuchar la canción: puede tener errores.</small>" : "<small></small>"}<button type="button" class="pill" data-act="lyr-fix">Corregir</button></div>`;
+      + `<div class="fp-lyr-foot">${L.src === "ia" ? "<small>Escrita por la IA al escuchar la canción: puede tener errores.</small>" : L.src === "internet" ? "<small>Letra de internet (LRCLIB). Si algo no cuadra, corrígela.</small>" : "<small></small>"}<button type="button" class="pill" data-act="lyr-fix">Corregir</button></div>`;
     syncLyrics(); return;
   }
   const lang = aiLang(t);
   const queued = aiQueue.includes(t);
-  box.innerHTML = head + `<p class="lyr-msg">${queued ? "En la cola de la IA: se transcribirá en cuanto termine la canción anterior." : "Esta canción no trae letra. La IA puede escucharla y escribirla por ti."}</p>
-    <div class="ai-row"><button type="button" class="add-top" data-act="ai-lyr">${ic("spark")}<span>Sacar la letra con IA</span></button><button type="button" class="pill" data-act="lyrics">Pegar o buscar</button></div>
+  box.innerHTML = head + `<p class="lyr-msg">${queued ? "En la cola de la IA: se transcribirá en cuanto termine la canción anterior." : "Esta canción no trae letra. Búscala en internet al instante, pídesela a la IA o pégala tú."}</p>
+    <div class="ai-row"><button type="button" class="add-top" data-act="lyr-net">${ic("search")}<span>Buscar en internet</span></button><button type="button" class="pill" data-act="ai-lyr">${ic("spark")}Sacar con IA</button><button type="button" class="pill" data-act="lyr-fix">Pegar o escribir</button></div>
     <div class="ai-lang" role="group" aria-label="Idioma de la canción"><span>Idioma de la canción:</span>
       <button type="button" class="chip${lang === "es" ? " on" : ""}" data-lang="es" aria-pressed="${lang === "es"}">Español</button>
       <button type="button" class="chip${lang === "en" ? " on" : ""}" data-lang="en" aria-pressed="${lang === "en"}">Inglés</button></div>
@@ -2629,7 +2665,7 @@ S.aplFor = null; S.pickPl = null; S.plEdit = null;
 const userPls = () => IMP_ORDER.filter(id => IMPORTED[id].source === "user");
 const itemFor = t => ({ link: t.id, sid: null, url: "", title: t.title, artists: t.artist && t.artist !== "Artista desconocido" ? [t.artist] : [], album: t.album.title || "", dur: Math.round(t.dur || 0), cover: "" });
 const plHas = (p, tid) => p.items.some(it => matchOf(it) === tid);
-function touchPl(p){ p.u = p.updated = Date.now(); savePl(p); markDirty("pl:" + p.id); }
+function touchPl(p){ p.u = p.updated = Date.now(); savePl(p); markDirty("pl:" + p.id); updateShare(p); }
 function dropPl(id){
   delete IMPORTED[id]; const i = IMP_ORDER.indexOf(id); if (i > -1) IMP_ORDER.splice(i, 1);
   idbReq("readwrite", s => s.delete(id), "playlists").catch(() => {});
@@ -2712,6 +2748,7 @@ function renderUserPl(id){
       <button class="pill" data-act="pick-open">${ic("add")}Añadir canciones</button>
       ${l.tracks.length > 2 ? `<button class="pill" data-act="dj-order" data-id="${id}">${ic("mix")}Orden DJ</button>` : ""}
       <button class="pill" data-act="pl-edit" data-id="${id}">${ic("edit")}Editar</button>
+      <button class="pill" data-act="pl-share" data-id="${id}">${ic("share")}${p.shareId ? "Compartida" : "Compartir"}</button>
       <button class="pill danger${armed ? " armed" : ""}" data-act="pl-del" data-id="${id}">${armed ? "Pulsa otra vez para eliminar" : "Eliminar"}</button>
     </div>
     ${l.tracks.length ? rows(l.tracks, id, { unpl: true })
@@ -2725,7 +2762,7 @@ function openPick(plId){
 function renderPick(){
   const p = IMPORTED[S.pickPl]; if (!p) return;
   const q = $("#pickQ").value.trim().toLowerCase(), inPl = new Set(p.items.map(matchOf).filter(Boolean));
-  const all = [...USER.slice().reverse().map(id => BYID[id]), ...TRACKS]
+  const all = [...USER.slice().reverse().map(id => BYID[id]), ...demoTracks()]
     .filter(t => !q || (t.title + " " + t.artist + " " + t.album.title).toLowerCase().includes(q)).slice(0, 300);
   $("#pickList").innerHTML = all.length ? all.map(t => `<button type="button" class="pp-item" data-pickadd="${t.id}" aria-pressed="${inPl.has(t.id)}">
       <img src="${esc(cover(t))}" alt=""><span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span><span class="pp-ck">${ic("check")}</span></button>`).join("")
@@ -3443,21 +3480,21 @@ const WAKE = /\b(ey|hey|hei|ei|oye|ok|okey|okay|hola|e)\s+(hum|jum|jam|gum|um|ho
 // --- moods: each one says what kind of sound fits it (0..1 values, relative to your own library)
 const midTempo = x => 1 - Math.abs(x - .6) * 1.6;
 const MOODS = [
-  { title: "Modo melancólico", say: "Te pongo canciones melancólicas.", words: /melanc|trist|nostalg|llor|deprim|desamor|despech|bajon|\bsad\b|melancholy/,
+  { title: "Modo melancólico", say: "Te pongo canciones melancólicas.", words: /melanc|trist|nostalg|llor|deprim|desamor|despech|bajon|\bsad\b|melancholy|chillar|ardid|corazon roto|\btusa\b|sentimental|bajonead/,
     lyr: /\b(llor\w*|trist\w*|adios|dolor|sol[oa]|soledad|extran\w*|olvid\w*|perd\w*|lagrim\w*|vacio|cry|tears|alone|lonely|goodbye|broken)\b/g,
     score: f => 1.3 * f.minor + (1 - f.energy) + .8 * (1 - f.bpm) + .5 * (1 - f.bright) },
-  { title: "Modo alegre", say: "Algo alegre, ¡vamos!", words: /alegr|feliz|happy|content|animad|buen (rollo|humor|dia)|positiv/,
+  { title: "Modo alegre", say: "Algo alegre, ¡vamos!", words: /alegr|feliz|happy|content|animad|buen (rollo|humor|dia)|positiv|buena vibra|buenas vibras|good vibes|chido|bonit/,
     lyr: /\b(feliz|alegr\w*|sonri\w*|verano|happy|smile|sunshine)\b/g,
     score: f => 1.2 * (1 - f.minor) + .7 * f.bright + .6 * f.energy + .5 * midTempo(f.bpm) },
-  { title: "Modo fiesta", say: "¡Modo fiesta!", words: /fiest|baila|bailar|perre|party|antro|energ|gym|ejercicio|entren|correr|motiva/,
+  { title: "Modo fiesta", say: "¡Modo fiesta!", words: /fiest|baila|bailar|party|antro|energ|gym|ejercicio|entren|correr|motiva|peda|pachanga|prendid|bailable|reventon|desmadre|carrete|parranda|jale/,
     lyr: /\b(fiesta|bail\w*|perre\w*|party|dance|disco|club)\b/g,
     score: f => 1.3 * f.energy + 1.1 * f.bpm + .4 * f.bright },
-  { title: "Modo relajado", say: "Algo tranquilo para relajarte.", words: /relaj|tranquil|chill|calm|dormir|sueno|estudi|concentr|lofi|zen|leer|descans/, lyr: null,
+  { title: "Modo relajado", say: "Algo tranquilo para relajarte.", words: /relaj|tranqui|chill|calm|dormir|sueno|estudi|concentr|lofi|zen|leer|descans|relax|suave|lent[oa]s?\b|bajit|cafecito|para la lluvia|de fondo|meditar/, lyr: null,
     score: f => 1.3 * (1 - f.energy) + .9 * (1 - f.bpm) + .4 * (1 - f.bright) },
-  { title: "Modo romántico", say: "Te pongo algo romántico.", words: /romant|enamor|\bamor\b|\blove\b|una cita|pareja/,
+  { title: "Modo romántico", say: "Te pongo algo romántico.", words: /romant|enamor|\bamor\b|\blove\b|una cita|pareja|mi novi|cursi|dedicar|para mi chica|para mi chico/,
     lyr: /\b(amor|te amo|te quiero|besos?|enamor\w*|coraz\w*|love|baby|kiss|heart)\b/g,
     score: f => .5 * (1 - f.bpm) + .3 * (1 - f.minor) + .3 * (1 - f.energy) },
-  { title: "Modo intenso", say: "Algo con fuerza.", words: /intens|enoj|rabia|coraje|fuerte|agresiv|\brock\b|metal/, lyr: null,
+  { title: "Modo intenso", say: "Algo con fuerza.", words: /intens|enoj|rabia|coraje|fuerte|agresiv|\bpesad|motivacion|pesas|con todo/, lyr: null,
     score: f => 1.2 * f.energy + .8 * f.bright + .4 * f.minor + .3 * f.bpm }
 ];
 const STYLE_FEEL = { lofi: [-24, .05], chill: [-23, .06], bright: [-19, .1], synthpop: [-16, .14], house: [-14, .12] };
@@ -3467,7 +3504,7 @@ function rawFeel(t){
   return { energy: ok ? f.energy : null, bright: ok ? f.bright : null, bpm: t.rec.bpm || null, minor: ok ? (f.minor ? .5 + c : .5 - c) : .5 };
 }
 function playMood(md, pre){
-  const ids = USER.length >= 6 ? USER.slice() : [...USER, ...TRACKS.map(t => t.id)];
+  const ids = USER.length >= 6 || demoOff() ? USER.slice() : [...USER, ...TRACKS.map(t => t.id)];
   const pool = ids.map(id => BYID[id]).filter(Boolean);
   if (!pool.length) return reply("Aún no tienes canciones. Añade las tuyas y te armo el ambiente.");
   const raws = pool.map(rawFeel);
@@ -3496,10 +3533,10 @@ function findMusic(q){
   const has = (text, w) => text.split(" ").some(x => x === w || (w.length >= 4 && x.startsWith(w)) || (x.length >= 4 && w.startsWith(x)));
   const frac = text => { const T = nrm(text); return toks.filter(w => has(T, w)).length / toks.length; };
   let list = null;
-  for (const id of ["mine", "liked", ...IMP_ORDER, ...PLAYLISTS.filter(p => !p.art).map(p => p.id), ...ALBUMS.map(a => a.id)]){
+  for (const id of ["mine", "liked", ...IMP_ORDER, ...(demoOff() ? [] : [...PLAYLISTS.filter(p => !p.art).map(p => p.id), ...ALBUMS.map(a => a.id)])]){
     const s = frac(getList(id).title); if (s > (list ? list.s : 0)) list = { id, s };
   }
-  const all = [...USER.map(id => BYID[id]), ...TRACKS];
+  const all = [...USER.map(id => BYID[id]), ...demoTracks()];
   let song = null;
   for (const t of all){ const s = frac(t.title + " " + t.artist) + frac(t.title) * .01 + (t.user ? .001 : 0); if (!song || s > song.s) song = { id: t.id, s }; }
   const arts = new Map();
@@ -3534,8 +3571,21 @@ function runCommand(raw){
   if (/(aleatori|mezcla|revuelve|shuffle)/.test(c)){ setShuffle(!S.shuffle); return reply(S.shuffle ? "Modo aleatorio activado." : "Modo aleatorio desactivado.", true); }
   if (/(que|cual) (cancion |rola |tema )?(es esta|suena|esta sonando|estoy escuchando)|^que suena/.test(c)) return reply(t ? `Suena “${t.title}”, de ${t.artist}.` : "No está sonando nada.");
   if (/(que puedes hacer|que sabes hacer|ayuda|como funciona|que haces)/.test(c))
-    return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta». Más: «slowed», «sped up», «8D», «karaoke», «música para este clima», «orden DJ», «activa el locutor», «¿cómo se llama esta canción?» para tararear, y «mi resumen del mes».");
+    return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta». Géneros: «pon trap», «algo bélico», «corridos», «reguetón», «banda», «rock», «rap»… y palabras como «algo tranqui» o «pa' llorar». Más: «slowed», «sped up», «8D», «karaoke», «música para este clima», «orden DJ», «activa el locutor», «¿cómo se llama esta canción?» para tararear, y «mi resumen del mes».");
   if (humExtra(c)) return; // effects, radio host, weather, DJ order, hum-it, monthly summary
+  // a genre ("pon trap", "algo bélico", "corridos"): unless you named an artist, play that genre from your music
+  const gen = genreInText(c);
+  if (gen){
+    const rest = c.replace(/^(pon(me|nos|le)?|reproduce|toca(me)?|quiero (escuchar|oir)|escuchar|play)\s+/, "").replace(gen.words, " ").replace(/\b(algo|musica|canciones|de|del|unos?|unas?|puro|puros|pura)\b/g, " ").trim();
+    const f = rest ? findMusic(rest) : null;
+    if (f && f.type === "artist"){ const ids = f.ids.filter(id => genresOf(BYID[id]).has(gen.id)); S.humList = { title: f.name, tracks: shuffled(ids.length ? ids : f.ids) }; playContext("hum"); return reply(`Pongo ${gen.name} de ${f.name}.`); }
+    return playGenre(gen);
+  }
+  if (/^(pon(me)? (algo|musica|lo que sea|cualquier cosa|una cancion)|lo que sea|sorprendeme|algo random|musica)$/.test(c)){
+    const ids = USER.length ? USER.slice() : demoTracks().map(t => t.id);
+    if (!ids.length) return reply("Aún no tienes canciones. Añade las tuyas y te pongo algo.");
+    S.humList = { title: "Hum", tracks: shuffled(ids) }; if (S.shuffle) setShuffle(false); playContext("hum"); return reply("Ahí va algo de tu música.");
+  }
   const mood = MOODS.find(md => md.words.test(c));
   const m = c.match(/^(pon(me|nos|le)?|reproduce|toca(me)?|quiero (escuchar|oir)|escuchar|play|busca)\s+(.+)$/);
   const what = m ? m[5] : c;
@@ -3757,7 +3807,7 @@ function asrText(pcm){
 function humIdeas(){
   const arts = {}; USER.forEach(id => { const a = BYID[id].artist; if (a && a !== "Artista desconocido") arts[a] = (arts[a] || 0) + 1; });
   const top = Object.entries(arts).sort((a, b) => b[1] - a[1])[0];
-  const ideas = ["Modo melancólico", top ? `Pon algo de ${top[0]}` : "Pon algo de Juno Atlas", "Modo fiesta", "Siguiente", "¿Qué suena?"];
+  const ideas = ["Modo melancólico", top ? `Pon algo de ${top[0]}` : demoOff() ? "Algo tranqui" : "Pon algo de Juno Atlas", "Pon trap", "Algo bélico", "Modo fiesta", "Siguiente"];
   $("#humIdeas").innerHTML = ideas.map(x => `<button type="button" data-humsay="${esc(x)}">${esc(x)}</button>`).join("");
 }
 function paintHum(){
@@ -4035,7 +4085,7 @@ function hummedNotes(pcm, sr){ // the notes you hummed, 10 per second (NaN = sil
 const fold = x => ((x % 12) + 18) % 12 - 6;
 function matchMelody(q){
   const voicedQ = q.filter(x => !isNaN(x)).length, results = [];
-  for (const t of [...USER.map(id => BYID[id]), ...TRACKS]){
+  for (const t of [...USER.map(id => BYID[id]), ...demoTracks()]){
     const S2 = melodyArray(t); if (!S2 || S2.length < q.length) continue;
     let best = Infinity;
     for (const sc of [.75, .9, 1, 1.12, 1.3]){
@@ -4211,6 +4261,251 @@ function homeExtras(){
 function paintHomeExtras(){ const el = $("#homeX"); if (el) el.outerHTML = homeExtras(); }
 if (W.coords) getWeather(false);
 
+/* ---------- your library: delete everything, example music on or off, pick several songs ---------- */
+const demoOff = () => S.hidden.has("demo"); // "demo" travels with your account like any hidden playlist
+const demoTracks = () => demoOff() ? [] : TRACKS;
+const isDemoList = id => !!((PL[id] && !PL[id].art) || ALBUM[id]);
+S.selMode = false; S.sel = new Set(); S.libArm = null;
+function openLibDlg(){ if (S.drawer){ S.drawer = false; applySide(); } S.libArm = null; renderLibDlg(); $("#libDlg").showModal(); }
+const delRow = (k, label, count, n) => `<div class="lib-del-row"><div><b>${label}</b><small>${count}</small></div>
+  <button type="button" class="pill danger${S.libArm === k ? " armed" : ""}" data-act="lib-del" data-k="${k}"${n ? "" : " disabled"}>${S.libArm === k ? "Pulsa otra vez" : "Borrar"}</button></div>`;
+function renderLibDlg(){
+  const pls = IMP_ORDER.length, liked = [...S.liked].filter(id => BYID[id]).length;
+  $("#libBody").innerHTML = `
+    <div class="mix-opt"><div><b>Música de ejemplo</b><small>Los álbumes y playlists que trae la app (Low Tide Hours, Concentración nocturna…). Si la quitas, solo verás tu música.</small></div>
+      <button type="button" class="switch" data-act="demo-toggle" role="switch" aria-checked="${!demoOff()}" aria-label="Música de ejemplo"></button></div>
+    <div class="lib-del">
+      ${delRow("songs", "Borrar todas mis canciones", nc(USER.length), USER.length)}
+      ${delRow("pls", "Borrar todas mis playlists", `${pls} ${pls === 1 ? "playlist" : "playlists"}`, pls)}
+      ${delRow("likes", "Quitar todos los me gusta", nc(liked), liked)}
+    </div>
+    <p class="mix-note">${S.acct ? "Tienes la sesión iniciada: lo que borres también se borra de tu Google Drive y de tus otros dispositivos." : "Se borra de este dispositivo."} Para borrar solo algunas canciones, entra a Mis canciones y pulsa “Seleccionar”.</p>`;
+}
+async function libDelete(k){
+  if (S.libArm !== k){ S.libArm = k; renderLibDlg(); setTimeout(() => { if (S.libArm === k){ S.libArm = null; if ($("#libDlg").open) renderLibDlg(); } }, 4000); return; }
+  S.libArm = null;
+  if (k === "songs"){ const ids = USER.slice(); for (const id of ids) await removeSong(id, { quiet: true }); toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`); }
+  if (k === "pls"){ const ids = IMP_ORDER.slice(); ids.forEach(id => { dropPl(id); tomb("pl:" + id); if (S.ctxId === id) S.ctxId = null; }); toast(ids.length === 1 ? "Borraste 1 playlist." : `Borraste ${ids.length} playlists.`); }
+  if (k === "likes"){ const now = Date.now(); [...S.liked].forEach(id => { S.liked.delete(id); S.likedU[id] = now; markDirty("like:" + id); }); store.set("liked", []); store.set("likedU", S.likedU); toast("Quitaste todos los me gusta."); }
+  if (S.view.type === "list" && !getList.ok(S.view.id)) go({ type: "home" }); else rerender();
+  renderLib(); paint(); renderLibDlg();
+}
+function toggleDemo(){
+  const off = !demoOff();
+  off ? S.hidden.add("demo") : S.hidden.delete("demo"); S.hiddenU.demo = Date.now(); saveHidden(); markDirty("hide:demo");
+  if (off) leaveDemo();
+  if (S.view.type === "list" && off && isDemoList(S.view.id)) go({ type: "home" }); else rerender();
+  renderLib(); paint(); if ($("#libDlg").open) renderLibDlg();
+  toast(off ? "Quitaste la música de ejemplo: solo verás la tuya." : "Volvió la música de ejemplo.");
+}
+function leaveDemo(){ // an example song was queued: switch to your own music
+  const t = cur(); if (!t || t.user) return;
+  if (S.playing) pause();
+  S.queue = USER.slice(); S.ctxList = S.queue.slice(); S.ctxId = USER.length ? "mine" : null; S.qi = 0; S.pausedPos = 0;
+  if (USER.length) loadAt(0);
+}
+// pick several songs in Mis canciones
+function setSelMode(on){ S.selMode = on; S.sel.clear(); S.libArm = null; rerender(); }
+function toggleSel(id, row){ S.sel.has(id) ? S.sel.delete(id) : S.sel.add(id); row.classList.toggle("picked", S.sel.has(id)); row.setAttribute("aria-selected", S.sel.has(id)); paintSelBar(); }
+function paintSelBar(){
+  const b = $("#selBar"); if (!b) return;
+  b.querySelector("b").textContent = S.sel.size === 1 ? "1 seleccionada" : `${S.sel.size} seleccionadas`;
+  const d = b.querySelector("[data-act=sel-del]"); d.disabled = !S.sel.size; d.textContent = S.libArm === "sel" ? "Pulsa otra vez" : "Borrar"; d.classList.toggle("armed", S.libArm === "sel");
+}
+async function selDelete(){
+  if (!S.sel.size) return;
+  if (S.libArm !== "sel"){ S.libArm = "sel"; paintSelBar(); setTimeout(() => { if (S.libArm === "sel"){ S.libArm = null; paintSelBar(); } }, 4000); return; }
+  S.libArm = null; const ids = [...S.sel];
+  for (const id of ids) await removeSong(id, { quiet: true });
+  S.selMode = false; S.sel.clear(); rerender(); renderLib(); paint();
+  toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`);
+}
+const selBar = () => `<div class="sel-bar" id="selBar"><b>${S.sel.size === 1 ? "1 seleccionada" : `${S.sel.size} seleccionadas`}</b>
+  <button type="button" class="pill" data-act="sel-all">Todas</button><button type="button" class="pill danger" data-act="sel-del"${S.sel.size ? "" : " disabled"}>Borrar</button><button type="button" class="add-top" data-act="sel-done">Listo</button></div>`;
+
+/* ---------- genres: what kind of music each of your songs is ----------
+   From the genre saved inside the file, a list of well-known artists, and words in the lyrics. */
+const GENRES = [
+  { id: "belico", name: "corridos bélicos", mood: "Modo intenso", words: /belic|corrido|tumbad|sierren|alterad/, tag: /corrido|sierre|regional mex|tumbad/,
+    artists: "peso pluma|natanael cano|junior h|fuerza regida|gabito ballesteros|tito double p|eslabon armado|luis r conriquez|oscar maydon|chino pacas|xavi|ivan cornejo|herencia de patrones|legado 7|jasiel nunez|marca mp|gerardo ortiz|el makabelico|alfredo olivas|los tucanes de tijuana|grupo marca registrada|neton vega|victor mendivil|codiciado|el fantasma|t3r elemento|grupo arriesgado|la adictiva|hassan|lenin ramirez|el yaki|los dareyes de la sierra",
+    lyr: /\b(belic\w*|cuerno\w*|r15|plebe\w*|clika|blindad\w*|pechera\w*|la cuatro|arsenal|plomo|cartel\w*|chapo|tumbad\w*)\b/g },
+  { id: "trap", name: "trap", mood: "Modo intenso", words: /\btrap\b|trapero|drill/, tag: /trap|drill/,
+    artists: "anuel aa|anuel|eladio carrion|myke towers|arcangel|bryant myers|jhay cortez|duki|ysy a|khea|quevedo|young miko|travis scott|future|lil baby|21 savage|playboi carti|young thug|migos|lil uzi vert|juice wrld|xxxtentacion|pop smoke|ovi|almighty|noriel|kevvo|natos y waor|neo pistea|paulo londra|cazzu|tiago pzk|milo j|lit killah|alemán|aleman|yeri mua|bhavi|omar courtz|rels b",
+    lyr: /\b(trap|drip|glock|lean|perco\w*|codein\w*|tra tra|bitch\w*)\b/g },
+  { id: "reggaeton", name: "reguetón", mood: "Modo fiesta", words: /regg?ae?ton|reguet|perre|dembow|urbano/, tag: /regg?ae?ton|reguet|latin urban|urbano|dembow/,
+    artists: "bad bunny|j balvin|karol g|daddy yankee|feid|rauw alejandro|maluma|ozuna|nicky jam|wisin|yandel|sech|farruko|jhayco|blessd|ryan castro|mora|de la ghetto|don omar|tego calderon|manuel turizo|anitta|becky g|natti natasha|lenny tavarez|dalex|justin quiles|zion|lennox|plan b|tainy|dei v|nengo flow|kevin roldan|reykon|chencho corleone|ivy queen|cris mj|young miko|myke towers|arcangel",
+    lyr: /\b(perre\w*|bellaqu\w*|bellac\w*|dembow|reggaeton)\b/g },
+  { id: "banda", name: "banda y regional", mood: "Modo fiesta", words: /\bbanda\b|regional|grupero|mariachi|rancher|norten|duranguense/, tag: /banda|norte|regional|ranchera|mariachi|grupero|duranguense/,
+    artists: "banda ms|banda el recodo|el recodo|la arrolladora|julion alvarez|christian nodal|carin leon|grupo firme|edwin luna|la trakalosa|calibre 50|los dos carnales|vicente fernandez|alejandro fernandez|pepe aguilar|angela aguilar|los tigres del norte|intocable|grupo frontera|marco antonio solis|los bukis|joan sebastian|espinoza paz|remmy valenzuela|los recoditos|el yaki|banda carnaval|banda la adictiva|grupo cañaveral|los angeles de charly|bronco|ramon ayala|la original banda el limon" },
+  { id: "cumbia", name: "cumbia", mood: "Modo fiesta", words: /cumbia/, tag: /cumbia/,
+    artists: "los angeles azules|grupo 5|la sonora dinamita|celso pina|rayito colombiano|grupo kual|agua marina|los caminantes|kumbia kings|aniceto molina|los mirlos|bryndis|amar azul|damas gratis|la k onga|ke personajes|chico trujillo|los palmeras|pibes chorros|la luz roja de san marcos|grupo cañaveral|los askis" },
+  { id: "rock", name: "rock", mood: "Modo intenso", words: /\brock\b|metal|punk|grunge|alternativ/, tag: /rock|metal|punk|grunge|alternative|indie/,
+    artists: "soda stereo|caifanes|zoe|cafe tacvba|cafe tacuba|enanitos verdes|mana|heroes del silencio|molotov|el tri|los prisioneros|panteon rococo|maldita vecindad|jaguares|division minuscula|panda|allison|kinky|babasonicos|los fabulosos cadillacs|la ley|aterciopelados|metallica|linkin park|nirvana|queen|ac dc|guns n roses|the beatles|the rolling stones|red hot chili peppers|foo fighters|green day|arctic monkeys|the strokes|radiohead|muse|coldplay|imagine dragons|my chemical romance|paramore|system of a down|rammstein|iron maiden|led zeppelin|pink floyd|bon jovi|slipknot|evanescence|the killers|oasis|blink 182|the cure|u2" },
+  { id: "pop", name: "pop", mood: "Modo alegre", words: /\bpop\b/, tag: /\bpop\b/,
+    artists: "shakira|taylor swift|dua lipa|the weeknd|ed sheeran|harry styles|billie eilish|ariana grande|sebastian yatra|morat|tini|danna paola|sabrina carpenter|olivia rodrigo|bruno mars|justin bieber|selena gomez|miley cyrus|katy perry|lady gaga|rihanna|beyonce|adele|sia|camila cabello|maroon 5|jesse y joy|reik|camilo|aitana|lali|thalia|paulina rubio|ricky martin|enrique iglesias|alejandro sanz|pablo alboran|carlos rivera|kenia os|belinda|rbd|ha ash|sin bandera|cnco|mau y ricky" },
+  { id: "rap", name: "rap", mood: "Modo intenso", words: /\brap\b|hip ?hop|freestyle|tiradera/, tag: /\brap\b|hip.?hop/,
+    artists: "eminem|kendrick lamar|drake|kanye west|j cole|canserbero|residente|calle 13|c kan|santa fe klan|gera mx|cartel de santa|tote king|nach|violadores del verso|mc davo|lefty sm|akwid|control machete|vico c|trueno|wos|nicki minaj|cardi b|50 cent|snoop dogg|tupac|2pac|jay z|tyler the creator|mac miller|post malone|lil wayne|nas|dr dre|bizarrap" },
+  { id: "electronica", name: "electrónica", mood: "Modo fiesta", words: /electro|\bedm\b|techno|tecno|\bhouse\b|dance|rave/, tag: /electro|edm|techno|house|dance|trance|dubstep/,
+    artists: "david guetta|avicii|calvin harris|martin garrix|tiesto|skrillex|marshmello|alan walker|kygo|zedd|the chainsmokers|daft punk|deadmau5|armin van buuren|swedish house mafia|diplo|major lazer|dj snake|steve aoki|alesso|hardwell|afrojack|fisher|peggy gou|fred again|disclosure|illenium|odesza|porter robinson|ovo kinetic|juno atlas" },
+  { id: "salsa", name: "salsa", mood: "Modo fiesta", words: /salsa/, tag: /salsa/,
+    artists: "marc anthony|celia cruz|hector lavoe|grupo niche|gilberto santa rosa|ruben blades|willie colon|frankie ruiz|victor manuelle|oscar de leon|el gran combo|la india|tito rojas|jerry rivera|eddie santiago|maelo ruiz|guayacan orquesta|fruko|joe arroyo|ismael rivera|ray barretto|tito nieves" },
+  { id: "bachata", name: "bachata", mood: "Modo romántico", words: /bachat/, tag: /bachat/,
+    artists: "romeo santos|aventura|prince royce|juan luis guerra|frank reyes|anthony santos|raulin rodriguez|zacarias ferreira|monchy y alexandra|xtreme|toby love|leslie grace|elvis martinez|joe veras|luis vargas|grupo extra" },
+  { id: "baladas", name: "baladas", mood: "Modo romántico", words: /balad|bolero|romantic\w* de las de antes|de las viejitas/, tag: /ballad|balada|bolero/,
+    artists: "jose jose|juan gabriel|rocio durcal|camilo sesto|luis miguel|ricardo arjona|franco de vita|chayanne|cristian castro|laura pausini|ana gabriel|yuri|emmanuel|mijares|ricardo montaner|roberto carlos|jose luis perales|raphael|armando manzanero|los panchos|lucero|marco antonio solis" }
+];
+GENRES.forEach(g => { g.artRe = new RegExp("(^| )(" + g.artists.split("|").map(a => nrm(a).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")( |$)"); });
+const ID3G = { 0: "blues", 1: "classic rock", 2: "country", 3: "dance", 7: "hip-hop", 8: "jazz", 9: "metal", 13: "pop", 15: "rap", 16: "reggae", 17: "rock", 18: "techno", 31: "trance", 52: "electronic", 79: "hard rock", 86: "latin", 127: "drum & bass", 143: "salsa", 144: "thrash metal", 147: "synthpop" };
+const genreCache = new Map();
+function genresOf(t){
+  if (!t.user){ const s = t.album.style; return new Set(s === "house" || s === "synthpop" ? ["electronica"] : []); }
+  const k = t.id + "|" + (t.rec.u || 0) + "|" + (t.rec.genre || "") + "|" + (t.rec.lyrics ? 1 : 0);
+  if (genreCache.has(k)) return genreCache.get(k);
+  const out = new Set(), tag = nrm(t.rec.genre || ""), art = nrm(t.artist + " " + (t.album.title || "")), lyr = t.rec.lyrics && t.rec.lyrics.plain ? nrm(t.rec.lyrics.plain) : "";
+  for (const g of GENRES){
+    if (tag && g.tag.test(tag)) out.add(g.id);
+    else if (g.artRe.test(art)) out.add(g.id);
+    else if (g.lyr && lyr && (lyr.match(g.lyr) || []).length >= 3) out.add(g.id);
+  }
+  genreCache.set(k, out); return out;
+}
+function genreInText(c){ return GENRES.find(g => g.words.test(c)) || null; }
+function playGenre(g, artistHint){
+  const ids = [...USER, ...demoTracks().map(t => t.id)].filter(id => BYID[id] && genresOf(BYID[id]).has(g.id));
+  if (!ids.length){
+    const md = MOODS.find(m => m.title === g.mood);
+    return md ? playMood(md, `No tengo canciones de ${g.name} marcadas en tu música. `) : reply(`No encontré canciones de ${g.name} en tu música.`);
+  }
+  S.humList = { title: g.name.charAt(0).toUpperCase() + g.name.slice(1), tracks: shuffled(ids) };
+  if (S.shuffle) setShuffle(false);
+  playContext("hum");
+  reply(ids.length === 1 ? `Solo tengo una de ${g.name}: te la pongo.` : `Te pongo ${g.name}: ${nc(ids.length)}.`);
+}
+// the genre written inside each file (older songs: read once from the file)
+const genreQueue = []; let genreRunning = false;
+function queueGenre(rec){ if (rec.genreScan || genreQueue.includes(rec)) return; genreQueue.push(rec); setTimeout(runGenre, 4000); }
+async function runGenre(){
+  if (genreRunning) return; genreRunning = true;
+  while (genreQueue.length){
+    const rec = genreQueue.shift(); if (!BYID[rec.id] || !rec.blob || rec.genreScan) continue;
+    try { const tags = await readTags(rec.blob); if (tags.genre) rec.genre = tags.genre; } catch {}
+    rec.genreScan = true; putRec(rec);
+    await new Promise(r => setTimeout(r, 40));
+  }
+  genreRunning = false;
+}
+
+/* ---------- lyrics from the internet, at once (LRCLIB: free, often in time with the song) ---------- */
+const LRC_HEAD = { "Lrclib-Client": "Hum Player (https://alelangar0415-blip.github.io/hum-player/)" };
+const netTried = new Set();
+async function lyricsOnline(t, manual){
+  if (!t || !t.user) return null;
+  if (!manual && (t.rec.lyrics || t.rec.lyrNet === "none" || netTried.has(t.id))) return null;
+  netTried.add(t.id);
+  const artist = t.artist && t.artist !== "Artista desconocido" ? t.artist : "", dur = Math.round(t.dur || 0);
+  let j = null;
+  try {
+    if (artist){
+      const q = { track_name: t.title, artist_name: artist }; if (dur) q.duration = dur;
+      const r = await fetch(`https://lrclib.net/api/get?${new URLSearchParams(q)}`, { headers: LRC_HEAD });
+      if (r.ok) j = await r.json();
+      if (j && dur && Math.abs((j.duration || 0) - dur) > 15) j = null; // a different version of the song
+    }
+    if (!j || (!j.syncedLyrics && !j.plainLyrics)){
+      const r = await fetch(`https://lrclib.net/api/search?${new URLSearchParams(artist ? { track_name: t.title, artist_name: artist } : { q: t.title })}`, { headers: LRC_HEAD });
+      const list = r.ok ? await r.json() : [];
+      j = list.filter(x => (x.syncedLyrics || x.plainLyrics) && (!dur || x.duration > 0)).sort((a, b) => Math.abs((a.duration || 0) - dur) - Math.abs((b.duration || 0) - dur))[0] || null;
+      if (j && dur && Math.abs((j.duration || 0) - dur) > 15) j = null; // a different version of the song
+    }
+  } catch { netTried.delete(t.id); return null; } // offline: try again later
+  if (!j || j.instrumental){ t.rec.lyrNet = "none"; putRec(t.rec); return null; }
+  const L = lyricsFromText(j.syncedLyrics || j.plainLyrics, "internet"); if (!L) return null;
+  if (t.rec.lyrics && !manual) return null; // you added lyrics meanwhile
+  t.rec.lyrics = L; delete t.rec.lyrNet; touchSong(t.rec);
+  if (cur() === t){ fpFor = null; renderFp(); renderFpLyrics(); paintLyrBtn(); if ($("#lyrDlg").open && !S.lyrEdit) renderLyrics(); }
+  return L;
+}
+async function netLyricsNow(){
+  const t = cur(); if (!t || !t.user) return;
+  toast("Buscando la letra en internet…");
+  const L = await lyricsOnline(t, true);
+  toast(L ? (L.synced ? "¡Letra encontrada! Va al ritmo de la canción." : "¡Letra encontrada!") : "No encontré la letra en internet. Puedes pedírsela a la IA o pegarla tú.");
+}
+
+/* ---------- shared playlists: send a link, the other person opens it in Hum ----------
+   The list (song names only, never your files) is saved in your Google Drive as a file anyone with
+   the link can read. Changes you make later reach whoever has it. */
+const GKEY = ""; // public Google key, only for reading shared playlists (restricted to the Drive API)
+const SITE = "https://alelangar0415-blip.github.io/hum-player/";
+const shareData = p => ({ v: 1, title: p.title, desc: p.desc || "", by: (S.acct && S.acct.name) || "", items: p.items.map(it => ({ title: it.title, artists: it.artists || [], album: it.album || "", dur: it.dur || 0 })) });
+async function sharePl(id){
+  const p = IMPORTED[id]; if (!p) return;
+  if (!S.acct){ toast("Inicia sesión con Google para compartir tus playlists."); openAcct(); return; }
+  if (!tokenOk()){ try { await askToken(""); } catch { toast("Vuelve a conectar con Google para compartir."); return; } }
+  try {
+    toast("Preparando el enlace…");
+    const body = new Blob([JSON.stringify(shareData(p))], { type: "application/json" });
+    await ensureLib();
+    let fid = p.shareId;
+    if (fid){ try { await gfetch(`${DRIVE_UP}/files/${fid}?uploadType=media`, { method: "PATCH", headers: { "content-type": "application/json" }, body }); } catch (e){ if (e.code === "not_found") fid = null; else throw e; } }
+    if (!fid){
+      fid = (await uploadSimple({ name: `Hum · ${p.title}.json`, parents: [sync.folder], appProperties: { hum: "share", humId: id }, mimeType: "application/json" }, body)).id;
+      await gfetch(`${DRIVE}/files/${fid}/permissions`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ role: "reader", type: "anyone" }) });
+      p.shareId = fid; touchPl(p);
+    }
+    showShare(p, `${SITE}#lista=${fid}`);
+  } catch { toast("No se pudo crear el enlace. Revisa tu internet y vuelve a intentarlo."); }
+}
+let shareT = 0;
+function updateShare(p){ // keep the shared copy up to date (a few seconds after your last change)
+  if (!p.shareId || !S.acct) return;
+  clearTimeout(shareT); shareT = setTimeout(() => {
+    if (!tokenOk()) return;
+    gfetch(`${DRIVE_UP}/files/${p.shareId}?uploadType=media`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(shareData(p)) }).catch(() => {});
+  }, 4000);
+}
+async function stopSharing(id){
+  const p = IMPORTED[id]; if (!p || !p.shareId) return;
+  const fid = p.shareId; delete p.shareId; touchPl(p); trashFile(fid); scheduleSync(500);
+  $("#shareDlg").close(); toast("Dejaste de compartir la playlist: el enlace ya no funciona."); rerender();
+}
+function showShare(p, link){
+  $("#shareBody").innerHTML = `<h2 id="shareH">Compartir “${esc(p.title)}”</h2>
+    <p>Envía este enlace a quien quieras. Al abrirlo, la playlist aparece en su Hum. Solo se comparten los nombres de las canciones: cada persona las escucha con sus propios archivos.</p>
+    <div class="share-link"><input id="shareLink" readonly value="${esc(link)}" aria-label="Enlace de la playlist"><button type="button" class="pill" data-act="share-copy">Copiar</button></div>
+    <div class="dlg-act"><button type="button" class="pill danger" data-act="share-stop" data-id="${p.id}">Dejar de compartir</button>${navigator.share ? `<button type="button" class="pill" data-act="share-send">Enviar…</button>` : ""}<button type="button" class="add-top" data-act="share-close">Listo</button></div>`;
+  $("#shareDlg").dataset.link = link; $("#shareDlg").dataset.title = p.title;
+  if (!$("#shareDlg").open) $("#shareDlg").showModal();
+}
+async function openShared(fid){
+  if (!/^[\w-]{10,200}$/.test(fid)) return;
+  if (!GKEY){ toast("Esta copia de Hum aún no puede abrir playlists compartidas."); return; }
+  try {
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media&key=${GKEY}`);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(); if (!j || !Array.isArray(j.items)) throw new Error("bad");
+    const items = j.items.slice(0, 2000).map(it => ({ sid: null, url: "", title: String(it.title || "").slice(0, 200), artists: (it.artists || []).slice(0, 10).map(a => String(a).slice(0, 100)), album: String(it.album || "").slice(0, 200), dur: +it.dur || 0, cover: "", link: null }));
+    const old = IMP_ORDER.map(id => IMPORTED[id]).find(p => p.sharedFrom === fid);
+    if (old){ old.title = String(j.title || old.title).slice(0, 100); old.desc = String(j.desc || "").slice(0, 300); old.items = items; old.owner = String(j.by || "").slice(0, 80); touchPl(old); renderLib(); if (S.view.id === old.id) rerender(); return old.id; }
+    const now = Date.now();
+    const rec = { id: "pl-" + rid(), source: "shared", sharedFrom: fid, title: String(j.title || "Playlist compartida").slice(0, 100), desc: String(j.desc || "").slice(0, 300), owner: String(j.by || "").slice(0, 80), cover: "", url: "", added: now, updated: now, u: now, items };
+    addImported(rec); savePl(rec); markDirty("pl:" + rec.id); renderLib();
+    toast(`Te compartieron “${rec.title}”${rec.owner ? ` (de ${rec.owner})` : ""}.`);
+    return rec.id;
+  } catch { toast("No se pudo abrir la playlist compartida. Puede que ya no se comparta."); return null; }
+}
+async function openSharedLink(text){
+  const m = String(text || "").match(/lista=([\w-]{10,200})/) || String(text || "").trim().match(/^([\w-]{20,200})$/);
+  if (!m){ toast("Ese enlace no es de una playlist de Hum."); return false; }
+  const id = await openShared(m[1]); if (id) go({ type: "list", id }); return !!id;
+}
+const sharedSeen = new Map();
+function refreshShared(id){ // when you open a shared playlist, bring the owner's latest changes
+  const p = IMPORTED[id]; if (!p || !p.sharedFrom || !navigator.onLine) return;
+  if (Date.now() - (sharedSeen.get(id) || 0) < 5 * 60000) return;
+  sharedSeen.set(id, Date.now()); openShared(p.sharedFrom);
+}
+
 /* ---------- rendering ---------- */
 function likeBtn(b){
   const id = b.dataset.like, on = S.liked.has(id);
@@ -4221,9 +4516,9 @@ function likeBtn(b){
 function rows(list, ctxId, opts = {}){
   if (!list.length) return "";
   const extra = opts.rm || opts.unpl;
-  return `<div class="tl${extra ? " rm" : ""}" role="list">
+  return `<div class="tl${extra ? " rm" : ""}${opts.sel ? " selecting" : ""}" role="list"${opts.sel ? ' aria-multiselectable="true"' : ""}>
     <div class="tl-head" aria-hidden="true"><span class="c-n">#</span><span>Título</span><span class="c-album">${opts.album === false ? "" : "Álbum"}</span><span></span><span></span><span class="c-dur">Dur.</span>${extra ? "<span></span>" : ""}</div>
-    ${list.map((id, i) => { const t = BYID[id]; return `<div class="row${t.user && !t.rec.blob ? " cloud-only" : ""}" role="listitem" tabindex="0" data-row="${id}" data-list="${ctxId}">
+    ${list.map((id, i) => { const t = BYID[id]; return `<div class="row${t.user && !t.rec.blob ? " cloud-only" : ""}${opts.sel && S.sel.has(id) ? " picked" : ""}" role="listitem" tabindex="0" data-row="${id}" data-list="${ctxId}"${opts.sel ? ` aria-selected="${S.sel.has(id)}"` : ""}>
       <span class="c-n"><span class="n">${i + 1}</span><span class="eq"><i></i><i></i><i></i></span><span class="pi">${ic("play")}</span></span>
       <span class="c-title">${opts.cover === false ? "" : `<img src="${cover(t)}" alt="" width="40" height="40">`}<span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span></span>
       <span class="c-album">${opts.album === false ? "" : esc(t.album.title)}</span>
@@ -4245,8 +4540,8 @@ function renderView(){
   if (view.type === "home"){
     const h = new Date().getHours();
     const greet = h < 5 ? "Trasnochando" : h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
-    const quick = ["mine", "liked", ...IMP_ORDER.slice(0, 2), "focus", "drive", "mix1", "lowtide", "glass"].filter(id => !S.hidden.has(id)).slice(0, 6);
-    const made = PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id));
+    const quick = ["mine", "liked", ...IMP_ORDER.slice(0, 4), "focus", "drive", "mix1", "lowtide", "glass"].filter(id => !S.hidden.has(id) && !(demoOff() && isDemoList(id))).slice(0, 6);
+    const made = demoOff() ? [] : PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id));
     v.innerHTML = `<h1 class="greet">${greet}</h1>${IMP_ORDER.some(id => IMPORTED[id].source !== "user") ? "" : banner()}
       ${homeExtras()}
       <div class="tiles">${quick.map(id => { const l = getList(id); return `<div class="tile" role="link" tabindex="0" data-open="${id}">
@@ -4254,10 +4549,11 @@ function renderView(){
       <h2 class="shelf-h">Tus playlists</h2><div class="shelf"><div class="card card-new" role="button" tabindex="0" data-act="pl-new">
         <div class="card-art">${ic("add")}</div><b>Crear playlist</b><small>Junta tus canciones favoritas</small></div>${IMP_ORDER.map(id => card(id)).join("")}</div>
       ${made.length ? `<h2 class="shelf-h">Hecho para ti</h2><div class="shelf">${made.map(p => card(p.id)).join("")}</div>` : ""}
-      <h2 class="shelf-h">Álbumes en tu biblioteca</h2><div class="shelf">${ALBUMS.map(a => card(a.id)).join("")}</div>
-      ${S.hidden.size ? `<p style="margin:28px 0 0"><button class="pill" data-act="pl-unhide">${ic("sync")}Recuperar las playlists de ejemplo que quitaste</button></p>` : ""}`;
+      ${demoOff() ? "" : `<h2 class="shelf-h">Álbumes en tu biblioteca</h2><div class="shelf">${ALBUMS.map(a => card(a.id)).join("")}</div>`}
+      ${[...S.hidden].some(x => x !== "demo") && !demoOff() ? `<p style="margin:28px 0 0"><button class="pill" data-act="pl-unhide">${ic("sync")}Recuperar las playlists de ejemplo que quitaste</button></p>` : ""}`;
   } else if (view.type === "list" && IMPORTED[view.id]){
     v.innerHTML = IMPORTED[view.id].source === "user" ? renderUserPl(view.id) : renderImported(view.id);
+    if (IMPORTED[view.id].sharedFrom) refreshShared(view.id);
   } else if (view.type === "list" && !getList.ok(view.id)){
     S.view = { type: "home" }; return renderView();
   } else if (view.type === "list"){
@@ -4272,12 +4568,13 @@ function renderView(){
       <div class="actions" style="--h:${l.hue}">
         <button class="fab" data-playlist="${l.id}" id="bigPlay" aria-label="Reproducir ${esc(l.title)}">${ic("play")}</button>
         <button class="ib tog" data-act="shuffle" aria-label="Aleatorio" id="listShuf">${ic("shuffle")}</button>
-        ${l.id === "mine" ? `<button class="pill" data-act="add">${ic("add")}Añadir canciones</button>` : ""}
+        ${l.id === "mine" ? `<button class="pill" data-act="add">${ic("add")}Añadir canciones</button>${l.tracks.length ? `<button class="pill" data-act="sel-mode">${ic("check")}Seleccionar</button>` : ""}` : ""}
         ${l.tracks.length > 2 ? `<button class="pill" data-act="dj-order" data-id="${l.id}">${ic("mix")}Orden DJ</button>` : ""}
         ${PL[l.id] && !PL[l.id].art ? (S.hidden.has(l.id) ? `<button class="pill" data-act="pl-unhide" data-id="${l.id}">${ic("sync")}Volver a mostrarla</button>`
           : `<button class="pill danger${S.delArm === l.id ? " armed" : ""}" data-act="pl-del" data-id="${l.id}">${S.delArm === l.id ? "Pulsa otra vez para quitarla" : "Quitar playlist"}</button>`) : ""}
       </div>
-      ${l.tracks.length ? rows(l.tracks, l.id, l.kind === "Album" ? { album: false, cover: false } : { rm: l.id === "mine" })
+      ${l.id === "mine" && S.selMode && l.tracks.length ? selBar() : ""}
+      ${l.tracks.length ? rows(l.tracks, l.id, l.kind === "Album" ? { album: false, cover: false } : { rm: l.id === "mine", sel: l.id === "mine" && S.selMode })
           + (l.id === "mine" ? `<p class="note">${S.saveFailed ? "Este navegador no deja guardar archivos: tus canciones desaparecerán al recargar la página." : "Tus canciones se guardan solo en este dispositivo. Si borras sus datos, tendrás que añadirlas otra vez."}</p>` : "")
         : l.id === "mine" ? dropzone()
         : `<div class="empty"><b>Aún no tienes canciones favoritas</b>Toca el corazón junto a cualquier canción y aparecerá aquí.</div>`}`;
@@ -4285,11 +4582,11 @@ function renderView(){
     const q = S.query.trim().toLowerCase();
     if (!q){
       v.innerHTML = `<h2 class="shelf-h" style="margin-top:12px">Explora tu biblioteca</h2>
-        <p style="color:var(--muted);margin:0 0 6px">Busca entre tus ${TRACKS.length + USER.length} canciones.</p>
-        <div class="shelf">${ALBUMS.map(a => card(a.id)).join("")}</div>`;
+        <p style="color:var(--muted);margin:0 0 6px">Busca entre tus ${demoTracks().length + USER.length} canciones.</p>
+        <div class="shelf">${(demoOff() ? [] : ALBUMS).map(a => card(a.id)).join("")}</div>`;
     } else {
-      S.searchList = [...USER.map(id => BYID[id]), ...TRACKS].filter(t => (t.title + " " + t.artist + " " + t.album.title).toLowerCase().includes(q)).map(t => t.id);
-      const als = ALBUMS.filter(a => (a.title + " " + a.artist).toLowerCase().includes(q));
+      S.searchList = [...USER.map(id => BYID[id]), ...demoTracks()].filter(t => (t.title + " " + t.artist + " " + t.album.title).toLowerCase().includes(q)).map(t => t.id);
+      const als = (demoOff() ? [] : ALBUMS).filter(a => (a.title + " " + a.artist).toLowerCase().includes(q));
       v.innerHTML = (S.searchList.length ? `<h2 class="shelf-h" style="margin-top:12px">Canciones</h2>${rows(S.searchList, "search")}` : "")
         + (als.length ? `<h2 class="shelf-h">Álbumes</h2><div class="shelf">${als.map(a => card(a.id)).join("")}</div>` : "")
         + (!S.searchList.length && !als.length ? `<div class="empty"><b>Sin resultados para “${esc(S.query.trim())}”</b>Revisa la ortografía o prueba con un artista, como Juno Atlas.</div>` : "");
@@ -4301,7 +4598,7 @@ function renderView(){
   $("#navSearch").classList.toggle("on", view.type === "search");
 }
 function renderLib(){
-  const items = ["mine", "liked", ...IMP_ORDER, ...PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id)).map(p => p.id), ...ALBUMS.map(a => a.id)];
+  const items = ["mine", "liked", ...IMP_ORDER, ...(demoOff() ? [] : [...PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id)).map(p => p.id), ...ALBUMS.map(a => a.id)])];
   $("#lib").innerHTML = items.map(id => { const l = getList(id);
     return `<div class="lib-item" role="link" tabindex="0" data-open="${id}"><img src="${esc(l.cover)}"${l.fb ? ` data-fb="${l.fb}"` : ""} alt="" width="44" height="44">
       <div><b>${esc(l.title)}</b><small>${esc(sub(l))}</small></div><span class="spk">${ic("speaker")}</span></div>`; }).join("");
@@ -4443,6 +4740,7 @@ document.addEventListener("click", e => {
   if (pl){ const id = pl.dataset.playlist;
     if (S.ctxId === id && cur()) toggle(); else playContext(id); return; }
   const row = e.target.closest("[data-row]");
+  if (row && S.selMode && row.dataset.list === "mine"){ toggleSel(row.dataset.row, row); return; }
   if (row){ const id = row.dataset.row, ctxId = row.dataset.list;
     if (cur() && cur().id === id && S.ctxId === ctxId) toggle(); else playContext(ctxId, id); return; }
   const qi = e.target.closest("[data-qi]");
@@ -4486,6 +4784,21 @@ document.addEventListener("click", e => {
     if (a === "hum-close") closeHum();
     if (a === "hum-listen") listenOnce();
     if (a === "hum-search") humSearch();
+    if (a === "lib-dlg") openLibDlg();
+    if (a === "lib-close") $("#libDlg").close();
+    if (a === "lib-del") libDelete(act.dataset.k);
+    if (a === "demo-toggle") toggleDemo();
+    if (a === "sel-mode") setSelMode(true);
+    if (a === "sel-done") setSelMode(false);
+    if (a === "sel-all"){ USER.forEach(id => S.sel.add(id)); rerender(); }
+    if (a === "sel-del") selDelete();
+    if (a === "lyr-net") netLyricsNow();
+    if (a === "pl-share") sharePl(act.dataset.id);
+    if (a === "share-close") $("#shareDlg").close();
+    if (a === "share-stop") stopSharing(act.dataset.id);
+    if (a === "share-copy"){ const i = $("#shareLink"); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast("Enlace copiado."), () => { document.execCommand("copy"); toast("Enlace copiado."); }); }
+    if (a === "share-send"){ const d = $("#shareDlg"); navigator.share({ title: `Playlist “${d.dataset.title}” en Hum`, text: `Escucha mi playlist “${d.dataset.title}” en Hum`, url: d.dataset.link }).catch(() => {}); }
+    if (a === "imp-link"){ const v = $("#impLink").value.trim(); if (v){ openSharedLink(v).then(ok => { if (ok) $("#impDlg").close(); }); } }
     if (a === "voice-try"){ H.viaVoice = true; if (S.voiceSel === "natural" && vozState !== "ready") loadNatural().then(() => humSpeak("Hola, soy Hum. Así sueno.")).catch(() => {}); else humSpeak("Hola, soy Hum. Así sueno."); }
     if (a === "fx") openFx();
     if (a === "fx-close") $("#fxDlg").close();
@@ -4582,7 +4895,7 @@ document.addEventListener("drop", e => { if (!hasFiles(e)) return; e.preventDefa
 $("#brandMark").innerHTML = ic("wave");
 $("#navHome").innerHTML = ic("home") + "Inicio";
 $("#navSearch").innerHTML = ic("search") + "Buscar";
-$("#libH").innerHTML = ic("library") + "<span>Tu biblioteca</span>" + `<button class="ib" data-act="pl-new" aria-label="Crear playlist" title="Crear playlist">${ic("plAdd")}</button><button class="ib" data-act="add" aria-label="Añadir canciones" title="Añadir canciones">${ic("add")}</button>`;
+$("#libH").innerHTML = ic("library") + "<span>Tu biblioteca</span>" + `<button class="ib" data-act="lib-dlg" aria-label="Gestionar biblioteca" title="Gestionar biblioteca">${ic("tune")}</button>` + `<button class="ib" data-act="pl-new" aria-label="Crear playlist" title="Crear playlist">${ic("plAdd")}</button><button class="ib" data-act="add" aria-label="Añadir canciones" title="Añadir canciones">${ic("add")}</button>`;
 $("#addTop").innerHTML = ic("add") + "<span>Añadir música</span>";
 $("#importBtn").innerHTML = ic("plAdd") + "<span>Importar playlist</span>";
 $("#installBtn").innerHTML = ic("install") + "<span>Instalar app</span>";
@@ -4633,8 +4946,12 @@ Promise.all([
   (covers || []).forEach(c => { if (c && c.blob) COVERS[c.id] = URL.createObjectURL(c.blob); });
   (recs || []).sort((a, b) => a.added - b.added).forEach(addUserTrack);
   (pls || []).sort((a, b) => a.added - b.added).forEach(addImported);
+  if (demoOff()) leaveDemo();
   renderLib(); if (S.view.type !== "search") renderView(); paint();
   startSync();
+  // opened from a shared-playlist link
+  const shared = (location.hash.match(/lista=([\w-]{10,200})/) || [])[1];
+  if (shared){ history.replaceState(null, "", location.pathname + location.search); openShared(shared).then(id => { if (id) go({ type: "list", id }); }); }
 });
 })();
 </script>
