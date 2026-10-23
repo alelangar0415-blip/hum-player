@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -585,6 +585,58 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 @media (max-width:760px){ .hum{bottom:calc(118px + env(safe-area-inset-bottom,0px))} }
 @media (prefers-reduced-motion:reduce){ .hum,.hum-orb,.hum-orb i{animation:none!important} }
 
+/* ---------- new: home cards, Hum tools, hum-it results, monthly summary ---------- */
+.home-x{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0 0 14px}
+.hx{display:flex;align-items:center;gap:14px;text-align:left;padding:12px 16px 12px 12px;border-radius:12px;min-width:0;
+  background:linear-gradient(120deg,hsl(var(--amb,42) 40% 22%),var(--raise) 70%);border:1px solid hsl(var(--amb,42) 40% 50% / .18)}
+.hx:hover{border-color:hsl(var(--amb,42) 60% 60% / .45)}
+.hx-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none}
+.hx b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx span:last-child{min-width:0}
+.hum-tools{display:flex;gap:8px;margin-top:10px}
+.hum-tools button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 10px;border-radius:999px;border:1px solid hsl(42 85% 60% / .45);color:var(--accent);font-weight:700;font-size:13px}
+.hum-tools button:hover{background:hsl(42 85% 52% / .12)}
+.hum-tools svg{width:18px;height:18px}
+.hum-found{display:flex;flex-direction:column;gap:4px}
+.hum-found button{display:grid;grid-template-columns:40px minmax(0,1fr) 24px;gap:12px;align-items:center;text-align:left;padding:6px;border-radius:8px}
+.hum-found button:hover{background:var(--raise)}
+.hum-found img{width:40px;height:40px;border-radius:5px;object-fit:cover}
+.hum-found b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hum-found small{display:block;color:var(--muted);font-size:13px}
+.hum-found svg{color:var(--accent)}
+.hum-note{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+.wrap{position:fixed;inset:0;z-index:46;overflow:auto;--wh:42;
+  background:linear-gradient(180deg,hsl(var(--wh) 55% 30%) 0%,hsl(var(--wh) 40% 14%) 50%,var(--bg) 100%);
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:fpIn .28s ease}
+.wrap-in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+.wrap .fp-top{margin-bottom:18px}
+.wrap .fp-top .pill{height:32px;font-size:13px;text-transform:capitalize}
+.wrap-eyebrow{margin:0;color:rgba(255,255,255,.75);font-weight:600;font-size:15px}
+.wrap-big{font:800 clamp(52px,14vw,88px)/1 var(--f-display);letter-spacing:-.04em;margin:4px 0 0}
+.wrap-sub{margin:0 0 22px;color:rgba(255,255,255,.75)}
+.wrap-hero{display:flex;gap:18px;align-items:center;padding:14px;border-radius:16px;background:rgba(0,0,0,.22);margin-bottom:10px}
+.wrap-hero img{width:120px;height:120px;border-radius:12px;object-fit:cover;box-shadow:0 12px 30px rgba(0,0,0,.45);flex:none}
+.wrap-hero div{min-width:0}
+.wrap-hero small{display:block;color:var(--accent);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.wrap-hero b{display:block;font:800 26px/1.15 var(--f-display);margin:4px 0;overflow-wrap:anywhere}
+.wrap-hero span{color:rgba(255,255,255,.75)}
+.wrap-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:2px}
+.wrap-list li{display:grid;grid-template-columns:22px 44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 8px;border-radius:10px}
+.wrap-list em{font:700 18px var(--f-display);color:var(--accent);font-style:normal;text-align:center}
+.wrap-list img{width:44px;height:44px;border-radius:6px;object-fit:cover}
+.wrap-list b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrap-list small{display:block;color:rgba(255,255,255,.65);font-size:13px}
+.wrap-list i{font-style:normal;font-family:var(--f-mono);font-size:13px;color:rgba(255,255,255,.65)}
+.wrap-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:18px}
+.wrap-facts div{padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.22)}
+.wrap-facts small{display:block;color:rgba(255,255,255,.65);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.wrap-facts b{display:block;font:700 18px/1.25 var(--f-display);margin-top:2px;overflow-wrap:anywhere}
+.wrap-share{align-self:flex-start;margin-left:0}
+.wrap-empty{padding:40px 4px;color:rgba(255,255,255,.8)}
+.wrap-empty b{display:block;font:800 26px/1.2 var(--f-display);margin-bottom:8px}
+@media (max-width:760px){ .b-right #fxBtn{display:none} .wrap-hero img{width:92px;height:92px} .wrap-hero b{font-size:21px} }
+
 /* ---------- narrower screens ---------- */
 @media (max-width:1100px){
   .app,.app:not(.np-open){grid-template-columns:clamp(200px,24vw,260px) minmax(0,1fr);grid-template-areas:"side main" "bar bar"}
@@ -665,6 +717,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <button class="nav-btn" id="navSearch" data-act="search"></button>
       <button class="nav-btn" id="navEq" data-act="eq"></button>
       <button class="nav-btn" id="navMix" data-act="mix"></button>
+      <button class="nav-btn" id="navFx" data-act="fx"></button>
       <button class="nav-btn" id="navSnd" data-act="snd"></button>
       <button class="nav-btn" id="navAcct" data-act="acct"></button>
       <button class="nav-btn" id="navApp" data-act="welcome"></button>
@@ -722,6 +775,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     </div>
     <div class="b-right">
       <button class="ib tog" id="lyrBtn" data-act="lyrics" aria-label="Letra" aria-pressed="false"></button>
+      <button class="ib tog" id="fxBtn" data-act="fx" aria-label="Efectos" title="Efectos: slowed, sped up, 8D, karaoke" aria-pressed="false"></button>
       <button class="ib tog" id="mixBtn" data-act="mix" aria-label="Transiciones entre canciones" aria-pressed="false"></button>
       <button class="ib tog" id="eqBtn" data-act="eq" aria-label="Ecualizador" aria-pressed="false"></button>
       <button class="ib" id="miniBtn" data-act="mini" aria-label="Mini reproductor" title="Mini reproductor" hidden></button>
@@ -886,11 +940,35 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     <button type="button" class="ib hum-mic" data-act="hum-listen" id="humMic" aria-label="Hablar"></button>
   </form>
   <div class="hum-ideas" id="humIdeas"></div>
+  <div class="hum-tools">
+    <button type="button" data-act="hum-search"><span></span>Tararéala</button>
+    <button type="button" data-act="wx-play"><span></span>Según el clima</button>
+  </div>
+  <div class="hum-wake">
+    <div><b>Hum locutor</b><small>Entre canciones te habla como en la radio: qué sonó, qué viene, la hora o el clima.</small></div>
+    <button type="button" class="switch" id="humHost" role="switch" aria-checked="false" aria-label="Hum locutor"></button>
+  </div>
   <div class="hum-wake" id="humWakeRow">
     <div><b>Escuchar «Ey Hum» siempre</b><small id="humWakeNote">Mientras la app esté abierta, di «Ey Hum» y lo que quieras.</small></div>
     <button type="button" class="switch" id="humWake" role="switch" aria-checked="false" aria-label="Escuchar «Ey Hum» siempre"></button>
   </div>
 </section>
+<dialog class="dlg snd-dlg" id="fxDlg" aria-labelledby="fxH">
+  <h2 id="fxH">Efectos</h2>
+  <p>Cambia cómo suenan tus canciones, como en los videos de TikTok. Se aplica a todo lo que suena.</p>
+  <div class="spk-grid" id="fxModes" role="group" aria-label="Velocidad"></div>
+  <div class="mix-opt" style="margin-top:12px">
+    <div><b>Audio 8D</b><small>El sonido da vueltas alrededor de tu cabeza. Se nota con audífonos.</small></div>
+    <button type="button" class="switch" id="fx8d" role="switch" aria-checked="false" aria-label="Audio 8D"></button>
+  </div>
+  <div class="mix-opt" style="margin-top:8px">
+    <div><b>Karaoke</b><small>Baja la voz de la canción para que cantes tú. Funciona mejor cuando la voz va al centro, como en la mayoría del pop y el reguetón.</small></div>
+    <button type="button" class="switch" id="fxKara" role="switch" aria-checked="false" aria-label="Karaoke"></button>
+  </div>
+  <p class="mix-note">Slowed y sped up cambian la velocidad de tus propias canciones. A Hum también se lo puedes pedir: «Ey Hum, pon slowed».</p>
+  <div class="dlg-act"><button type="button" class="add-top" data-act="fx-close">Listo</button></div>
+</dialog>
+<section class="wrap" id="wrap" hidden aria-label="Hum Wrapped: tu mes en música"></section>
 <dialog class="dlg" id="acctDlg" aria-labelledby="acctH"><div id="acctBody"></div></dialog>
 <dialog class="dlg" id="plDlg" aria-labelledby="plH">
   <form id="plForm" novalidate>
@@ -960,6 +1038,12 @@ const P = {
   check:"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
   edit:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
   cloud:"M19.35 10.04A7.49 7.49 0 0012 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z",
+  sun:"M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z",
+  insights:"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z",
+  share:"M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z",
+  note:"M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z",
+  radio:"M3.24 6.15C2.51 6.43 2 7.17 2 8v12c0 1.1.89 2 2 2h16c1.11 0 2-.9 2-2V8c0-1.11-.89-2-2-2H8.3l8.26-3.34L15.88 1 3.24 6.15zM7 20c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-8h-2v-2h-2v2H4V8h16v4z",
+  fx:"M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z",
   link:"M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"
 };
 const ic = n => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${P[n]}"/></svg>`;
@@ -1162,7 +1246,7 @@ function ensureCtx(){
   boostNode = ctx.createGain();
   limiter = ctx.createDynamicsCompressor();
   limiter.threshold.value = -1; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .002; limiter.release.value = .12;
-  master.connect(eq.input); eq.output.connect(spkNodes[0]); spkNodes[4].connect(compNode);
+  const fxc = buildFx(); master.connect(fxc.input); fxc.output.connect(eq.input); eq.output.connect(spkNodes[0]); spkNodes[4].connect(compNode);
   compNode.connect(boostNode); boostNode.connect(limiter); limiter.connect(analyser); analyser.connect(ctx.destination);
   applySpk(); applyBoost(); applyBits();
   try {
@@ -1348,6 +1432,7 @@ function playContext(listId, startId){
   playIndex(S.qi);
 }
 function next(auto){
+  if (auto) S.autoNext = Date.now();
   if (!S.queue.length) return;
   if (auto && S.repeat === "one"){ loadAt(0); return; }
   if (S.qi + 1 < S.queue.length) return playIndex(S.qi + 1);
@@ -1415,6 +1500,7 @@ function addUserTrack(rec){
   if (!rec.bpmDone) queueBpm(rec);
   if (!rec.lyrScan) queueLyrScan(rec);
   if (!rec.feel && rec.blob) queueFeel(rec);
+  if (!rec.melody && rec.blob) queueMelody(rec);
   return t;
 }
 function probe(file){
@@ -2094,8 +2180,8 @@ let mix = null, glide = null, mixBusy = false, mixFailed = null;
 const deckOf = el => decks ? decks.find(d => d.el === el) : null;
 function deckGain(el, v){ const d = deckOf(el); if (d && ctx){ d.g.gain.cancelScheduledValues(ctx.currentTime); d.g.gain.setValueAtTime(v, ctx.currentTime); } }
 function cancelMix(){
-  if (mix){ mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = 1; mix = null; }
-  glide = null; audio.playbackRate = 1; deckGain(audio, 1);
+  if (mix){ mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = fxRate(); mix = null; }
+  glide = null; audio.playbackRate = fxRate(); deckGain(audio, 1);
 }
 function upcoming(){
   if (S.repeat === "one") return -1;
@@ -2110,10 +2196,10 @@ async function startMix(t, nt, ni, fade){
   const from = audio, inc = decks[0].el === from ? decks[1].el : decks[0].el;
   inc.pause(); deckGain(inc, 0);
   inc.src = songUrl(nt); inc.dataset.id = nt.id;
-  inc.preservesPitch = inc.mozPreservesPitch = inc.webkitPreservesPitch = true; // speed changes keep the key
+  inc.preservesPitch = inc.mozPreservesPitch = inc.webkitPreservesPitch = S.fx.mode === "off"; // speed changes keep the key (unless slowed / sped up is on)
   await once(inc, "loadedmetadata", "error");
   if (!S.playing || audio !== from || cur() !== t) return; // something changed while loading
-  let r = 1, startAt = 0;
+  let r = fxRate(), startAt = 0;
   if (S.mix.sync && t.rec.bpm && nt.rec.bpm){
     const bOut = t.rec.bpm * from.playbackRate;
     const cand = [nt.rec.bpm, nt.rec.bpm * 2, nt.rec.bpm / 2].sort((x, y) => Math.abs(x - bOut) - Math.abs(y - bOut))[0];
@@ -2137,20 +2223,20 @@ async function startMix(t, nt, ni, fade){
   // the old song ended (and the app already moved on) while the new one was starting: drop this mix
   if (audio !== from || cur() !== t){ inc.pause(); deckGain(inc, 1); deckGain(from, 1); return; }
   mix = { from, r, end: now + .05 + fade };
-  glide = null; audio = inc; S.qi = ni; paint();
+  glide = null; audio = inc; S.qi = ni; S.autoNext = Date.now(); paint();
 }
 async function mixTick(){
   if (!ctx || !decks) return;
   const now = ctx.currentTime;
   if (mix && now >= mix.end){
-    mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = 1;
-    if (Math.abs(mix.r - 1) > .002) glide = { start: now, dur: Math.max(8, S.mix.secs * 1.5), r: mix.r };
+    mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = fxRate();
+    if (Math.abs(mix.r - fxRate()) > .002) glide = { start: now, dur: Math.max(8, S.mix.secs * 1.5), r: mix.r };
     mix = null;
   }
   if (glide){
     const x = clamp((now - glide.start) / glide.dur, 0, 1), e = x * x * (3 - 2 * x);
-    audio.playbackRate = glide.r + (1 - glide.r) * e;
-    if (x >= 1){ audio.playbackRate = 1; glide = null; }
+    audio.playbackRate = glide.r + (fxRate() - glide.r) * e;
+    if (x >= 1){ audio.playbackRate = fxRate(); glide = null; }
     paintTempo();
   }
   if (mix || mixBusy || !S.mix.on || !S.playing) return;
@@ -2613,6 +2699,7 @@ function renderUserPl(id){
       <button class="fab" data-playlist="${id}" aria-label="Reproducir ${esc(p.title)}">${ic("play")}</button>
       <button class="ib tog" data-act="shuffle" aria-label="Aleatorio" id="listShuf">${ic("shuffle")}</button>
       <button class="pill" data-act="pick-open">${ic("add")}Añadir canciones</button>
+      ${l.tracks.length > 2 ? `<button class="pill" data-act="dj-order" data-id="${id}">${ic("mix")}Orden DJ</button>` : ""}
       <button class="pill" data-act="pl-edit" data-id="${id}">${ic("edit")}Editar</button>
       <button class="pill danger${armed ? " armed" : ""}" data-act="pl-del" data-id="${id}">${armed ? "Pulsa otra vez para eliminar" : "Eliminar"}</button>
     </div>
@@ -2969,6 +3056,7 @@ function moveFile(rec, dir, left){
     await putRec(rec);
     if (!rec.bpmDone) queueBpm(rec);
     if (!rec.feel) queueFeel(rec);
+    if (!rec.melody) queueMelody(rec);
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
     document.querySelectorAll(`.row[data-row="${rec.id}"]`).forEach(r => { r.classList.remove("cloud-only"); const im = r.querySelector("img"); if (im) im.src = cover(t); });
     if (xfer.want === rec.id){ xfer.want = null; const at = xfer.wait.get(rec.id) || 0; xfer.wait.delete(rec.id); if (cur() === t && S.playing){ loadAt(at); paint(); } }
@@ -3293,7 +3381,7 @@ function rawFeel(t){
   const f = t.rec.feel || {}, ok = !f.none && f.energy != null, c = Math.min(.5, (f.keyConf || 0) * 3);
   return { energy: ok ? f.energy : null, bright: ok ? f.bright : null, bpm: t.rec.bpm || null, minor: ok ? (f.minor ? .5 + c : .5 - c) : .5 };
 }
-function playMood(md){
+function playMood(md, pre){
   const ids = USER.length >= 6 ? USER.slice() : [...USER, ...TRACKS.map(t => t.id)];
   const pool = ids.map(id => BYID[id]).filter(Boolean);
   if (!pool.length) return reply("Aún no tienes canciones. Añade las tuyas y te armo el ambiente.");
@@ -3311,7 +3399,7 @@ function playMood(md){
   S.humList = { title: md.title, tracks: shuffled(scored.slice(0, n).map(x => x.id)) };
   if (S.shuffle) setShuffle(false);
   playContext("hum");
-  reply(md.say + (waiting ? ` Aún estoy conociendo ${nc(waiting)} de las tuyas, así que la próxima vez acertaré mejor.` : ""));
+  reply((pre || "") + md.say + (waiting ? ` Aún estoy conociendo ${nc(waiting)} de las tuyas, así que la próxima vez acertaré mejor.` : ""));
 }
 
 // --- find a song, an artist or a playlist by name
@@ -3361,7 +3449,8 @@ function runCommand(raw){
   if (/(aleatori|mezcla|revuelve|shuffle)/.test(c)){ setShuffle(!S.shuffle); return reply(S.shuffle ? "Modo aleatorio activado." : "Modo aleatorio desactivado.", true); }
   if (/(que|cual) (cancion |rola |tema )?(es esta|suena|esta sonando|estoy escuchando)|^que suena/.test(c)) return reply(t ? `Suena “${t.title}”, de ${t.artist}.` : "No está sonando nada.");
   if (/(que puedes hacer|que sabes hacer|ayuda|como funciona|que haces)/.test(c))
-    return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta».");
+    return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta». Más: «slowed», «sped up», «8D», «karaoke», «música para este clima», «orden DJ», «activa el locutor», «¿cómo se llama esta canción?» para tararear, y «mi resumen del mes».");
+  if (humExtra(c)) return; // effects, radio host, weather, DJ order, hum-it, monthly summary
   const mood = MOODS.find(md => md.words.test(c));
   const m = c.match(/^(pon(me|nos|le)?|reproduce|toca(me)?|quiero (escuchar|oir)|escuchar|play|busca)\s+(.+)$/);
   const what = m ? m[5] : c;
@@ -3454,11 +3543,13 @@ async function recordWhisper(){
   try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
   catch { return reply("Necesito permiso para usar el micrófono."); }
   const chunks = [], mr = new MediaRecorder(stream); H.mediaRec = mr;
-  setListening(true); duck(true); $("#humReply").textContent = ""; $("#humStatus").textContent = "Te escucho… toca el micrófono al terminar";
+  setListening(true); duck(true); $("#humStatus").textContent = "Te escucho… toca el micrófono al terminar";
   mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
   const auto = setTimeout(() => { if (mr.state !== "inactive") mr.stop(); }, 6000);
   mr.onstop = async () => {
-    clearTimeout(auto); H.mediaRec = null; stream.getTracks().forEach(t => t.stop()); duck(false); setListening(false); setThinking(true);
+    clearTimeout(auto); H.mediaRec = null; stream.getTracks().forEach(t => t.stop()); duck(false); setListening(false);
+    if (mr.discard) return;
+    setThinking(true);
     $("#humStatus").textContent = modelReady ? "Entendiendo…" : "Preparando la voz de Hum… (solo la primera vez, unos 80 MB)";
     try {
       const text = await asrText(await prepAudio(new Blob(chunks, { type: mr.mimeType })));
@@ -3500,7 +3591,7 @@ function openHum(byWake){
   if (S.drawer){ S.drawer = false; applySide(); }
   H.byWake = !!byWake; clearTimeout(H.closeT);
   const p = $("#hum"); p.hidden = false; humIdeas(); paintHum();
-  if (!byWake){ $("#humReply").textContent = ""; $("#humHeard").textContent = ""; if (canListen) listenOnce(); else $("#humStatus").textContent = "Escríbeme qué quieres escuchar"; }
+  if (!byWake){ $("#humReply").textContent = ""; $("#humHeard").textContent = ""; if (canWebSpeech) listenOnce(); else $("#humStatus").textContent = canWhisper ? "Toca el micrófono para hablar, o escríbeme" : "Escríbeme qué quieres escuchar"; }
 }
 function closeHum(){
   $("#hum").hidden = true; clearTimeout(H.closeT);
@@ -3510,12 +3601,444 @@ function closeHum(){
   if (H.ducked) duck(false);
   setListening(false);
 }
-$("#humForm").addEventListener("submit", e => { e.preventDefault(); const v = $("#humInput").value.trim(); if (!v) return; $("#humInput").value = ""; H.byWake = false; heard(v, false); });
+$("#humForm").addEventListener("submit", e => { e.preventDefault(); const v = $("#humInput").value.trim(); if (!v) return;
+  if (H.mediaRec && H.mediaRec.state !== "inactive"){ H.mediaRec.discard = true; H.mediaRec.stop(); } // you typed instead: drop the recording
+  $("#humInput").value = ""; H.byWake = false; heard(v, false); });
 $("#humWake").addEventListener("click", () => {
   H.wakeOn = !H.wakeOn; store.set("humWake", H.wakeOn); paintHum();
   if (H.wakeOn){ startWake(); toast("Hum te escucha: di «Ey Hum» y lo que quieras."); } else stopWake();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#hum").hidden && !document.querySelector("dialog[open]")) closeHum(); });
+
+/* ---------- sound effects: slowed + reverb, sped up, 8D and karaoke ----------
+   They sit between your songs and the equalizer, so the EQ, speaker correction and limiter still apply. */
+const fxSaved = store.get("fx", null);
+S.fx = { mode: fxSaved && ["off", "slowed", "sped"].includes(fxSaved.mode) ? fxSaved.mode : "off", d8: !!(fxSaved && fxSaved.d8), kara: !!(fxSaved && fxSaved.kara) };
+const FX_RATE = { off: 1, slowed: .85, sped: 1.22 };
+const fxRate = () => FX_RATE[S.fx.mode] || 1;
+let fxN = null;
+function makeImpulse(secs, decay){ // a big soft room, made of fading noise
+  const len = Math.round(ctx.sampleRate * secs), b = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++){ const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+  return b;
+}
+function buildFx(){
+  const g = () => ctx.createGain();
+  const input = g(), dry = g(), mixBus = g(), out = g(), wet = g();
+  // karaoke: the voice is usually in the middle of the stereo image; left minus right takes it out,
+  // and the bass (also in the middle) comes back from a low-pass copy
+  const split = ctx.createChannelSplitter(2), gl = g(), gr = g(), side = g(), merge = ctx.createChannelMerger(2), karaWet = g(), bass = ctx.createBiquadFilter(), bassG = g();
+  gr.gain.value = -1; side.gain.value = .9; bass.type = "lowpass"; bass.frequency.value = 160; bass.Q.value = .5;
+  input.connect(dry); dry.connect(mixBus);
+  input.connect(split); split.connect(gl, 0); split.connect(gr, 1); gl.connect(side); gr.connect(side);
+  side.connect(merge, 0, 0); side.connect(merge, 0, 1); merge.connect(karaWet); karaWet.connect(mixBus);
+  input.connect(bass); bass.connect(bassG); bassG.connect(mixBus);
+  const pan = ctx.createStereoPanner(); mixBus.connect(pan); pan.connect(out);
+  const rev = ctx.createConvolver(); rev.buffer = makeImpulse(2.8, 2.6); pan.connect(rev); rev.connect(wet); wet.connect(out);
+  fxN = { input, output: out, dry, karaWet, bassG, pan, wet };
+  applyFx(true);
+  return fxN;
+}
+function applyFx(silent){
+  const r = fxRate(), shift = S.fx.mode !== "off";
+  [audio, deckB].forEach(el => { el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = !shift; el.defaultPlaybackRate = r; });
+  if (!mix && !glide) audio.playbackRate = r;
+  if (fxN && ctx){
+    const t = ctx.currentTime, k = S.fx.kara;
+    fxN.dry.gain.setTargetAtTime(k ? 0 : 1, t, .05); fxN.karaWet.gain.setTargetAtTime(k ? 1 : 0, t, .05); fxN.bassG.gain.setTargetAtTime(k ? 1 : 0, t, .05);
+    fxN.wet.gain.setTargetAtTime(S.fx.mode === "slowed" ? .4 : S.fx.d8 ? .14 : 0, t, .1);
+    if (!S.fx.d8) fxN.pan.pan.setTargetAtTime(0, t, .2);
+  }
+  if (!silent) store.set("fx", S.fx);
+  const on = S.fx.mode !== "off" || S.fx.d8 || S.fx.kara;
+  const b = $("#fxBtn"); if (b){ b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); }
+  const dot = $("#navFx .eq-dot"); if (dot) dot.hidden = !on;
+  if ($("#fxDlg").open) renderFxUI();
+  paintTempo();
+}
+// 8D: the sound goes slowly around your head (best with headphones)
+setInterval(() => { if (fxN && ctx && S.fx.d8 && S.playing) fxN.pan.pan.setTargetAtTime(Math.sin(ctx.currentTime * 2 * Math.PI / 9) * .9, ctx.currentTime, .15); }, 120);
+function renderFxUI(){
+  $("#fxModes").innerHTML = [["off", "Normal", "Como suena el archivo"], ["slowed", "Slowed + reverb", "Más lento, más grave y con eco"], ["sped", "Sped up", "Más rápido y más agudo"]]
+    .map(([k, n, d]) => `<button type="button" class="spk${S.fx.mode === k ? " on" : ""}" data-fxmode="${k}" aria-pressed="${S.fx.mode === k}"><b>${n}</b><small>${d}</small></button>`).join("");
+  $("#fx8d").setAttribute("aria-checked", S.fx.d8);
+  $("#fxKara").setAttribute("aria-checked", S.fx.kara);
+}
+function openFx(){ if (S.drawer){ S.drawer = false; applySide(); } renderFxUI(); $("#fxDlg").showModal(); }
+function setFx(patch, say){
+  Object.assign(S.fx, patch); applyFx();
+  if (say) toast(say);
+}
+
+/* ---------- Hum, radio host: between songs Hum talks like a DJ on the radio ---------- */
+S.host = !!store.get("host", false);
+let hostLast = 0, hostCount = 0, lastTrackId = null;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function trackChanged(t){ // called on every paint; acts only when the song changed
+  if (lastTrackId === t.id) return;
+  const prev = lastTrackId && BYID[lastTrackId]; lastTrackId = t.id;
+  const auto = S.autoNext && Date.now() - S.autoNext < 4000; S.autoNext = 0;
+  if (S.host && auto && S.playing && prev && prev.id !== t.id) hostTalk(prev, t);
+}
+function hostTalk(prev, t){
+  hostCount++;
+  if (hostCount % 2 === 0 && Date.now() - hostLast < 6 * 60000) return; // about every other song, never too long a silence
+  hostLast = Date.now();
+  const h = new Date(), hh = h.getHours(), mm = h.getMinutes();
+  const listTitle = S.ctxId === "hum" ? S.humList.title : "";
+  const mood = /^Modo /.test(listTitle) ? listTitle.replace(/^Modo /, "") : "";
+  const was = pick([`Eso fue “${prev.title}”, de ${prev.artist}.`, `Acabas de escuchar “${prev.title}”.`, `“${prev.title}”, de ${prev.artist}. Qué buena.`]);
+  const now = pick([`Ahora suena “${t.title}”, de ${t.artist}.`, `Sigue “${t.title}”, de ${t.artist}.`, `Te dejo con “${t.title}”.`, `Y ahora, ${t.artist} con “${t.title}”.`]);
+  const extra = [];
+  if (mood) extra.push(pick([`Seguimos en modo ${mood}.`, `Todo sigue en modo ${mood}.`]));
+  if (W.now && Math.random() < .5) extra.push(weatherLine());
+  if (Math.random() < .3) extra.push(`Son las ${hh % 12 || 12}${mm ? ":" + String(mm).padStart(2, "0") : ""} ${hh < 12 ? "de la mañana" : hh < 20 ? "de la tarde" : "de la noche"}.`);
+  speakHost([was, ...extra.slice(0, 1), now].join(" "));
+}
+function speakHost(text){
+  if (!("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = humLang; u.rate = 1.05;
+    humVoice = humVoice || pickVoice(); if (humVoice) u.voice = humVoice;
+    u.onstart = () => duck(true); u.onend = u.onerror = () => duck(false);
+    speechSynthesis.speak(u);
+  } catch {}
+}
+function setHost(on){ S.host = on; store.set("host", on); paintHumExtras(); }
+
+/* ---------- weather: music for the weather where you are (Open-Meteo, free and without keys) ---------- */
+const W = { now: null, at: 0, coords: store.get("wxLoc", null) };
+const WX = c => c === 0 ? ["despejado", "sol"] : c <= 3 ? ["nublado", "nubes"] : c <= 48 ? ["con niebla", "niebla"]
+  : (c <= 67 || (c >= 80 && c <= 82)) ? ["lloviendo", "lluvia"] : (c <= 77 || c === 85 || c === 86) ? ["nevando", "nieve"] : ["con tormenta", "tormenta"];
+async function getWeather(ask){
+  if (W.now && Date.now() - W.at < 20 * 60000) return W.now;
+  if (!W.coords){
+    if (!ask || !navigator.geolocation) return null;
+    // only a rounded position (about 10 km) is kept and sent
+    W.coords = await new Promise(res => navigator.geolocation.getCurrentPosition(
+      p => res({ lat: Math.round(p.coords.latitude * 10) / 10, lon: Math.round(p.coords.longitude * 10) / 10 }), () => res(null), { maximumAge: 36e5, timeout: 15000 }));
+    if (!W.coords) return null;
+    store.set("wxLoc", W.coords);
+  }
+  try {
+    const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${W.coords.lat}&longitude=${W.coords.lon}&current=temperature_2m,weather_code,is_day&timezone=auto`)).json();
+    const c = j.current; W.now = { temp: Math.round(c.temperature_2m), code: c.weather_code, day: !!c.is_day }; W.at = Date.now();
+    if (S.view.type === "home") paintHomeExtras();
+    return W.now;
+  } catch { return null; }
+}
+function weatherLine(){ const [d] = WX(W.now.code); return `Afuera está ${d}, ${W.now.temp} grados.`; }
+function moodForWeather(w){
+  const [, k] = WX(w.code), h = new Date().getHours(), M = n => MOODS.find(m => m.title === n);
+  if (k === "tormenta") return M("Modo intenso");
+  if (k === "lluvia" || k === "nieve") return M("Modo melancólico");
+  if (k === "niebla") return M("Modo relajado");
+  if (!w.day || h >= 21 || h < 6) return M(h >= 20 && h < 24 ? "Modo romántico" : "Modo relajado");
+  if (k === "sol") return M(w.temp >= 28 ? "Modo fiesta" : "Modo alegre");
+  return M(w.temp <= 12 ? "Modo melancólico" : "Modo relajado");
+}
+async function playWeather(){
+  const w = await getWeather(true);
+  if (!w) return reply("Para ver el clima necesito tu ubicación. Permite el acceso a la ubicación y vuelve a intentarlo.");
+  playMood(moodForWeather(w), weatherLine() + " ");
+}
+
+/* ---------- harmonic DJ order: each song flows into the next by key and tempo (Camelot wheel) ---------- */
+const CAM_MAJ = [8, 3, 10, 5, 12, 7, 2, 9, 4, 11, 6, 1], CAM_MIN = [5, 12, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10];
+function keyOf(t){
+  if (!t.user) return { n: (t.mode === "major" ? CAM_MAJ : CAM_MIN)[((t.root % 12) + 12) % 12], minor: t.mode !== "major", bpm: t.bpm };
+  const f = t.rec.feel;
+  const k = f && !f.none && f.key != null && (f.keyConf || 0) >= .04 ? { n: (f.minor ? CAM_MIN : CAM_MAJ)[f.key], minor: !!f.minor } : null;
+  return { ...(k || {}), bpm: t.rec.bpm || null };
+}
+function djCost(a, b){
+  let c = 3; // unknown key
+  if (a.n && b.n){ const d = Math.min(Math.abs(a.n - b.n), 12 - Math.abs(a.n - b.n)); c = d + (a.minor !== b.minor ? 1 : 0); if (d === 0 && a.minor !== b.minor) c = 1; }
+  if (a.bpm && b.bpm) c += 12 * Math.min(...[.5, 1, 2].map(x => Math.abs(b.bpm * x - a.bpm) / a.bpm));
+  return c;
+}
+function djOrder(listId){
+  const l = getList(listId), ids = l.tracks.filter(id => BYID[id]);
+  if (ids.length < 3) return reply("Para ordenar como DJ hacen falta al menos 3 canciones.");
+  const keys = new Map(ids.map(id => [id, keyOf(BYID[id])]));
+  const start = cur() && ids.includes(cur().id) ? cur().id : ids[0];
+  const out = [start], left = new Set(ids.filter(id => id !== start));
+  while (left.size){
+    const last = keys.get(out[out.length - 1]); let best = null, bc = Infinity;
+    for (const id of left){ const c = djCost(last, keys.get(id)); if (c < bc){ bc = c; best = id; } }
+    out.push(best); left.delete(best);
+  }
+  S.humList = { title: `${l.title} · orden DJ`, tracks: out };
+  const turnedOn = !S.mix.on; if (turnedOn){ S.mix.on = true; saveMix(); }
+  if (S.shuffle) setShuffle(false);
+  playContext("hum");
+  const unknown = ids.filter(id => !keys.get(id).n).length;
+  reply(`Ordené “${l.title}” para que cada canción entre suave en la siguiente, por tono y por ritmo.${turnedOn ? " Activé las transiciones." : ""}${unknown ? ` Aún estoy conociendo ${nc(unknown)}.` : ""}`);
+}
+
+/* ---------- hum it and Hum finds it ----------
+   Each song's main melody is estimated once on this device (the strongest note, frame by frame);
+   your humming is turned into notes and compared at several speeds, in any key. */
+const FFTN = 2048, HANN = new Float32Array(FFTN).map((_, i) => .5 - .5 * Math.cos(2 * Math.PI * i / (FFTN - 1)));
+function fft(re, im){
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++){ let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j){ let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1){
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), half = len >> 1;
+    for (let i = 0; i < n; i += len){
+      let cr = 1, ci = 0;
+      for (let j = 0; j < half; j++){
+        const a = i + j, b = a + half, br = re[b] * cr - im[b] * ci, bi = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - br; im[b] = im[a] - bi; re[a] += br; im[a] += bi;
+        const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t;
+      }
+    }
+  }
+}
+const melQueue = []; let melRunning = false;
+function queueMelody(rec){ if (rec.melody || melQueue.includes(rec)) return; melQueue.push(rec); setTimeout(runMelody, 5000); }
+async function runMelody(){
+  if (melRunning) return; melRunning = true;
+  while (melQueue.length){
+    const rec = melQueue.shift();
+    if (!BYID[rec.id] || !rec.blob || rec.melody) continue;
+    if (bpmRunning || feelRunning || asrState.id){ melQueue.push(rec); await new Promise(r => setTimeout(r, 2500)); continue; }
+    try { rec.melody = await melodyOf(rec.blob); } catch { rec.melody = "-"; }
+    putRec(rec);
+    await new Promise(r => setTimeout(r, 300));
+  }
+  melRunning = false;
+}
+async function melodyOf(blob){
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC) return "-";
+  const sr = 11025, ab = await new OAC(1, 1, sr).decodeAudioData(await blob.arrayBuffer());
+  const c0 = ab.getChannelData(0), c1 = ab.numberOfChannels > 1 ? ab.getChannelData(1) : null, len = ab.length;
+  const hop = Math.round(sr / 10), frames = Math.max(0, Math.floor((len - FFTN) / hop)), out = new Uint8Array(frames);
+  const re = new Float32Array(FFTN), im = new Float32Array(FFTN), binHz = sr / FFTN;
+  const note = []; for (let m = 45; m <= 84; m++) note.push({ m, f: 440 * Math.pow(2, (m - 69) / 12), w: m >= 55 && m <= 79 ? 1 : .7 });
+  for (let f = 0; f < frames; f++){
+    const s0 = f * hop; let e = 0;
+    for (let i = 0; i < FFTN; i++){ const x = c1 ? (c0[s0 + i] + c1[s0 + i]) * .5 : c0[s0 + i]; re[i] = x * HANN[i]; im[i] = 0; e += x * x; }
+    if (e / FFTN < 1e-5){ out[f] = 0; continue; }
+    fft(re, im);
+    const mag = k => Math.hypot(re[k], im[k]);
+    let best = 0, bm = 0, sum = 0;
+    for (const n of note){
+      let s = 0; for (let h = 1; h <= 6; h++){ const k = Math.round(n.f * h / binHz); if (k + 1 >= FFTN / 2) break; s += Math.pow(.8, h - 1) * Math.max(mag(k - 1), mag(k), mag(k + 1)); }
+      s *= n.w; sum += s; if (s > best){ best = s; bm = n.m; }
+    }
+    out[f] = best > 1.6 * sum / note.length ? bm : 0;
+    if (f % 300 === 299) await new Promise(r => setTimeout(r, 0)); // stay smooth while it works
+  }
+  for (let f = 1; f + 1 < frames; f++){ const a = out[f - 1], b = out[f], c = out[f + 1]; if (a && c && a === c && b !== a) out[f] = a; } // smooth one-frame blips
+  let bin = ""; for (let i = 0; i < out.length; i += 4096) bin += String.fromCharCode.apply(null, out.subarray(i, i + 4096));
+  return btoa(bin);
+}
+function melodyArray(t){
+  if (!t.user){ // the built-in songs: their melody is known exactly
+    if (t._mel) return t._mel;
+    const steps = Array(32).fill(0);
+    t.lead.forEach((e, p) => { if (e) for (let k = 0; k < e.len && p + k < 32; k++) steps[p + k] = degMidi(t, e.deg, 12); });
+    const frames = Math.floor(t.dur * 10), out = new Uint8Array(frames);
+    for (let f = 0; f < frames; f++){ const s = Math.floor(f / 10 / t.sd), bar = Math.floor(s / 16); out[f] = bar >= 8 && bar < t.bars - 4 ? steps[(bar % 2) * 16 + (s % 16)] : 0; }
+    return t._mel = out;
+  }
+  const m = t.rec.melody; if (!m || m === "-") return null;
+  if (!t._mel || t._melSrc !== m){ const b = atob(m); t._mel = Uint8Array.from(b, c => c.charCodeAt(0)); t._melSrc = m; }
+  return t._mel;
+}
+function hummedNotes(pcm, sr){ // the notes you hummed, 10 per second (NaN = silence)
+  const N = 1024, hop = Math.round(sr / 10), out = [];
+  const tMin = Math.floor(sr / 1000), tMax = Math.ceil(sr / 75), d = new Float32Array(tMax + 1);
+  for (let s0 = 0; s0 + N + tMax < pcm.length; s0 += hop){
+    let e = 0; for (let i = 0; i < N; i++) e += pcm[s0 + i] * pcm[s0 + i];
+    if (e / N < 2e-5){ out.push(NaN); continue; }
+    for (let tau = 1; tau <= tMax; tau++){ let s = 0; for (let i = 0; i < N; i++){ const x = pcm[s0 + i] - pcm[s0 + i + tau]; s += x * x; } d[tau] = s; }
+    let run = 0, tau = -1;
+    for (let k = 1; k <= tMax; k++){ run += d[k]; const cm = d[k] * k / (run || 1); if (k >= tMin && cm < .15){ while (k + 1 <= tMax && d[k + 1] < d[k]) k++; tau = k; break; } }
+    out.push(tau > 0 ? 69 + 12 * Math.log2(sr / tau / 440) : NaN);
+  }
+  return out;
+}
+const fold = x => ((x % 12) + 18) % 12 - 6;
+function matchMelody(q){
+  const voicedQ = q.filter(x => !isNaN(x)).length, results = [];
+  for (const t of [...USER.map(id => BYID[id]), ...TRACKS]){
+    const S2 = melodyArray(t); if (!S2 || S2.length < q.length) continue;
+    let best = Infinity;
+    for (const sc of [.75, .9, 1, 1.12, 1.3]){
+      const L = Math.round(q.length * sc); if (L >= S2.length) continue;
+      for (let st = 0; st + L < S2.length; st += 3){
+        let cs = 0, sn = 0, n = 0;
+        for (let i = 0; i < q.length; i++){ const s = S2[st + Math.floor(i * L / q.length)]; if (!s || isNaN(q[i])) continue; const a = (q[i] - s) * Math.PI / 6; cs += Math.cos(a); sn += Math.sin(a); n++; }
+        if (n < voicedQ * .55) continue;
+        const shift = Math.atan2(sn, cs) * 6 / Math.PI; let cost = 0;
+        for (let i = 0; i < q.length; i++){ const s = S2[st + Math.floor(i * L / q.length)]; if (!s || isNaN(q[i])) continue; cost += Math.abs(fold(q[i] - s - shift)); }
+        cost = cost / n + (1 - n / voicedQ) * 1.5;
+        if (cost < best) best = cost;
+      }
+    }
+    if (best < Infinity) results.push({ id: t.id, cost: best });
+  }
+  return results.sort((a, b) => a.cost - b.cost);
+}
+async function humSearch(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return reply("Este navegador no deja usar el micrófono.");
+  if ($("#hum").hidden) openHum(true);
+  if (H.rec){ try { H.rec.abort(); } catch {} }
+  stopWake();
+  let stream; try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true } }); }
+  catch { return reply("Necesito permiso para usar el micrófono."); }
+  const wasPlaying = S.playing; if (wasPlaying) pause();
+  const chunks = [], mr = new MediaRecorder(stream), secs = 8;
+  setListening(true); $("#humReply").textContent = "";
+  let left = secs; $("#humStatus").textContent = `Tararea la canción… ${left}`; $("#humHeard").textContent = "Unos segundos de la parte que mejor recuerdes";
+  const tick = setInterval(() => { left--; if (left > 0) $("#humStatus").textContent = `Tararea la canción… ${left}`; }, 1000);
+  mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  mr.onstop = async () => {
+    clearInterval(tick); stream.getTracks().forEach(t => t.stop()); setListening(false); setThinking(true);
+    $("#humStatus").textContent = "Buscando entre tus canciones…"; $("#humHeard").textContent = "";
+    try {
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, sr = 16000;
+      const ab = await new OAC(1, 1, sr).decodeAudioData(await new Blob(chunks, { type: mr.mimeType }).arrayBuffer());
+      const q = hummedNotes(ab.getChannelData(0), sr);
+      setThinking(false);
+      if (q.filter(x => !isNaN(x)).length < 12) { if (wasPlaying) play(); return reply("No te oí tararear. Acércate al micrófono y vuelve a intentarlo."); }
+      await new Promise(r => setTimeout(r, 30));
+      const res = matchMelody(q), learning = USER.filter(id => BYID[id].rec.blob && !BYID[id].rec.melody).length;
+      const top = res.slice(0, 3);
+      if (!top.length){ if (wasPlaying) play(); return reply("Todavía no conozco las melodías de tus canciones. Dame unos minutos y vuelve a probar."); }
+      const sure = top[0].cost < 1.1 && (!top[1] || top[1].cost - top[0].cost > .15);
+      const t0 = BYID[top[0].id];
+      $("#humStatus").textContent = sure ? "¡La encontré!" : "Creo que es una de estas";
+      $("#humReply").innerHTML = `<span class="hum-found">${top.map(r => { const t = BYID[r.id];
+        return `<button type="button" data-humplay="${t.id}"><img src="${esc(cover(t))}" alt=""><span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span>${ic("play")}</button>`; }).join("")}</span>`
+        + (learning ? `<small class="hum-note">Aún estoy aprendiendo ${nc(learning)}; con el tiempo acertaré más.</small>` : "");
+      if (sure) speakHost(`Creo que es “${t0.title}”, de ${t0.artist}.`);
+    } catch { setThinking(false); reply("No pude escucharte bien. Vuelve a intentarlo."); }
+  };
+  mr.start(); setTimeout(() => { if (mr.state !== "inactive") mr.stop(); }, secs * 1000);
+}
+
+/* ---------- Hum Wrapped: your month in music (counted on this device) ---------- */
+const STATS = store.get("stats", {});
+const monthKey = (d = new Date()) => d.toISOString().slice(0, 7);
+const monthName = k => new Date(k + "-15").toLocaleDateString("es", { month: "long" });
+let statsDirty = 0;
+setInterval(() => {
+  if (!S.playing) return;
+  const t = cur(); if (!t) return;
+  const k = monthKey(), m = STATS[k] || (STATS[k] = { secs: 0, songs: {}, plays: {}, meta: {}, artists: {}, moods: {}, hours: {} });
+  m.secs++; m.songs[t.id] = (m.songs[t.id] || 0) + 1;
+  m.meta[t.id] = [t.title, t.artist];
+  if (t.artist) m.artists[t.artist] = (m.artists[t.artist] || 0) + 1;
+  if (S.ctxId === "hum" && /^Modo /.test(S.humList.title)) m.moods[S.humList.title] = (m.moods[S.humList.title] || 0) + 1;
+  const h = new Date().getHours(); m.hours[h] = (m.hours[h] || 0) + 1;
+  if (++statsDirty >= 15){ statsDirty = 0; store.set("stats", STATS); }
+}, 1000);
+function countPlay(t){ // a song counts as played after 30 seconds of it
+  const k = monthKey(), m = STATS[k]; if (!m) return;
+  m.plays[t.id] = (m.plays[t.id] || 0) + 1; store.set("stats", STATS);
+}
+let playWatch = { id: null, since: 0, counted: false };
+setInterval(() => {
+  const t = cur(); if (!t || !S.playing) return;
+  if (playWatch.id !== t.id){ playWatch = { id: t.id, since: 0, counted: false }; }
+  if (!playWatch.counted && ++playWatch.since >= 30){ playWatch.counted = true; countPlay(t); }
+}, 1000);
+const hrs = s => { const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60); return h ? `${h} h ${m} min` : `${m} min`; };
+function wrapData(k){
+  const m = STATS[k]; if (!m || m.secs < 60) return null;
+  const top = Object.keys(m.songs).sort((a, b) => (m.plays[b] || 0) - (m.plays[a] || 0) || m.songs[b] - m.songs[a]).slice(0, 5)
+    .map(id => ({ id, title: (m.meta[id] || [])[0] || "Canción", artist: (m.meta[id] || [])[1] || "", plays: m.plays[id] || 1, t: BYID[id] }));
+  const artist = Object.entries(m.artists).sort((a, b) => b[1] - a[1])[0];
+  const mood = Object.entries(m.moods).sort((a, b) => b[1] - a[1])[0];
+  const hb = [0, 0, 0, 0]; Object.entries(m.hours).forEach(([h, s]) => { hb[h < 6 ? 3 : h < 12 ? 0 : h < 20 ? 1 : 2] += s; });
+  const when = ["por la mañana", "por la tarde", "por la noche", "de madrugada"][hb.indexOf(Math.max(...hb))];
+  return { k, secs: m.secs, top, artist: artist && artist[0], mood: mood && mood[0].replace(/^Modo /, ""), when };
+}
+let wrapKey = null;
+function openWrapped(k){
+  if (S.drawer){ S.drawer = false; applySide(); }
+  wrapKey = k || monthKey();
+  const d = wrapData(wrapKey), el = $("#wrap"), prevK = monthKey(new Date(new Date(wrapKey + "-15").getTime() - 30 * 864e5));
+  const hue = d && d.top[0] && d.top[0].t && d.top[0].t.album ? (d.top[0].t.album.hue ?? hash(d.top[0].id) % 360) : 42;
+  el.style.setProperty("--wh", hue);
+  el.innerHTML = `<div class="wrap-in">
+    <div class="fp-top"><button type="button" class="ib" data-act="wrap-close" aria-label="Cerrar">${ic("chevDown")}</button><span>Hum Wrapped</span>
+      ${STATS[prevK] ? `<button type="button" class="pill" data-act="wrap-month" data-k="${prevK}">${esc(monthName(prevK))}</button>` : "<i></i>"}</div>
+    ${!d ? `<div class="wrap-empty"><b>Tu ${esc(monthName(wrapKey))} en música está empezando</b><p>Escucha un poco más y aquí verás tus canciones, tu artista y tu ánimo del mes.</p></div>` : `
+    <p class="wrap-eyebrow">Tu ${esc(monthName(wrapKey))} en música</p>
+    <h2 class="wrap-big">${hrs(d.secs)}</h2><p class="wrap-sub">de música escuchada</p>
+    ${d.top[0] ? `<div class="wrap-hero"><img src="${esc(d.top[0].t ? cover(d.top[0].t) : FB)}" alt=""><div><small>Tu canción del mes</small><b>${esc(d.top[0].title)}</b><span>${esc(d.top[0].artist)} · ${d.top[0].plays} ${d.top[0].plays === 1 ? "vez" : "veces"}</span></div></div>` : ""}
+    <ol class="wrap-list">${d.top.slice(1).map((s, i) => `<li><em>${i + 2}</em><img src="${esc(s.t ? cover(s.t) : FB)}" alt=""><span><b>${esc(s.title)}</b><small>${esc(s.artist)}</small></span><i>${s.plays}×</i></li>`).join("")}</ol>
+    <div class="wrap-facts">${d.artist ? `<div><small>Tu artista</small><b>${esc(d.artist)}</b></div>` : ""}${d.mood ? `<div><small>Tu ánimo</small><b>${esc(d.mood.charAt(0).toUpperCase() + d.mood.slice(1))}</b></div>` : ""}<div><small>Escuchas más</small><b>${esc(d.when.charAt(0).toUpperCase() + d.when.slice(1))}</b></div></div>
+    <button type="button" class="add-top wrap-share" data-act="wrap-share">${ic("share")}<span>Compartir imagen</span></button>`}
+  </div>`;
+  el.hidden = false; el.scrollTop = 0;
+}
+async function wrapImage(){
+  const d = wrapData(wrapKey); if (!d) return;
+  const W2 = 1080, H2 = 1920, c = document.createElement("canvas"); c.width = W2; c.height = H2; const x = c.getContext("2d");
+  const hue = getComputedStyle($("#wrap")).getPropertyValue("--wh") || 42;
+  const g = x.createLinearGradient(0, 0, 0, H2); g.addColorStop(0, `hsl(${hue},55%,30%)`); g.addColorStop(.55, `hsl(${hue},40%,14%)`); g.addColorStop(1, "#0d0e13");
+  x.fillStyle = g; x.fillRect(0, 0, W2, H2);
+  const font = (w, s) => `${w} ${s}px "Bricolage Grotesque","Figtree","Segoe UI",sans-serif`;
+  x.fillStyle = "#f2b544"; x.font = font(800, 64); x.fillText("hum", 80, 140);
+  x.fillStyle = "rgba(255,255,255,.75)"; x.font = font(600, 44); x.fillText(`Mi ${monthName(d.k)} en música`, 80, 270);
+  x.fillStyle = "#fff"; x.font = font(800, 150); x.fillText(hrs(d.secs), 80, 430);
+  const img = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  if (d.top[0]){
+    const im = d.top[0].t ? await img(cover(d.top[0].t)) : null;
+    if (im){ x.save(); x.beginPath(); x.roundRect ? x.roundRect(80, 520, 420, 420, 28) : x.rect(80, 520, 420, 420); x.clip(); x.drawImage(im, 80, 520, 420, 420); x.restore(); }
+    x.fillStyle = "rgba(255,255,255,.7)"; x.font = font(600, 36); x.fillText("Mi canción del mes", 540, 600);
+    x.fillStyle = "#fff"; x.font = font(800, 58); wrapText(x, d.top[0].title, 540, 680, 470, 66, 3);
+    x.fillStyle = "rgba(255,255,255,.75)"; x.font = font(500, 38); x.fillText(d.top[0].artist.slice(0, 26), 540, 900);
+  }
+  let y = 1060; x.font = font(700, 46);
+  d.top.slice(1).forEach((s, i) => { x.fillStyle = "#f2b544"; x.fillText(String(i + 2), 80, y); x.fillStyle = "#fff"; x.fillText(clip(x, s.title, 820), 150, y); x.fillStyle = "rgba(255,255,255,.6)"; x.font = font(500, 34); x.fillText(clip(x, s.artist, 820), 150, y + 46); x.font = font(700, 46); y += 120; });
+  y = Math.max(y + 40, 1600); x.font = font(600, 34);
+  [[d.artist && "Mi artista", d.artist], [d.mood && "Mi ánimo", d.mood && d.mood.charAt(0).toUpperCase() + d.mood.slice(1)]].filter(a => a[0]).forEach(([k, v], i) => { x.fillStyle = "rgba(255,255,255,.6)"; x.fillText(k, 80 + i * 480, y); x.fillStyle = "#fff"; x.font = font(800, 48); x.fillText(clip(x, v, 440), 80 + i * 480, y + 60); x.font = font(600, 34); });
+  return new Promise(r => c.toBlob(r, "image/png"));
+}
+function clip(x, s, w){ s = String(s || ""); if (x.measureText(s).width <= w) return s; while (s.length > 1 && x.measureText(s + "…").width > w) s = s.slice(0, -1); return s + "…"; }
+function wrapText(x, s, X, Y, w, lh, max){ const words = String(s).split(" "); let line = "", n = 0; for (const wd of words){ const tl = line ? line + " " + wd : wd; if (x.measureText(tl).width > w && line){ x.fillText(line, X, Y + n * lh); line = wd; if (++n >= max - 1){ x.fillText(clip(x, words.slice(words.indexOf(wd)).join(" "), w), X, Y + n * lh); return; } } else line = tl; } x.fillText(line, X, Y + n * lh); }
+async function shareWrapped(){
+  const blob = await wrapImage(); if (!blob) return;
+  const file = new File([blob], `hum-${wrapKey}.png`, { type: "image/png" });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })){ await navigator.share({ files: [file], title: "Mi mes en Hum" }); return; } } catch (e){ if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Imagen guardada en tus descargas.");
+}
+
+/* ---------- Hum understands the new things too ---------- */
+function humExtra(c){
+  if (/(que|como) (clima|tiempo) hace|como esta el (clima|tiempo)/.test(c)){ getWeather(true).then(w => reply(w ? weatherLine() : "No pude ver el clima. Permite la ubicación y vuelve a intentarlo.")); return true; }
+  if (/(clima|segun el tiempo|para este tiempo|para el tiempo que hace)/.test(c)){ playWeather(); return true; }
+  if (/(quita|sin|apaga|desactiva|quitale)( los| el)? (efecto|efectos|slowed|sped|8d|karaoke)|^(normal|sonido normal)$/.test(c)){ setFx({ mode: "off", d8: false, kara: false }); reply("Quité los efectos.", true); return true; }
+  if (/slowed|reverb|lento con eco|en lento/.test(c)){ setFx({ mode: "slowed" }); reply("Modo slowed y reverb.", true); return true; }
+  if (/sped|acelerad|mas rapid/.test(c)){ setFx({ mode: "sped" }); reply("Modo sped up.", true); return true; }
+  if (/\b8 ?d\b|ocho d/.test(c)){ setFx({ d8: true }); reply("Audio 8D activado. Mejor con audífonos.", true); return true; }
+  if (/karaoke|quita(le)? la voz|sin voz|sin la voz/.test(c)){ setFx({ kara: true }); openFp(); reply("Modo karaoke: bajé la voz. ¡Te toca cantar!"); return true; }
+  if (/locutor|como (un )?(dj|locutor)|que hables entre|radio/.test(c) && !/orden/.test(c)){ const off = /(desactiva|quita|apaga|ya no|sin)/.test(c); setHost(!off); reply(off ? "Dejo de hablar entre canciones." : "Ahora te hablaré entre canciones, como en la radio."); return true; }
+  if (/(orden|ordena(la|lo|las)?|mezcla(la)?) (como )?dj|mezcla armonica|modo dj|como dj/.test(c)){ djOrder(S.ctxId && getList.ok(S.ctxId) ? S.ctxId : S.ctxId === "hum" ? "hum" : "mine"); return true; }
+  if (/(como se llama|que cancion es|cual es esta cancion|tararear|tarareo|tarareala|adivina|reconoce)/.test(c)){ humSearch(); return true; }
+  if (/(resumen|wrapped|estadisticas|mi mes|lo que mas escuche)/.test(c)){ closeHum(); openWrapped(); return true; }
+  return false;
+}
+function paintHumExtras(){ const s = $("#humHost"); if (s) s.setAttribute("aria-checked", S.host); }
+
+/* ---------- home: the weather card and your month ---------- */
+function homeExtras(){
+  const d = wrapData(monthKey());
+  return `<div class="home-x" id="homeX">
+    <button type="button" class="hx" data-act="wx-play"><span class="hx-ic">${ic("sun")}</span><span><b id="hxWx">${W.now ? `${W.now.temp}° · ${WX(W.now.code)[0]}` : "Música para tu clima"}</b><small>${W.now ? "Toca y te pongo algo para este tiempo" : "Hum mira el tiempo que hace y elige el ánimo"}</small></span></button>
+    <button type="button" class="hx" data-act="wrap"><span class="hx-ic">${ic("insights")}</span><span><b>Tu ${esc(monthName(monthKey()))} en música</b><small>${d ? `${hrs(d.secs)} escuchados${d.top[0] ? " · " + esc(d.top[0].title) : ""}` : "Tu resumen del mes, para compartir"}</small></span></button>
+  </div>`;
+}
+function paintHomeExtras(){ const el = $("#homeX"); if (el) el.outerHTML = homeExtras(); }
+if (W.coords) getWeather(false);
 
 /* ---------- rendering ---------- */
 function likeBtn(b){
@@ -3554,6 +4077,7 @@ function renderView(){
     const quick = ["mine", "liked", ...IMP_ORDER.slice(0, 2), "focus", "drive", "mix1", "lowtide", "glass"].filter(id => !S.hidden.has(id)).slice(0, 6);
     const made = PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id));
     v.innerHTML = `<h1 class="greet">${greet}</h1>${IMP_ORDER.some(id => IMPORTED[id].source !== "user") ? "" : banner()}
+      ${homeExtras()}
       <div class="tiles">${quick.map(id => { const l = getList(id); return `<div class="tile" role="link" tabindex="0" data-open="${id}">
         <img src="${esc(l.cover)}"${l.fb ? ` data-fb="${l.fb}"` : ""} alt="" width="64" height="64"><b>${esc(l.title)}</b><button class="fab" data-playlist="${id}" aria-label="Reproducir ${esc(l.title)}">${ic("play")}</button></div>`; }).join("")}</div>
       <h2 class="shelf-h">Tus playlists</h2><div class="shelf"><div class="card card-new" role="button" tabindex="0" data-act="pl-new">
@@ -3578,6 +4102,7 @@ function renderView(){
         <button class="fab" data-playlist="${l.id}" id="bigPlay" aria-label="Reproducir ${esc(l.title)}">${ic("play")}</button>
         <button class="ib tog" data-act="shuffle" aria-label="Aleatorio" id="listShuf">${ic("shuffle")}</button>
         ${l.id === "mine" ? `<button class="pill" data-act="add">${ic("add")}Añadir canciones</button>` : ""}
+        ${l.tracks.length > 2 ? `<button class="pill" data-act="dj-order" data-id="${l.id}">${ic("mix")}Orden DJ</button>` : ""}
         ${PL[l.id] && !PL[l.id].art ? (S.hidden.has(l.id) ? `<button class="pill" data-act="pl-unhide" data-id="${l.id}">${ic("sync")}Volver a mostrarla</button>`
           : `<button class="pill danger${S.delArm === l.id ? " armed" : ""}" data-act="pl-del" data-id="${l.id}">${S.delArm === l.id ? "Pulsa otra vez para quitarla" : "Quitar playlist"}</button>`) : ""}
       </div>
@@ -3660,7 +4185,7 @@ function paint(){
   $("#upnext").innerHTML = up.length ? up.map(i => { const u = BYID[S.queue[i]];
     return `<li tabindex="0" data-qi="${i}"><img src="${cover(u)}" alt="" width="40" height="40"><span><b>${esc(u.title)}</b><small>${esc(u.artist)}</small></span><span class="d">${fmt(u.dur)}</span></li>`; }).join("")
     : `<li style="cursor:default;grid-template-columns:1fr;color:var(--muted)">Es la última canción de la cola.</li>`;
-  paintMarks(); paintMediaSession(); paintMini(); deskState();
+  paintMarks(); paintMediaSession(); paintMini(); deskState(); trackChanged(t);
 }
 
 /* ---------- visualizer + progress loop ---------- */
@@ -3735,6 +4260,10 @@ document.addEventListener("click", e => {
   if (pa){ toggleInPl(S.pickPl, pa.dataset.pickadd, true); pa.setAttribute("aria-pressed", IMPORTED[S.pickPl] ? plHas(IMPORTED[S.pickPl], pa.dataset.pickadd) : false); return; }
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
+  const fm = e.target.closest("[data-fxmode]");
+  if (fm){ setFx({ mode: fm.dataset.fxmode }); return; }
+  const hp = e.target.closest("[data-humplay]");
+  if (hp){ const t = BYID[hp.dataset.humplay]; if (t) playContext(t.user ? "mine" : t.album.id, t.id); return; }
   const hs = e.target.closest("[data-humsay]");
   if (hs){ H.byWake = false; heard(hs.dataset.humsay, false); return; }
   const like = e.target.closest("[data-like]");
@@ -3785,6 +4314,15 @@ document.addEventListener("click", e => {
     if (a === "hum") $("#hum").hidden ? openHum() : closeHum();
     if (a === "hum-close") closeHum();
     if (a === "hum-listen") listenOnce();
+    if (a === "hum-search") humSearch();
+    if (a === "fx") openFx();
+    if (a === "fx-close") $("#fxDlg").close();
+    if (a === "wx-play"){ if ($("#hum").hidden) openHum(true); H.viaVoice = false; playWeather(); }
+    if (a === "wrap") openWrapped();
+    if (a === "wrap-close") $("#wrap").hidden = true;
+    if (a === "wrap-month") openWrapped(act.dataset.k);
+    if (a === "wrap-share") shareWrapped();
+    if (a === "dj-order"){ if ($("#hum").hidden) openHum(true); H.viaVoice = false; djOrder(act.dataset.id); }
     if (a === "pl-new") openPlDlg({});
     if (a === "pl-new-with"){ $("#aplDlg").close(); openPlDlg({ withSong: S.aplFor }); }
     if (a === "pl-edit") openPlDlg({ id: act.dataset.id });
@@ -3805,6 +4343,7 @@ document.addEventListener("click", e => {
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.matches("[data-open],[data-row],[data-qi],.card-new")){ e.preventDefault(); e.target.click(); }
   if (e.key === "Escape" && !$("#welcome").hidden){ closeWelcome(); return; }
+  if (e.key === "Escape" && !$("#wrap").hidden && !document.querySelector("dialog[open]")){ $("#wrap").hidden = true; return; }
   if (e.key === "Escape" && !$("#fp").hidden && !document.querySelector("dialog[open]")){ closeFp(); return; }
   if (e.key === "Enter" && e.target.matches(".b-now")){ openFp(); return; }
   if (e.key === "Escape" && S.drawer){ S.drawer = false; applySide(); return; }
@@ -3897,6 +4436,14 @@ $("#fpPrev").innerHTML = ic("prev"); $("#fpNext").innerHTML = ic("next"); $("#fp
 $("#navSnd").innerHTML = ic("spkr") + "Calidad y bocinas" + '<i class="eq-dot" hidden></i>';
 renderSndUI();
 $("#navMix").innerHTML = ic("mix") + "Transiciones" + '<i class="eq-dot" hidden></i>';
+$("#navFx").innerHTML = ic("fx") + "Efectos" + '<i class="eq-dot" hidden></i>';
+$("#fxBtn").innerHTML = ic("fx");
+document.querySelector(".hum-tools [data-act=hum-search] span").innerHTML = ic("note");
+document.querySelector(".hum-tools [data-act=wx-play] span").innerHTML = ic("sun");
+$("#fx8d").addEventListener("click", () => setFx({ d8: !S.fx.d8 }));
+$("#fxKara").addEventListener("click", () => setFx({ kara: !S.fx.kara }));
+$("#humHost").addEventListener("click", () => { setHost(!S.host); toast(S.host ? "Hum te hablará entre canciones, como en la radio." : "Hum ya no hablará entre canciones."); });
+applyFx(true); paintHumExtras();
 renderMixUI();
 applySide(); applyEq(true);
 $("#qIcon").innerHTML = ic("search");
