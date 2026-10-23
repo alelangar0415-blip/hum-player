@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-FBpHK2LpFqGqjSC83hoQEgXVfGyFNGhJ6YzHMoP63T4=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JCg7pfb2dmoGN8AgbRvmDHHdRFF46nC9l011aKPjzRk=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -670,6 +670,39 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .game-box.mix-off #gmDuckRow,.game-box.mix-off #gmLevel{opacity:.5}
 #fxBtn.ducking{color:var(--accent);animation:pulse 1s ease-in-out infinite}
 
+/* ---------- hearing test, headphones, sleep, running, listen together ---------- */
+.ear-dlg{width:min(520px,calc(100% - 32px))}
+.ear-where{font-weight:600;text-align:center;margin-top:6px}
+.ear-prog{height:6px;border-radius:3px;background:var(--raise);overflow:hidden;margin:10px 0 18px}
+.ear-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.ear-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:min(220px,70%);aspect-ratio:1;margin:6px auto 14px;border-radius:50%;border:0;background:var(--accent);color:var(--bg);font:inherit;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.ear-btn svg{width:46px;height:46px;fill:currentColor}
+.ear-btn:active{transform:scale(.97)}
+.ear-res{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.ear-res b{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.ear-bars{display:flex;align-items:flex-end;gap:4px;height:90px;padding:8px;border-radius:10px;background:var(--raise)}
+.ear-bar{flex:1;height:100%;display:flex;align-items:flex-end}
+.ear-bar i{display:block;width:100%;border-radius:3px 3px 0 0;background:var(--accent)}
+.ear-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.hp-search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--raise);color:inherit;font:inherit;margin:4px 0 10px}
+.hp-list{display:grid;gap:4px;max-height:min(46vh,420px);overflow:auto;padding-right:4px}
+.hp-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.hp-item:hover{background:var(--raise)}
+.hp-item.on{background:var(--raise);box-shadow:inset 0 0 0 2px var(--accent)}
+.hp-item small{color:var(--muted);font-size:12px;white-space:nowrap}
+.sleep-chips{flex-wrap:wrap}
+#sleepBtn.on,.np-x .pill.on,.fp-extra .pill.on{color:var(--accent)}
+.run-cad{margin:10px 2px 8px;font-weight:600;color:var(--accent)}
+.np-x,.fp-extra{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.fp-extra{justify-content:center;margin-top:14px}
+.np-x .pill,.fp-extra .pill{display:inline-flex;align-items:center;gap:6px}
+.np-x .pill svg,.fp-extra .pill svg{width:18px;height:18px;fill:currentColor}
+.tg-chip{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bar-h,88px) + 12px);z-index:60;display:flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:8px 8px 8px 14px;border-radius:999px;background:var(--panel,#1b1d24);color:inherit;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:14px}
+.tg-chip svg{width:18px;height:18px;fill:var(--accent);flex:none}
+.tg-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tg-chip button{flex:none;border:0;border-radius:999px;padding:6px 12px;background:var(--raise);color:inherit;font:inherit;font-weight:600;cursor:pointer}
+@media (max-width:760px){ .b-right #sleepBtn{display:none} .tg-chip{bottom:calc(150px + env(safe-area-inset-bottom,0px))} }
+
 /* ---------- narrower screens ---------- */
 @media (max-width:1100px){
   .app,.app:not(.np-open){grid-template-columns:clamp(200px,24vw,260px) minmax(0,1fr);grid-template-areas:"side main" "bar bar"}
@@ -782,6 +815,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     <canvas class="viz" id="viz" aria-hidden="true"></canvas>
     <dl class="facts" id="facts"></dl>
     <button type="button" class="pill np-lyr" data-act="lyrics" id="npLyr"></button>
+    <div class="np-x"><button type="button" class="pill" data-act="sleep" id="npSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="npTg"></button></div>
     <h4>A continuación</h4>
     <ol class="upnext" id="upnext"></ol>
   </aside>
@@ -807,6 +841,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       </div>
     </div>
     <div class="b-right">
+      <button class="ib tog" id="sleepBtn" data-act="sleep" aria-label="Modo dormir" title="Modo dormir" aria-pressed="false"></button>
       <button class="ib tog" id="lyrBtn" data-act="lyrics" aria-label="Letra" aria-pressed="false"></button>
       <button class="ib tog" id="fxBtn" data-act="fx" aria-label="Efectos" title="Efectos: slowed, sped up, 8D, karaoke" aria-pressed="false"></button>
       <button class="ib tog" id="mixBtn" data-act="mix" aria-label="Transiciones entre canciones" aria-pressed="false"></button>
@@ -910,6 +945,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <button type="button" class="ib big" id="fpNext" aria-label="Siguiente"></button>
       <button type="button" class="ib tog" id="fpRep" aria-label="Repetir"></button>
     </div>
+    <div class="fp-extra"><button type="button" class="pill" data-act="sleep" id="fpSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="fpTg"></button></div>
     <div class="fp-lyr" id="fpLyr"></div>
   </div>
 </section>
@@ -938,6 +974,17 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <div class="mix-opt" style="margin-top:14px">
     <div><b>Sonido más fuerte y claro</b><small>Sube el volumen que percibes y controla los picos para que no distorsione, incluso con el volumen alto.</small></div>
     <button type="button" class="switch" id="sndBoost" role="switch" aria-checked="false" aria-label="Sonido más fuerte y claro"></button>
+  </div>
+  <h3 class="snd-h">Tu oído y tus audífonos</h3>
+  <div class="mix-opt">
+    <div><b>Ajustado a tu oído</b><small id="earNote"></small></div>
+    <button type="button" class="pill" data-act="ear-open" id="earOpenBtn">Hacer la prueba</button>
+    <button type="button" class="switch" id="earSw" role="switch" aria-checked="false" aria-label="Usar el ajuste a tu oído" hidden></button>
+  </div>
+  <div class="mix-opt" style="margin-top:8px">
+    <div><b>Tus audífonos</b><small id="hpNote"></small></div>
+    <button type="button" class="pill" data-act="hp-open" id="hpOpenBtn">Elegir modelo</button>
+    <button type="button" class="switch" id="hpSw" role="switch" aria-checked="false" aria-label="Usar la corrección de tus audífonos" hidden></button>
   </div>
   <div class="dlg-act"><button type="button" class="add-top" data-act="snd-close">Listo</button></div>
 </dialog>
@@ -1030,9 +1077,42 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     </div>
     <p class="mix-note" id="gmKeys" hidden>Atajos mientras juegas, sin salir del juego: <b>Ctrl+Alt+→</b> siguiente · <b>Ctrl+Alt+←</b> anterior · <b>Ctrl+Alt+Espacio</b> pausa · <b>Ctrl+Alt+↑ / ↓</b> volumen.</p>
   </div>
+  <div class="game-box" id="runBox" hidden>
+    <h3 class="snd-h">Modo correr</h3>
+    <div class="mix-opt">
+      <div><b>Música a tu paso</b><small>Lleva el teléfono contigo: Hum cuenta tus pasos al caminar o correr y ajusta un poco la velocidad de la canción (sin cambiar su tono) para que cada paso caiga en el golpe.</small></div>
+      <button type="button" class="switch" id="runSw" role="switch" aria-checked="false" aria-label="Modo correr"></button>
+    </div>
+    <p class="run-cad" id="runCad" hidden></p>
+    <button type="button" class="pill" data-act="run-pick" id="runPick" hidden>Poner canciones a mi ritmo</button>
+  </div>
   <p class="mix-note">Slowed y sped up cambian la velocidad de tus propias canciones. A Hum también se lo puedes pedir: «Ey Hum, pon slowed».</p>
   <div class="dlg-act"><button type="button" class="add-top" data-act="fx-close">Listo</button></div>
 </dialog>
+<dialog class="dlg ear-dlg" id="earDlg" aria-labelledby="earH"><div id="earBody"></div></dialog>
+<dialog class="dlg" id="hpDlg" aria-labelledby="hpH">
+  <h2 id="hpH">Tus audífonos</h2>
+  <p>Cada modelo suena distinto: unos con graves de más, otros con agudos chillones. Elige el tuyo y Hum lo corrige para que suene más fiel.</p>
+  <input type="search" id="hpSearch" class="hp-search" placeholder="Busca tu modelo: AirPods, Galaxy Buds, JBL…" autocomplete="off" aria-label="Buscar modelo de audífonos">
+  <div class="hp-list" id="hpList" role="group" aria-label="Modelos de audífonos"></div>
+  <p class="mix-note">Mediciones de laboratorio de <a href="https://github.com/jaakkopasanen/AutoEq" target="_blank" rel="noopener">AutoEq</a> (Jaakko Pasanen, licencia MIT).</p>
+  <div class="dlg-act"><button type="button" class="add-top" data-act="hp-close">Listo</button></div>
+</dialog>
+<dialog class="dlg" id="sleepDlg" aria-labelledby="sleepH">
+  <h2 id="sleepH">Modo dormir</h2>
+  <p id="sleepState">Elige cuándo quieres que se detenga la música.</p>
+  <div class="chips snd-chips sleep-chips" role="group" aria-label="Detener la música en">
+    <button type="button" class="chip" data-sleep="15">15 min</button><button type="button" class="chip" data-sleep="30">30 min</button><button type="button" class="chip" data-sleep="45">45 min</button><button type="button" class="chip" data-sleep="60">1 hora</button><button type="button" class="chip" data-sleep="90">1 h 30</button><button type="button" class="chip" data-sleep="song">Al acabar esta canción</button>
+  </div>
+  <div class="mix-opt" style="margin-top:12px">
+    <div><b>Pasar a música tranquila</b><small>Después de la canción que suena, solo pone canciones relajadas de tu música.</small></div>
+    <button type="button" class="switch" id="sleepCalm" role="switch" aria-checked="true" aria-label="Pasar a música tranquila"></button>
+  </div>
+  <p class="mix-note">La música baja poco a poco y se detiene justo al final de una canción, no a la mitad.</p>
+  <div class="dlg-act"><button type="button" class="pill danger" data-act="sleep-off" id="sleepOff" hidden>Apagar</button><button type="button" class="add-top" data-act="sleep-close">Listo</button></div>
+</dialog>
+<dialog class="dlg" id="tgDlg" aria-labelledby="tgH"><div id="tgBody"></div></dialog>
+<div class="tg-chip" id="tgChip" hidden role="status"></div>
 <section class="wrap" id="wrap" hidden aria-label="Hum Wrapped: tu mes en música"></section>
 <dialog class="dlg" id="libDlg" aria-labelledby="libH2">
   <h2 id="libH2">Gestionar biblioteca</h2>
@@ -1119,6 +1199,11 @@ const P = {
   fx:"M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z",
   link:"M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"
 };
+Object.assign(P, {
+  moon:"M12.34 2.02C6.59 1.82 2 6.42 2 12c0 5.52 4.48 10 10 10 3.71 0 6.93-2.02 8.66-5.02-7.51-.25-12.09-8.43-8.32-14.96z",
+  hear:"M17 20c-.29 0-.56-.06-.76-.15-.71-.37-1.21-.88-1.71-2.38-.51-1.56-1.47-2.29-2.39-3-.79-.61-1.61-1.24-2.32-2.53C9.29 10.98 9 9.93 9 9c0-2.8 2.2-5 5-5s5 2.2 5 5h2c0-3.93-3.07-7-7-7S7 5.07 7 9c0 1.26.38 2.65 1.07 3.9.91 1.65 1.98 2.48 2.85 3.15.81.62 1.39 1.07 1.71 2.05.6 1.82 1.37 2.84 2.73 3.55.51.23 1.07.35 1.64.35 2.21 0 4-1.79 4-4h-2c0 1.1-.9 2-2 2zM7.64 2.64L6.22 1.22C4.23 3.21 3 5.96 3 9s1.23 5.79 3.22 7.78l1.41-1.41C6.01 13.74 5 11.49 5 9s1.01-4.74 2.64-6.36zM11.5 9c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5-2.5 1.12-2.5 2.5z",
+  group:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+});
 const ic = n => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${P[n]}"/></svg>`;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1293,6 +1378,7 @@ const keep = new Audio(); keep.loop = true; keep.src = URL.createObjectURL(silen
 // plan B for phones whose screen-off stops the sound engine: a plain player (no equalizer) the phone always lets play
 const bgEl = new Audio(); bgEl.preload = "auto";
 let bgOn = false, bgUnlocked = false;
+let sleepK = 1, runRate = 1; // sleep-mode fade, running-mode speed
 function silentWav(sec){
   const rate = 8000, n = rate * sec, b = new ArrayBuffer(44 + n), v = new DataView(b);
   const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
@@ -1322,7 +1408,7 @@ function ensureCtx(){
   boostNode = ctx.createGain();
   limiter = ctx.createDynamicsCompressor();
   limiter.threshold.value = -1; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .002; limiter.release.value = .12;
-  const fxc = buildFx(); master.connect(fxc.input); fxc.output.connect(eq.input); eq.output.connect(spkNodes[0]); spkNodes[4].connect(compNode);
+  const fxc = buildFx(); master.connect(fxc.input); fxc.output.connect(eq.input); const pn = buildPers(); eq.output.connect(pn.input); pn.output.connect(spkNodes[0]); spkNodes[4].connect(compNode);
   compNode.connect(boostNode); boostNode.connect(limiter); limiter.connect(analyser); analyser.connect(ctx.destination);
   applySpk(); applyBoost(); applyBits();
   try {
@@ -1518,6 +1604,7 @@ function playContext(listId, startId){
   playIndex(S.qi);
 }
 function next(auto){
+  if (auto && S.sleep && sleepAtSongEnd()) return; // sleep mode: stop at the end of this song
   if (auto) S.autoNext = Date.now();
   if (!S.queue.length) return;
   if (auto && S.repeat === "one"){ loadAt(0); return; }
@@ -2369,7 +2456,7 @@ async function mixTick(){
     if (x >= 1){ audio.playbackRate = fxRate(); glide = null; }
     paintTempo();
   }
-  if (bgOn || mix || mixBusy || !S.mix.on || !S.playing) return;
+  if (bgOn || (S.sleep && S.sleep.stopAtEnd) || mix || mixBusy || !S.mix.on || !S.playing) return;
   const t = cur(); if (!t || !t.user || !(t.dur > 0)) return;
   const remain = (t.dur - audio.currentTime) / (audio.playbackRate || 1);
   if (remain > S.mix.secs + .15 || remain < 1.2) return;
@@ -2401,7 +2488,7 @@ setInterval(() => {
    phone always lets play (the equalizer and effects rest while the screen is off), and the full sound comes back
    when you return to the app. */
 const bgCan = () => isMobile && !desk;
-const bgVol = () => { bgEl.volume = S.muted ? 0 : clamp(S.vol * S.vol, 0, 1); };
+const bgVol = () => { bgEl.volume = S.muted ? 0 : clamp(S.vol * S.vol * sleepK, 0, 1); };
 function unlockBg(){ // runs on a tap: phones only let a player start later if it already played once from a tap
   if (bgUnlocked || bgOn || !bgCan()) return;
   bgUnlocked = true; bgEl.muted = true; bgEl.src = keep.src;
@@ -3742,6 +3829,7 @@ function runCommand(raw){
   if (/(que|cual) (cancion |rola |tema )?(es esta|suena|esta sonando|estoy escuchando)|^que suena/.test(c)) return reply(t ? `Suena “${t.title}”, de ${t.artist}.` : "No está sonando nada.");
   if (/(que puedes hacer|que sabes hacer|ayuda|como funciona|que haces)/.test(c))
     return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta». Géneros: «pon trap», «algo bélico», «corridos», «reguetón», «banda», «rock», «rap»… y palabras como «algo tranqui» o «pa' llorar». Más: «slowed», «sped up», «8D», «karaoke», «música para este clima», «orden DJ», «activa el locutor», «¿cómo se llama esta canción?» para tararear, y «mi resumen del mes».");
+  if (humModes(c)) return; // sleep, running, hearing test, listen together
   if (humExtra(c)) return; // effects, radio host, weather, DJ order, hum-it, monthly summary
   // a genre ("pon trap", "algo bélico", "corridos"): unless you named an artist, play that genre from your music
   const gen = genreInText(c);
@@ -4015,7 +4103,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#hum")
 const fxSaved = store.get("fx", null);
 S.fx = { mode: fxSaved && ["off", "slowed", "sped"].includes(fxSaved.mode) ? fxSaved.mode : "off", d8: !!(fxSaved && fxSaved.d8), kara: !!(fxSaved && fxSaved.kara) };
 const FX_RATE = { off: 1, slowed: .85, sped: 1.22 };
-const fxRate = () => FX_RATE[S.fx.mode] || 1;
+const fxRate = () => (FX_RATE[S.fx.mode] || 1) * runRate;
 let fxN = null;
 function makeImpulse(secs, decay){ // a big soft room, made of fading noise
   const len = Math.round(ctx.sampleRate * secs), b = ctx.createBuffer(2, len, ctx.sampleRate);
@@ -4077,6 +4165,7 @@ function trackChanged(t){ // called on every paint; acts only when the song chan
   if (lastTrackId === t.id) return;
   const prev = lastTrackId && BYID[lastTrackId]; lastTrackId = t.id;
   const auto = S.autoNext && Date.now() - S.autoNext < 4000; S.autoNext = 0;
+  if (modesReady) modesOnTrack(prev, t, auto);
   if (S.host && auto && S.playing && prev && prev.id !== t.id) hostTalk(prev, t);
 }
 function hostTalk(prev, t){
@@ -4808,6 +4897,503 @@ function renderGameUI(){
   $("#gameBox").classList.toggle("mix-off", !S.game.on);
 }
 
+/* ---------- your ears and your headphones ----------
+   After your equalizer, two more steps that only affect you:
+   1. Hearing test: Hum plays soft beeps in each ear and finds the quietest one you can hear at each pitch.
+      Where your ear hears less than the rest of your own hearing, the music is lifted there (half the
+      difference, the way hearing aids do it), separately for the left and the right ear.
+   2. Headphone profile: lab measurements of popular headphones (AutoEq, by Jaakko Pasanen, MIT license)
+      that straighten out each model's own sound. */
+const EAR_F = [250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+const EAR_REF = { 250: 9, 500: 2, 1000: 0, 2000: -3, 3000: -6, 4000: -5, 6000: 2, 8000: 9 }; // how loud a pitch must be for normal hearing, next to 1 kHz
+const earSaved = store.get("ear", null), hpSaved = store.get("hp", null);
+S.ear = earSaved && Array.isArray(earSaved.L) && earSaved.L.length === EAR_F.length && Array.isArray(earSaved.R) ? earSaved : null;
+S.hp = hpSaved && Array.isArray(hpSaved.f) ? { on: hpSaved.on !== false, n: str(hpSaved.n, 120), p: clamp(+hpSaved.p || 0, -20, 0), f: hpSaved.f.slice(0, 10) } : null;
+let persN = null;
+function buildPers(){ // sits after the equalizer, before your speaker type
+  const input = ctx.createGain();
+  input.channelCount = 2; input.channelCountMode = "explicit"; input.channelInterpretation = "speakers"; // mono songs become two equal sides
+  const split = ctx.createChannelSplitter(2), merge = ctx.createChannelMerger(2);
+  const bank = () => EAR_F.map(f => { const b = ctx.createBiquadFilter(); b.type = "peaking"; b.frequency.value = f; b.Q.value = 1.2; b.gain.value = 0; return b; });
+  const eL = bank(), eR = bank(), link = a => a.reduce((x, y) => { x.connect(y); return y; });
+  link(eL); link(eR);
+  input.connect(split); split.connect(eL[0], 0); split.connect(eR[0], 1);
+  eL[eL.length - 1].connect(merge, 0, 0); eR[eR.length - 1].connect(merge, 0, 1);
+  const hp = Array.from({ length: 10 }, () => { const b = ctx.createBiquadFilter(); b.type = "peaking"; b.frequency.value = 1000; b.gain.value = 0; return b; });
+  link(hp); merge.connect(hp[0]);
+  const trim = ctx.createGain(), sleepG = ctx.createGain();
+  hp[9].connect(trim); trim.connect(sleepG);
+  persN = { input, eL, eR, hp, trim, sleepG, output: sleepG };
+  applyPers(true);
+  return persN;
+}
+// how much each pitch is lifted, per ear
+function earBoost(){
+  if (!S.ear) return null;
+  const d = side => S.ear[side].map((thr, i) => thr - EAR_REF[EAR_F[i]]);
+  const L = d("L"), R = d("R"), all = [...L, ...R].sort((a, b) => a - b), base = all[Math.floor(all.length / 2)];
+  // a pitch heard at the very first, quietest beep is heard fine (how much better can't be measured): never lifted.
+  // Small differences (under 3 dB) are just how a test goes, not your ear.
+  const lift = (v, i, side) => S.ear[side][i] <= ET_MIN + 3 || v - base < 3 ? 0 : Math.round(clamp((v - base) * .5, 0, 8) * 2) / 2;
+  return { L: L.map((v, i) => lift(v, i, "L")), R: R.map((v, i) => lift(v, i, "R")) };
+}
+function applyPers(silent){
+  if (persN && ctx){
+    const t = ctx.currentTime, b = S.ear && S.ear.on !== false ? earBoost() : null;
+    persN.eL.forEach((f, i) => f.gain.setTargetAtTime(b ? b.L[i] : 0, t, .05));
+    persN.eR.forEach((f, i) => f.gain.setTargetAtTime(b ? b.R[i] : 0, t, .05));
+    const h = S.hp && S.hp.on ? S.hp : null;
+    persN.hp.forEach((f, i) => {
+      const x = h && h.f[i];
+      if (x){ f.type = x[0] === "l" ? "lowshelf" : x[0] === "h" ? "highshelf" : "peaking"; f.frequency.setValueAtTime(clamp(+x[1] || 1000, 20, 20000), t); f.Q.setValueAtTime(clamp(+x[3] || 1, .1, 10), t); f.gain.setTargetAtTime(clamp(+x[2] || 0, -15, 15), t, .05); }
+      else f.gain.setTargetAtTime(0, t, .05);
+    });
+    const maxLift = b ? Math.max(...b.L, ...b.R) : 0;
+    persN.trim.gain.setTargetAtTime(Math.pow(10, ((h ? h.p * .5 : 0) - maxLift * .3) / 20), t, .05); // a little headroom, the limiter does the rest
+  }
+  if (!silent){ store.set("ear", S.ear); store.set("hp", S.hp); }
+  renderPersUI();
+}
+function renderPersUI(){
+  const es = $("#earSw"), hs = $("#hpSw"); if (!es) return;
+  es.hidden = !S.ear; es.setAttribute("aria-checked", !!(S.ear && S.ear.on !== false));
+  $("#earOpenBtn").textContent = S.ear ? "Repetir" : "Hacer la prueba";
+  $("#earNote").textContent = S.ear ? earSummary() : "Una prueba de unos 3 minutos con audífonos: Hum realza lo que tu oído escucha menos, en cada oído por separado.";
+  hs.hidden = !S.hp; hs.setAttribute("aria-checked", !!(S.hp && S.hp.on));
+  $("#hpOpenBtn").textContent = S.hp ? "Cambiar" : "Elegir modelo";
+  $("#hpNote").textContent = S.hp ? `${S.hp.n}: su sonido corregido para que suene más fiel.` : "Elige tu modelo y Hum corrige su sonido con mediciones de laboratorio.";
+}
+function earSummary(){
+  const b = earBoost(); if (!b) return "";
+  const zone = i => EAR_F[i] <= 500 ? "graves" : EAR_F[i] <= 2000 ? "medios" : "agudos";
+  const words = side => { const z = new Set(); b[side].forEach((v, i) => { if (v >= 2) z.add(zone(i)); }); return [...z]; };
+  const l = words("L"), r = words("R");
+  if (!l.length && !r.length) return "Tu oído escucha parejo: casi no hace falta realzar nada.";
+  const j = w => w.join(" y ");
+  if (l.length && r.length) return j(l) === j(r) ? `Tus dos oídos oyen un poco menos los ${j(l)}: Hum los realza.`
+    : `Tu oído izquierdo oye un poco menos los ${j(l)}, y el derecho, los ${j(r)}: Hum los realza.`;
+  return `Tu oído ${l.length ? "izquierdo" : "derecho"} oye un poco menos los ${j(l.length ? l : r)}: Hum los realza.`;
+}
+// --- the hearing test
+const ET = { steps: [], i: 0, pass: 0, level: 0, lastLevel: 0, coarse: 0, timer: 0, res: null, resume: false, busy: false };
+const ET_MIN = -90, ET_MAX = -12; // dB below full scale; never louder than -12
+function openEar(){ if ($("#sndDlg").open) $("#sndDlg").close(); renderEarIntro(); $("#earDlg").showModal(); }
+function renderEarIntro(){
+  $("#earBody").innerHTML = `<h2 id="earH">Prueba de oído</h2>
+    <p>Ponte tus audífonos de siempre, busca un lugar tranquilo y deja el volumen como lo usas normalmente.</p>
+    <p>Oirás pitidos suaves, primero en un oído y luego en el otro. Cada vez que oigas uno, aunque sea muy bajito, toca <b>«Lo oigo»</b> (o la barra espaciadora). Dura unos 3 minutos.</p>
+    <p class="mix-note">No es una prueba médica: sirve para ajustar la música a tu oído. Si notas que oyes mucho menos de un lado, consulta a un especialista.</p>
+    <div class="dlg-act"><button type="button" class="pill" data-act="ear-close">Ahora no</button><button type="button" class="add-top" data-act="ear-start">${ic("play")}<span>Empezar</span></button></div>`;
+}
+function earStart(){
+  ensureCtx();
+  if (S.playing){ ET.resume = true; pause(); } else ET.resume = false; // the music pauses (and its engine sleeps)…
+  ctx.resume().catch(() => {}); // …so wake the engine again for the beeps
+  const order = [1000, 2000, 3000, 4000, 6000, 8000, 500, 250];
+  ET.steps = []; ["L", "R"].forEach(ear => order.forEach(f => ET.steps.push({ ear, f })));
+  ET.res = { L: EAR_F.map(() => null), R: EAR_F.map(() => null) };
+  ET.i = 0; ET.busy = true;
+  $("#earBody").innerHTML = `<h2 id="earH">Prueba de oído</h2>
+    <p class="ear-where" id="earWhere"></p>
+    <div class="ear-prog"><i id="earProg"></i></div>
+    <button type="button" class="ear-btn" data-act="ear-heard" id="earHeard">${ic("hear")}<span>Lo oigo</span></button>
+    <p class="mix-note" style="text-align:center">Toca solo cuando oigas un pitido. Si no oyes nada, espera: irá subiendo poco a poco.</p>
+    <div class="dlg-act"><button type="button" class="pill" data-act="ear-cancel">Cancelar</button></div>`;
+  earStep();
+}
+function earStep(){
+  clearTimeout(ET.timer);
+  if (ET.i >= ET.steps.length) return earDone();
+  const s = ET.steps[ET.i];
+  $("#earWhere").textContent = `${s.ear === "L" ? "Oído izquierdo" : "Oído derecho"} · tono ${ET.i % 8 + 1} de 8`;
+  $("#earProg").style.width = (ET.i / ET.steps.length * 100) + "%";
+  ET.pass = 0; ET.level = ET_MIN;
+  ET.timer = setTimeout(earBeep, 700 + Math.random() * 900); // a pause you can't predict
+}
+function earBeep(){
+  if (!ET.busy) return;
+  const s = ET.steps[ET.i], step = ET.pass === 0 ? 5 : 2;
+  if (ET.level > ET_MAX){ earHeard(true); return; } // not heard even at the top: counts as the top
+  if (ctx.state !== "running") ctx.resume().catch(() => {});
+  const t0 = ctx.currentTime + .02, o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+  o.frequency.value = s.f; p.pan.value = s.ear === "L" ? -1 : 1;
+  const v = Math.pow(10, ET.level / 20);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + .03); g.gain.setValueAtTime(v, t0 + .27); g.gain.linearRampToValueAtTime(0, t0 + .3);
+  o.connect(g); g.connect(p); p.connect(ctx.destination); o.start(t0); o.stop(t0 + .32);
+  ET.lastLevel = ET.level; ET.level += step;
+  ET.timer = setTimeout(earBeep, 520);
+}
+function earHeard(top){
+  if (!ET.busy) return;
+  clearTimeout(ET.timer);
+  const s = ET.steps[ET.i], lvl = top ? ET_MAX : ET.lastLevel;
+  if (ET.pass === 0 && !top){ ET.pass = 1; ET.coarse = lvl; ET.level = Math.max(ET_MIN, lvl - 10); ET.timer = setTimeout(earBeep, 600 + Math.random() * 700); return; } // once more, finer
+  const thr = top ? ET_MAX : lvl;
+  ET.res[s.ear][EAR_F.indexOf(s.f)] = thr;
+  ET.i++; earStep();
+}
+function earCancel(){ ET.busy = false; clearTimeout(ET.timer); $("#earDlg").close(); if (ET.resume) play(); }
+function earDone(){
+  ET.busy = false;
+  S.ear = { on: true, L: ET.res.L, R: ET.res.R, at: Date.now() };
+  applyPers();
+  const b = earBoost(), bars = side => b[side].map((v, i) => `<span class="ear-bar" title="${EAR_F[i] >= 1000 ? EAR_F[i] / 1000 + " kHz" : EAR_F[i] + " Hz"}: +${v} dB"><i style="height:${8 + v * 11}%"></i></span>`).join("");
+  $("#earBody").innerHTML = `<h2 id="earH">Listo: tu música, a tu oído</h2>
+    <p>${esc(earSummary())}</p>
+    <div class="ear-res"><div><b>Izquierdo</b><div class="ear-bars">${bars("L")}</div></div><div><b>Derecho</b><div class="ear-bars">${bars("R")}</div></div></div>
+    <div class="ear-axis"><span>Graves</span><span>Agudos</span></div>
+    <p class="mix-note">Puedes apagarlo o repetir la prueba cuando quieras en «Calidad y bocinas».</p>
+    <div class="dlg-act"><button type="button" class="pill" data-act="ear-start">Repetir</button><button type="button" class="add-top" data-act="ear-close">Escuchar así</button></div>`;
+  if (ET.resume){ ET.resume = false; play(); }
+}
+document.addEventListener("keydown", e => { if (ET.busy && $("#earDlg").open && (e.code === "Space" || e.key === "Enter")){ e.preventDefault(); earHeard(false); } });
+// --- headphone profiles
+let hpList = null;
+async function openHp(){
+  if ($("#sndDlg").open) $("#sndDlg").close();
+  $("#hpDlg").showModal(); $("#hpSearch").value = ""; $("#hpList").innerHTML = `<p class="pl-empty">Cargando modelos…</p>`;
+  if (!hpList){ try { const r = await fetch("eq/headphones.json"); hpList = (await r.json()).filter(h => h && typeof h.n === "string" && Array.isArray(h.f)); } catch { $("#hpList").innerHTML = `<p class="pl-empty">No se pudo cargar la lista. Revisa tu internet.</p>`; return; } }
+  renderHp(); setTimeout(() => $("#hpSearch").focus(), 50);
+}
+function renderHp(){
+  const q = nrm($("#hpSearch").value || ""), kind = { o: "Diadema", i: "In-ear", b: "Earbuds" };
+  const hits = hpList.map((h, i) => ({ h, i })).filter(({ h }) => !q || q.split(" ").every(w => nrm(h.n).includes(w)));
+  $("#hpList").innerHTML = `<button type="button" class="hp-item${!S.hp ? " on" : ""}" data-hp="-1"><b>Ninguno</b><small>Sin corrección</small></button>`
+    + hits.map(({ h, i }) => `<button type="button" class="hp-item${S.hp && S.hp.n === h.n ? " on" : ""}" data-hp="${i}"><b>${esc(h.n)}</b><small>${kind[h.t] || ""}</small></button>`).join("")
+    + (hits.length ? "" : `<p class="pl-empty">No está en la lista. Prueba con la marca, o elige uno parecido del mismo tipo.</p>`);
+}
+function pickHp(i){
+  const h = hpList && hpList[i];
+  S.hp = h ? { on: true, n: h.n, p: clamp(+h.p || 0, -20, 0), f: h.f.slice(0, 10) } : null;
+  if (!ctx) ensureCtx();
+  applyPers(); renderHp();
+  toast(h ? `Corrección para ${h.n} activada.` : "Sin corrección de audífonos.");
+}
+
+/* ---------- sleep mode: the music fades out and stops at the end of a song ---------- */
+S.sleep = { end: 0, total: 0, stopAtEnd: false, calm: store.get("sleepCalm", true), calmDone: false };
+function setSleep(mins){
+  if (!ctx) ensureCtx();
+  if (mins === "song"){ S.sleep = { ...S.sleep, end: 0, total: 0, stopAtEnd: true, calmDone: true }; toast("La música se detiene cuando acabe esta canción."); }
+  else if (mins > 0){ S.sleep = { ...S.sleep, end: Date.now() + mins * 60000, total: mins * 60000, stopAtEnd: false, calmDone: false }; toast(`Modo dormir: ${mins} minutos. La música bajará poco a poco.`); }
+  else { clearSleep(); toast("Modo dormir apagado."); }
+  if (S.sleep.end && S.sleep.calm) sleepCalm();
+  sleepTick(); renderSleepUI();
+}
+function clearSleep(){
+  S.sleep = { ...S.sleep, end: 0, total: 0, stopAtEnd: false, calmDone: false };
+  sleepK = 1; if (persN && ctx) persN.sleepG.gain.setTargetAtTime(1, ctx.currentTime, .3); bgVol(); renderSleepUI();
+}
+function sleepCalm(){ // after this song, calm music only
+  if (S.sleep.calmDone) return; S.sleep.calmDone = true;
+  const md = MOODS.find(m => m.title === "Modo relajado"), t = cur(); if (!md || !t) return;
+  const ids = moodIds(md).filter(id => id !== t.id); if (!ids.length) return;
+  S.queue = [...S.queue.slice(0, S.qi + 1), ...ids]; if (S.shuffle) S.shuffle = false; paint();
+}
+function sleepTick(){
+  const sl = S.sleep; if (!sl.end && !sl.stopAtEnd){ if (sleepK !== 1) clearSleep(); return; }
+  if (sl.end){
+    const left = sl.end - Date.now(), fade = Math.min(10 * 60000, sl.total * .4);
+    sleepK = clamp(left / fade, .18, 1); // slowly down, never fully silent until the song ends
+    if (left <= 0){ sl.end = 0; sl.stopAtEnd = true; }
+  }
+  if (sl.stopAtEnd){
+    const t = cur(), rest = t ? (t.dur || 0) - pos() : 0;
+    if (rest > 240){ sleepK = Math.max(0, sleepK - .06); if (sleepK <= .02){ sleepStop(); return; } } // a very long song: fade it out instead
+  }
+  if (persN && ctx) persN.sleepG.gain.setTargetAtTime(sleepK, ctx.currentTime, 1.5);
+  bgVol(); renderSleepUI();
+}
+setInterval(sleepTick, 2000);
+function sleepStop(){ pause(); clearSleep(); toast("Buenas noches. La música se detuvo."); }
+function sleepAtSongEnd(){ if (!S.sleep.stopAtEnd) return false; sleepStop(); return true; } // called when a song ends by itself
+function renderSleepUI(){
+  const sl = S.sleep, on = !!(sl.end || sl.stopAtEnd), mins = sl.end ? Math.max(1, Math.ceil((sl.end - Date.now()) / 60000)) : 0;
+  const label = !on ? "Modo dormir" : sl.end ? `Modo dormir: quedan ${mins} min` : "Se detiene al acabar la canción";
+  [$("#sleepBtn"), $("#fpSleep"), $("#npSleep")].forEach(b => { if (!b) return; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.title = label; });
+  const fb = $("#fpSleep"), nb = $("#npSleep");
+  if (fb) fb.innerHTML = ic("moon") + `<span>${on ? (sl.end ? mins + " min" : "Al acabar") : "Dormir"}</span>`;
+  if (nb) nb.innerHTML = ic("moon") + `<span>${on ? (sl.end ? mins + " min" : "Al acabar") : "Modo dormir"}</span>`;
+  if ($("#sleepDlg").open){
+    $("#sleepState").textContent = on ? label + "." : "Elige cuándo quieres que se detenga la música.";
+    $("#sleepCalm").setAttribute("aria-checked", !!sl.calm);
+    $("#sleepOff").hidden = !on;
+  }
+}
+function openSleep(){ $("#sleepDlg").showModal(); renderSleepUI(); }
+// the same ranking Hum uses for "modo relajado", without starting it
+function moodIds(md){
+  const ids = USER.length >= 6 || demoOff() ? USER.slice() : [...USER, ...TRACKS.map(t => t.id)];
+  const pool = ids.map(id => BYID[id]).filter(Boolean); if (!pool.length) return [];
+  const raws = pool.map(rawFeel);
+  const rank = key => { const vals = raws.map(r => r[key]).filter(v => v != null).sort((a, b) => a - b);
+    return v => v == null || vals.length < 2 ? .5 : vals.filter(x => x < v).length / (vals.length - 1); };
+  const rE = rank("energy"), rB = rank("bright"), rT = rank("bpm");
+  const scored = pool.map((t, i) => ({ id: t.id, s: md.score({ energy: rE(raws[i].energy), bright: rB(raws[i].bright), bpm: rT(raws[i].bpm), minor: raws[i].minor }) })).sort((a, b) => b.s - a.s);
+  const n = Math.max(Math.min(6, scored.length), Math.min(30, Math.ceil(scored.length * .35)));
+  return shuffled(scored.slice(0, n).map(x => x.id));
+}
+
+/* ---------- running mode: the music follows your steps ----------
+   The phone's motion sensor counts your steps; a song whose beat is close to your pace is nudged (at most 8%,
+   keeping its pitch) so each step lands on the beat. */
+const RUN = { on: false, iv: [], lastPeak: 0, up: false, avg: 9.8, lp: 0, cad: 0, listen: null };
+const canRun = () => isMobile && !desk && "DeviceMotionEvent" in window;
+function onMotion(e){
+  const a = e.accelerationIncludingGravity; if (!a || a.x == null) return;
+  RUN.got = true;
+  const m = Math.hypot(a.x, a.y, a.z), now = performance.now();
+  RUN.avg += (m - RUN.avg) * .02; RUN.lp += (m - RUN.avg - RUN.lp) * .35;
+  if (!RUN.up && RUN.lp > 1.3 && now - RUN.lastPeak > 260){
+    RUN.up = true;
+    if (RUN.lastPeak && now - RUN.lastPeak < 1500){ RUN.iv.push(now - RUN.lastPeak); if (RUN.iv.length > 16) RUN.iv.shift(); }
+    RUN.lastPeak = now;
+  } else if (RUN.up && RUN.lp < .3) RUN.up = false;
+}
+async function setRun(on){
+  if (on){
+    if (!canRun()){ toast("El modo correr necesita el sensor de movimiento de tu teléfono."); return; }
+    // iPhone asks for permission; some browsers answer "no" even when the sensor works, so what counts is whether data arrives
+    try { if (typeof DeviceMotionEvent.requestPermission === "function") await DeviceMotionEvent.requestPermission(); } catch {}
+    RUN.on = true; RUN.iv = []; RUN.lastPeak = 0; RUN.cad = 0; RUN.got = false;
+    window.addEventListener("devicemotion", onMotion);
+    toast("Modo correr: empieza a moverte y Hum se adapta a tu paso.");
+    setTimeout(() => { if (RUN.on && !RUN.got){ setRun(false); toast("No llegan datos del sensor de movimiento. Revisa el permiso de movimiento para este sitio."); } }, 5000);
+  } else {
+    RUN.on = false; window.removeEventListener("devicemotion", onMotion);
+    runRate = 1; applyFx(true);
+  }
+  renderRunUI();
+}
+setInterval(() => {
+  if (!RUN.on) return;
+  const now = performance.now();
+  if (!RUN.lastPeak || now - RUN.lastPeak > 2500 || RUN.iv.length < 6) RUN.cad = 0;
+  else { const s = RUN.iv.slice().sort((a, b) => a - b); RUN.cad = Math.round(60000 / s[Math.floor(s.length / 2)]); }
+  let want = 1;
+  const t = cur();
+  if (RUN.cad >= 90 && RUN.cad <= 210 && t && t.user && t.rec.bpm > 0){
+    const c = [t.rec.bpm, t.rec.bpm * 2, t.rec.bpm / 2].sort((x, y) => Math.abs(x - RUN.cad) - Math.abs(y - RUN.cad))[0];
+    const r = RUN.cad / c; if (Math.abs(r - 1) <= .08) want = r;
+  }
+  const nr = Math.abs(want - runRate) < .004 ? want : runRate + (want - runRate) * .35;
+  if (nr !== runRate){ runRate = +nr.toFixed(4); applyFx(true); }
+  renderRunUI();
+}, 2000);
+function runPick(){ // songs with a beat close to your pace
+  const cad = RUN.cad || 165;
+  const near = t => Math.min(...[1, 2, .5].map(k => Math.abs(t.rec.bpm * k - cad))) / cad;
+  const ids = USER.map(id => BYID[id]).filter(t => t && t.rec.blob && t.rec.bpm > 0).sort((a, b) => near(a) - near(b)).slice(0, 40).map(t => t.id);
+  if (!ids.length){ toast("Aún no conozco el ritmo de tus canciones. Dale unos minutos a la app para analizarlas."); return; }
+  S.humList = { title: "Modo correr", tracks: ids }; if (S.shuffle) setShuffle(false); playContext("hum");
+}
+function renderRunUI(){
+  const box = $("#runBox"); if (!box) return;
+  box.hidden = !canRun();
+  $("#runSw").setAttribute("aria-checked", RUN.on);
+  $("#runPick").hidden = !RUN.on;
+  const c = $("#runCad"); c.hidden = !RUN.on;
+  if (RUN.on) c.textContent = RUN.cad ? `Tu paso: ${RUN.cad} pasos por minuto${Math.abs(runRate - 1) > .005 ? ` · canción al ${Math.round(runRate * 100)}%` : ""}` : "Esperando tus pasos…";
+}
+
+/* ---------- listen together: a friend hears the same song, at the same second ----------
+   You (signed in) share a link. Hum writes a tiny file in your Google Drive with the song's name and second;
+   whoever opens the link reads it every few seconds and plays the same song from their own music. No server,
+   no cost: only names and times are shared, never the music. */
+const TG = { role: null, fid: null, by: "", last: null, lastAt: 0, beat: 0, busy: false, dirty: false, lo: -Infinity, hi: Infinity, timer: 0, joined: false, miss: "", fails: 0 };
+const tgNow = () => Date.now() + (isFinite(TG.lo) && isFinite(TG.hi) ? (TG.lo + TG.hi) / 2 : 0); // the server's clock
+function tgClock(r, sent, got){ // narrows down the difference between this device's clock and Google's (±0.5 s)
+  const d = Date.parse(r.headers.get("date") || ""); if (!isFinite(d)) return;
+  const lo = d - got, hi = d + 1000 - sent;
+  if (lo > TG.hi || hi < TG.lo){ TG.lo = lo; TG.hi = hi; return; } // the clock jumped: start over
+  TG.lo = Math.max(TG.lo, lo); TG.hi = Math.min(TG.hi, hi);
+}
+function tgSnap(){ const t = cur(); return t ? { title: t.title, artist: t.artist, album: t.album.title || "", dur: Math.round(t.dur || 0), pos: +pos().toFixed(2), rate: t.user && audio.playbackRate ? +audio.playbackRate.toFixed(3) : 1, playing: !!S.playing, id: t.id } : null; }
+async function tgHost(){
+  if (TG.role === "host"){ openTg(); return; }
+  if (!S.acct){ toast("Inicia sesión con Google para escuchar con alguien."); openAcct(); return; }
+  if (!tokenOk()){ try { await askToken(""); } catch { toast("Vuelve a conectar con Google."); return; } }
+  try {
+    toast("Preparando el enlace…");
+    await ensureLib();
+    TG.by = (S.acct.name || "").split(" ")[0] || "Tu amigo";
+    const body = new Blob([JSON.stringify({ v: 1, by: TG.by, at: Date.now() })], { type: "application/json" });
+    const fid = (await uploadSimple({ name: "Hum · escuchar juntos.json", parents: [sync.folder], appProperties: { hum: "together" }, mimeType: "application/json" }, body)).id;
+    await gfetch(`${DRIVE}/files/${fid}/permissions`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ role: "reader", type: "anyone" }) });
+    TG.role = "host"; TG.fid = fid; TG.last = null; TG.beat = 0;
+    clearInterval(TG.timer); TG.timer = setInterval(tgHostTick, 1000); tgPush();
+    openTg(); renderTgChip();
+  } catch { toast("No se pudo preparar la sesión. Revisa tu internet y vuelve a intentarlo."); }
+}
+async function tgPush(){
+  if (TG.role !== "host") return;
+  if (TG.busy){ TG.dirty = true; return; }
+  const s = tgSnap(); TG.busy = true; TG.dirty = false;
+  try {
+    const sent = Date.now(), at = tgNow();
+    const body = new Blob([JSON.stringify({ v: 1, by: TG.by, ...(s || {}), id: undefined, at })], { type: "application/json" });
+    const r = await gfetch(`${DRIVE_UP}/files/${TG.fid}?uploadType=media&fields=id`, { method: "PATCH", headers: { "content-type": "application/json" }, body });
+    tgClock(r, sent, Date.now());
+    TG.last = s; TG.lastAt = sent; TG.beat = sent; TG.fails = 0;
+  } catch { TG.fails++; if (TG.fails >= 5){ toast("Se perdió la conexión de «Escuchar juntos»."); tgEnd(); } }
+  finally { TG.busy = false; if (TG.dirty) tgPush(); }
+}
+function tgHostTick(){ // sends a new state only when something changed (song, play/pause, a jump), plus a beat every 15 s
+  if (TG.role !== "host") return;
+  const s = tgSnap(), l = TG.last;
+  if (!s) return;
+  const expect = l ? l.pos + (l.playing ? (Date.now() - TG.lastAt) / 1000 * (l.rate || 1) : 0) : 0;
+  if (!l || l.id !== s.id || l.playing !== s.playing || Math.abs(expect - s.pos) > 1.5 || Math.abs((l.rate || 1) - s.rate) > .01 || Date.now() - TG.beat > 15000) tgPush();
+}
+function tgEnd(){
+  const was = TG.role, fid = TG.fid;
+  clearInterval(TG.timer); TG.role = null; TG.fid = null; TG.last = null; TG.joined = false; TG.miss = "";
+  if (was === "host" && fid){ trashFile(fid); scheduleSync(500); }
+  if ($("#tgDlg").open) $("#tgDlg").close();
+  renderTgChip();
+}
+// joining from a link
+function tgJoin(fid){
+  if (!/^[\w-]{10,200}$/.test(fid)) return;
+  if (TG.role === "host") tgEnd();
+  TG.role = "guest"; TG.fid = fid; TG.joined = false; TG.miss = ""; TG.lo = -Infinity; TG.hi = Infinity; TG.fails = 0;
+  clearInterval(TG.timer); TG.timer = setInterval(tgGuestTick, 2500); tgGuestTick();
+  openTg();
+}
+async function tgGuestTick(){
+  if (TG.role !== "guest" || TG.busy) return;
+  TG.busy = true;
+  try {
+    const sent = Date.now();
+    const r = await fetch(`${DRIVE}/files/${TG.fid}?alt=media&key=${GKEY}`, { cache: "no-store" });
+    if (r.status === 404 || r.status === 403){ toast("La sesión de «Escuchar juntos» terminó."); tgEnd(); return; }
+    if (!r.ok) throw new Error(r.status);
+    tgClock(r, sent, Date.now());
+    const j = await r.json(); TG.fails = 0;
+    TG.by = str(j.by, 40) || "tu amigo";
+    if (j.title == null){ TG.miss = ""; renderTgChip(); if ($("#tgDlg").open) renderTg(); return; }
+    const it = { title: str(j.title, 300), artists: j.artist ? [str(j.artist, 300)] : [], album: str(j.album, 300), dur: clamp(+j.dur || 0, 0, 86400) };
+    const id = matchOf(it);
+    TG.now = it;
+    if (!id){ TG.miss = `${it.title}${it.artists[0] ? " · " + it.artists[0] : ""}`; if (S.playing && TG.joined) pause(); }
+    else {
+      TG.miss = "";
+      if (TG.joined){
+        const age = Math.max(0, (tgNow() - (+j.at || tgNow())) / 1000);
+        const want = clamp((+j.pos || 0) + (j.playing ? age * clamp(+j.rate || 1, .5, 2) : 0), 0, Math.max(0, (BYID[id].dur || it.dur) - .5));
+        const t = cur();
+        if (!t || t.id !== id){ S.humList = { title: `Con ${TG.by}`, tracks: [id] }; if (S.shuffle) setShuffle(false); S.ctxId = "hum"; S.ctxList = [id]; S.queue = [id]; S.qi = 0; loadAt(want); if (j.playing && !S.playing) play(); paint(); }
+        else {
+          if (j.playing && !S.playing) play();
+          if (!j.playing && S.playing) pause();
+          if (Math.abs(pos() - want) > 1.2) { loadAt(want); paint(); }
+        }
+      }
+    }
+    renderTgChip(); if ($("#tgDlg").open) renderTg();
+  } catch { TG.fails++; if (TG.fails >= 6){ toast("No se puede conectar con la sesión. Revisa tu internet."); tgEnd(); } }
+  finally { TG.busy = false; }
+}
+function tgStartListening(){ TG.joined = true; ensureCtx(); ctx.resume().catch(() => {}); unlockBg(); $("#tgDlg").close(); tgGuestTick(); renderTgChip(); }
+function openTg(){ renderTg(); if (!$("#tgDlg").open) $("#tgDlg").showModal(); }
+function renderTg(){
+  const link = TG.role === "host" ? `${SITE}#juntos=${TG.fid}` : "";
+  $("#tgBody").innerHTML = TG.role === "host" ? `<h2 id="tgH">Escuchar juntos</h2>
+      <p>Envía este enlace a quien quieras. Al abrirlo, escuchará lo mismo que tú, en el mismo segundo, con su propia música. Si no tiene la canción, Hum le dirá cuál es.</p>
+      <div class="share-link"><input id="tgLink" readonly value="${esc(link)}" aria-label="Enlace para escuchar juntos"><button type="button" class="pill" data-act="tg-copy">Copiar</button></div>
+      <p class="mix-note">Solo se comparte el nombre de la canción y el segundo en que va. Tu música no sale de tu dispositivo.</p>
+      <div class="dlg-act"><button type="button" class="pill danger" data-act="tg-end">Terminar sesión</button>${navigator.share ? `<button type="button" class="pill" data-act="tg-send">Enviar…</button>` : ""}<button type="button" class="add-top" data-act="tg-close">Listo</button></div>`
+    : TG.role === "guest" ? `<h2 id="tgH">Escuchar con ${esc(TG.by || "tu amigo")}</h2>
+      <p>${TG.now ? `Ahora suena <b>${esc(TG.now.title)}</b>${TG.now.artists[0] ? ", de " + esc(TG.now.artists[0]) : ""}.` : "Conectando…"}</p>
+      ${TG.miss ? `<p class="mix-note">Esa canción no está en tu música. Cuando suene una que tengas, se oirá aquí.</p>` : ""}
+      <div class="dlg-act"><button type="button" class="pill" data-act="tg-end">Salir</button>${TG.joined ? `<button type="button" class="add-top" data-act="tg-close">Listo</button>` : `<button type="button" class="add-top" data-act="tg-join">${ic("play")}<span>Escuchar juntos</span></button>`}</div>`
+    : `<h2 id="tgH">Escuchar juntos</h2>
+      <p>Comparte un enlace y tu amigo escucha lo mismo que tú, al mismo tiempo, cada uno con sus propias canciones.</p>
+      <div class="dlg-act"><button type="button" class="pill" data-act="tg-close">Ahora no</button><button type="button" class="add-top" data-act="tg-host">${ic("group")}<span>Crear enlace</span></button></div>`;
+}
+function renderTgChip(){
+  const c = $("#tgChip"); if (!c) return;
+  c.hidden = !TG.role;
+  if (TG.role === "host") c.innerHTML = `${ic("group")}<span>Escuchan contigo</span><button type="button" data-act="tg-open">Enlace</button>`;
+  else if (TG.role === "guest") c.innerHTML = `${ic("group")}<span>${TG.miss ? "No tienes: " + esc(TG.miss) : "Con " + esc(TG.by || "tu amigo")}</span><button type="button" data-act="${TG.joined ? "tg-end" : "tg-open"}">${TG.joined ? "Salir" : "Unirme"}</button>`;
+  [$("#fpTg"), $("#npTg")].forEach(b => { if (b) b.classList.toggle("on", !!TG.role); });
+}
+// opened with a link while the app was already open
+window.addEventListener("hashchange", () => {
+  const j = (location.hash.match(/juntos=([\w-]{10,200})/) || [])[1], l = (location.hash.match(/lista=([\w-]{10,200})/) || [])[1];
+  if (j || l) history.replaceState(null, "", location.pathname + location.search);
+  if (j) tgJoin(j);
+  if (l) openShared(l).then(id => { if (id) go({ type: "list", id }); });
+});
+
+/* ---------- what happens on a new song, for the modes above ---------- */
+function modesOnTrack(prev, t, auto){
+  if (auto && prev && prev.id !== t.id && S.sleep.stopAtEnd){ sleepStop(); return; } // a DJ mix moved on by itself
+  if (S.sleep.end && S.sleep.calm) sleepCalm();
+  if (RUN.on && S.ctxId === "hum" && S.humList.title === "Modo correr" && RUN.cad){ // keep the next songs close to your pace
+    const cad = RUN.cad, near = id => { const x = BYID[id]; return x && x.user && x.rec.bpm > 0 ? Math.min(...[1, 2, .5].map(k => Math.abs(x.rec.bpm * k - cad))) / cad : 9; };
+    const rest = S.queue.slice(S.qi + 1).sort((a, b) => near(a) - near(b)); S.queue = [...S.queue.slice(0, S.qi + 1), ...rest];
+  }
+}
+
+// --- buttons
+document.addEventListener("click", e => {
+  const hp = e.target.closest("[data-hp]");
+  if (hp){ pickHp(+hp.dataset.hp); return; }
+  const sl = e.target.closest("[data-sleep]");
+  if (sl){ const v = sl.dataset.sleep; setSleep(v === "song" ? "song" : +v); $("#sleepDlg").close(); return; }
+  const act = e.target.closest("[data-act]"); if (!act) return;
+  const a = act.dataset.act;
+  if (a === "ear-open") openEar();
+  if (a === "ear-start") earStart();
+  if (a === "ear-heard") earHeard(false);
+  if (a === "ear-cancel") earCancel();
+  if (a === "ear-close"){ ET.busy = false; $("#earDlg").close(); }
+  if (a === "hp-open") openHp();
+  if (a === "hp-close") $("#hpDlg").close();
+  if (a === "sleep") openSleep();
+  if (a === "sleep-off"){ clearSleep(); toast("Modo dormir apagado."); $("#sleepDlg").close(); }
+  if (a === "sleep-close") $("#sleepDlg").close();
+  if (a === "run-pick") runPick();
+  if (a === "tg-open") openTg();
+  if (a === "tg-host") tgHost();
+  if (a === "tg-join") tgStartListening();
+  if (a === "tg-end") tgEnd();
+  if (a === "tg-close") $("#tgDlg").close();
+  if (a === "tg-copy"){ const i = $("#tgLink"); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast("Enlace copiado."), () => { document.execCommand("copy"); toast("Enlace copiado."); }); }
+  if (a === "tg-send") navigator.share({ title: "Escucha conmigo en Hum", text: "Escucha lo mismo que yo, ahora, en Hum", url: $("#tgLink").value }).catch(() => {});
+});
+$("#earSw").addEventListener("click", () => { if (!S.ear) return; S.ear.on = S.ear.on === false; if (!ctx) ensureCtx(); applyPers(); });
+$("#hpSw").addEventListener("click", () => { if (!S.hp) return; S.hp.on = !S.hp.on; if (!ctx) ensureCtx(); applyPers(); });
+$("#hpSearch").addEventListener("input", () => { if (hpList) renderHp(); });
+$("#sleepCalm").addEventListener("click", () => { S.sleep.calm = !S.sleep.calm; store.set("sleepCalm", S.sleep.calm); if (S.sleep.calm && S.sleep.end) sleepCalm(); renderSleepUI(); });
+$("#runSw").addEventListener("click", () => setRun(!RUN.on));
+$("#earDlg").addEventListener("close", () => { if (ET.busy){ ET.busy = false; clearTimeout(ET.timer); if (ET.resume) play(); } });
+$("#sleepBtn").innerHTML = ic("moon");
+[$("#fpTg"), $("#npTg")].forEach(b => { if (b) b.innerHTML = ic("group") + "<span>Escuchar juntos</span>"; });
+renderPersUI(); renderSleepUI(); renderRunUI(); renderTgChip();
+
+// --- Hum understands it
+function humModes(c){
+  if (/(quita|apaga|cancela|desactiva|sin)( el)? (modo dormir|temporizador)/.test(c)){ clearSleep(); reply("Quité el modo dormir.", true); return true; }
+  const sm = c.match(/(?:modo dormir|temporizador|duermeme|apaga(?:te|la|r)? (?:la musica )?en|detente en|para(?:la)? en|me voy a dormir)\D*(\d{1,3})?\s*(min|hora)?/);
+  const words = /media hora/.test(c) ? 30 : /(una|1) hora y media/.test(c) ? 90 : /\buna hora\b/.test(c) ? 60 : /dos horas/.test(c) ? 120 : 0;
+  if (sm && (sm[1] || words || /modo dormir|me voy a dormir|duermeme|temporizador/.test(c))){
+    let m = +sm[1] || words || 30; if (sm[1] && /hora/.test(sm[2] || "")) m *= 60;
+    if (/(acabe|termine) (esta|la) cancion/.test(c)){ setSleep("song"); reply("Me detengo cuando acabe esta canción.", true); return true; }
+    setSleep(clamp(m, 1, 240)); reply(`Modo dormir: ${clamp(m, 1, 240)} minutos. Bajo la música poco a poco.`); return true;
+  }
+  if (/(quita|apaga|desactiva|sin)( el)? modo (correr|running|trotar)/.test(c)){ setRun(false); reply("Quité el modo correr.", true); return true; }
+  if (/modo (correr|running|trotar)|voy a (correr|trotar|salir a correr)/.test(c)){
+    if (!canRun()){ reply("El modo correr funciona en tu teléfono, con su sensor de movimiento."); return true; }
+    setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
+  }
+  if (/(prueba de oido|ajusta(lo)? a mi oido|mi oido)/.test(c)){ openEar(); reply("Vamos con la prueba de oído."); return true; }
+  if (/(escuchar|escuchemos|oir) (juntos|con alguien|con un amigo|con mi)/.test(c)){ openTg(); reply("Comparte el enlace y escuchen lo mismo al mismo tiempo."); return true; }
+  return false;
+}
+var modesReady = true;
+
 /* ---------- rendering ---------- */
 function likeBtn(b){
   const id = b.dataset.like, on = S.liked.has(id);
@@ -5259,6 +5845,9 @@ Promise.all([
   // opened from a shared-playlist link
   const shared = (location.hash.match(/lista=([\w-]{10,200})/) || [])[1];
   if (shared){ history.replaceState(null, "", location.pathname + location.search); openShared(shared).then(id => { if (id) go({ type: "list", id }); }); }
+  // opened from a "listen together" link
+  const together = (location.hash.match(/juntos=([\w-]{10,200})/) || [])[1];
+  if (together){ history.replaceState(null, "", location.pathname + location.search); tgJoin(together); }
 });
 })();
 </script>
