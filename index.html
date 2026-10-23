@@ -536,6 +536,9 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .acct-st .ok{width:22px;height:22px;border-radius:50%;background:hsl(150 50% 40%);color:#fff;display:grid;place-items:center;flex:none}
 .acct-st .ok svg{width:14px;height:14px}
 .acct-facts{margin:0 0 12px}
+.g-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:48px;border-radius:999px;background:#fff;color:#1f1f1f;font:600 15px var(--f-body);border:1px solid #dadce0;margin:4px 0 0}
+.g-btn:hover{background:#f3f4f6}
+.g-btn .g-logo{width:20px;height:20px}
 .top-acct.on{color:var(--accent)}
 .nav-btn .sync-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.3}}
@@ -743,9 +746,9 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     <ul class="w-feat"><li>Ecualizador inteligente</li><li>Letras al ritmo</li><li>Transiciones DJ</li></ul>
     <div class="w-acts">
       <button type="button" class="w-primary" data-act="welcome-go">Empezar</button>
-      <button type="button" class="w-ghost" data-act="welcome-acct" id="wAcct">Iniciar sesión o crear cuenta</button>
+      <button type="button" class="w-ghost" data-act="welcome-acct" id="wAcct">Continuar con Google</button>
       <button type="button" class="w-ghost" data-act="install" id="wInstall" hidden>Instalar en este dispositivo</button>
-      <a class="w-ghost" id="wWin" href="/descargas/HumPlayer-Setup-1.1.0.exe" download hidden>Descargar para Windows</a>
+      <a class="w-ghost" id="wWin" href="https://github.com/alelangar0415-blip/hum-player/releases/latest/download/HumPlayer-Setup.exe" hidden>Descargar para Windows</a>
     </div>
     <p class="w-small" id="wHelp">En el móvil: en Android, menú ⋮ › Instalar app. En iPhone, Compartir › Añadir a pantalla de inicio.</p>
   </div>
@@ -1507,7 +1510,7 @@ async function removeSong(id, opts = {}){
   try { await idbReq("readwrite", s => s.delete(id)); } catch {}
   if (wasCur){ loadAt(0); if (wasPlaying) play(); }
   const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y; renderLib(); paint();
-  if (!opts.remote){ tomb("song:" + id); toast(`Quitada de Mis canciones: ${t.title}`); }
+  if (!opts.remote){ trashFile(t.rec.cloud); tomb("song:" + id); toast(`Quitada de Mis canciones: ${t.title}`); }
 }
 const dropzone = () => `<div class="dropzone"><b>Añade tu música</b>
   <span>Arrastra aquí tus archivos de audio o elígelos desde tu dispositivo. Funciona con MP3, M4A, WAV, OGG y FLAC.</span>
@@ -1888,6 +1891,7 @@ function resetCover(id){
   if (COVERS[id]) URL.revokeObjectURL(COVERS[id]);
   delete COVERS[id];
   idbReq("readwrite", st => st.delete(id), "covers").catch(() => {});
+  if (COVER_V[id] && COVER_V[id].f) trashFile(COVER_V[id].f);
   COVER_V[id] = { del: true, u: Date.now() }; saveCoverV(); markDirty("cover:" + id);
   rerender(); renderLib(); toast("Has recuperado la portada original.");
 }
@@ -2362,15 +2366,12 @@ function closeFp(){ $("#fp").hidden = true; }
 
 /* ---------- welcome cover (first time, and from the menu) ---------- */
 const isElectron = /Electron/i.test(navigator.userAgent);
-let winInstaller = null; // true once we know the Windows installer is on this site
 function openWelcome(){
   if (S.drawer){ S.drawer = false; applySide(); }
   const w = $("#welcome"); w.hidden = false;
   $("#wInstall").hidden = isElectron || isStandalone() || !(installEvt || isIOS);
   $("#wHelp").hidden = isElectron || isStandalone();
-  $("#wWin").hidden = isElectron || winInstaller !== true;
-  if (!isElectron && winInstaller === null && location.protocol === "https:")
-    fetch($("#wWin").getAttribute("href"), { method: "HEAD" }).then(r => { winInstaller = r.ok; $("#wWin").hidden = !r.ok; }).catch(() => { winInstaller = false; });
+  $("#wWin").hidden = isElectron || isPhone(); // the installer lives on GitHub (free, no download limit)
   setTimeout(() => w.querySelector(".w-primary").focus(), 50);
 }
 function closeWelcome(){
@@ -2497,38 +2498,123 @@ function renderPick(){
 }
 $("#pickDlg").addEventListener("close", () => { if (S.view.type === "list" && S.view.id === S.pickPl) rerender(); });
 
-/* ---------- your account: the same songs, playlists and likes on all your devices ----------
-   The list of what you have (songs' details, playlists, likes) is synced in small pieces; each
-   change carries the time it was made and the newest one wins. Audio files go up and come down
-   in 3 MB pieces, one song at a time, in the background. */
-const API = /^https?:$/.test(location.protocol) ? "" : "https://hum-player-soldcell.netlify.app";
-const PART = 3 * 1024 * 1024;
-S.acct = store.get("acct", null); S.acctMode = "login"; S.acctMe = null; S.acctEmail = "";
-const sync = { dirty: store.get("dirty", {}), tomb: store.get("tomb", {}), cursor: store.get("cursor", 0), last: store.get("lastSync", 0), busy: false, again: false, timer: 0, err: "" };
-const xfer = { running: false, label: "", sub: "", want: null, wait: new Map(), failed: new Set() };
-const COVER_V = store.get("coverV", {}); // playlist id -> { v, u, up } for covers you chose
-const saveSync = () => { store.set("dirty", sync.dirty); store.set("tomb", sync.tomb); store.set("cursor", sync.cursor); store.set("lastSync", sync.last); };
+/* ---------- your account: sign in with Google; your music is kept in YOUR Google Drive ----------
+   Nothing goes through a server of ours: this device talks straight to your Drive. Drive keeps a
+   "Hum Player" folder with your audio files and one small file (hum-library.json) listing songs'
+   details, playlists and likes. Every change carries the time it was made and the newest one wins,
+   so phone and PC end up with the same library. The app can only see files it created itself. */
+const GCLIENT = "723444963284-5fugf9ophn35jo6phkfn8t1a6tj97rv5.apps.googleusercontent.com";
+const GSCOPE_DRIVE = "https://www.googleapis.com/auth/drive.file";
+const GSCOPE = GSCOPE_DRIVE + " openid email profile";
+const DRIVE = "https://www.googleapis.com/drive/v3", DRIVE_UP = "https://www.googleapis.com/upload/drive/v3";
+if (store.get("acct", null)) store.set("acct", null); // email accounts from the previous version are gone
+S.acct = store.get("gacct", null); // { email, name }
+S.gtok = store.get("gtok", null);  // { t, exp }: short-lived access token
+S.acctMe = null;
+const sync = { dirty: store.get("dirty", {}), tomb: store.get("tomb", {}), trash: store.get("trash", []), last: store.get("lastSync", 0),
+  folder: store.get("gFolder", null), lib: store.get("gLib", null), ver: null, remote: null,
+  busy: false, again: false, timer: 0, err: "", needAuth: false, authTried: 0 };
+const xfer = { running: false, label: "", sub: "", want: null, wait: new Map(), failed: new Set(), pct: -1 };
+const COVER_V = store.get("coverV", {}); // playlist id -> { v, u, up, f } for covers you chose
+const saveSync = () => { store.set("dirty", sync.dirty); store.set("tomb", sync.tomb); store.set("trash", sync.trash); store.set("lastSync", sync.last); store.set("gFolder", sync.folder); store.set("gLib", sync.lib); };
 const saveCoverV = () => store.set("coverV", COVER_V);
 function markDirty(key){ sync.dirty[key] = Date.now(); store.set("dirty", sync.dirty); scheduleSync(1500); }
 function tomb(key){ sync.tomb[key] = Date.now(); store.set("tomb", sync.tomb); markDirty(key); }
+function trashFile(fileId){ if (fileId && S.acct){ sync.trash.push(fileId); saveSync(); } }
 function scheduleSync(ms){ if (!S.acct) return; clearTimeout(sync.timer); sync.timer = setTimeout(doSync, ms); }
 const putRec = rec => idbReq("readwrite", s => s.put(rec)).catch(() => { S.saveFailed = true; });
 function touchSong(rec){ rec.u = Date.now(); putRec(rec); markDirty("song:" + rec.id); }
+const fail = (code, status) => Object.assign(new Error(code), { code, status });
 
-async function api(path, o = {}){
-  const headers = {};
-  if (S.acct && !o.anon) headers.authorization = "Bearer " + S.acct.token;
-  let body = o.body;
-  if (o.json){ headers["content-type"] = "application/json"; body = JSON.stringify(o.json); }
-  else if (body) headers["content-type"] = "application/octet-stream";
+// --- Google sign-in (Google's own sign-in window; the Windows app does it through the system browser)
+let gsiP = null, tokenClient = null, tokenWait = null;
+function loadGsi(){
+  if (desk || gsiP) return gsiP || Promise.resolve();
+  return gsiP = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+    s.onload = () => res(); s.onerror = () => { gsiP = null; rej(fail("offline")); };
+    document.head.appendChild(s);
+  });
+}
+function getTokenClient(){
+  if (!tokenClient && window.google && google.accounts && google.accounts.oauth2)
+    tokenClient = google.accounts.oauth2.initTokenClient({ client_id: GCLIENT, scope: GSCOPE,
+      callback: r => tokenDone(r), error_callback: e => tokenDone({ error: (e && e.type) || "popup_failed" }) });
+  return tokenClient;
+}
+function tokenDone(r){
+  const w = tokenWait; tokenWait = null; if (!w) return;
+  if (!r || r.error) return w.rej(fail(r && r.error === "access_denied" ? "denied" : (r && r.error) || "denied"));
+  if (google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, GSCOPE_DRIVE)) return w.rej(fail("no_drive"));
+  setToken(r.access_token, r.expires_in); w.res();
+}
+function setToken(t, secs){ S.gtok = { t, exp: Date.now() + Math.max(60, (+secs || 3600) - 120) * 1000 }; store.set("gtok", S.gtok); sync.needAuth = false; }
+const tokenOk = () => !!(S.gtok && S.gtok.exp > Date.now());
+// must be called inside a tap: browsers only let a sign-in window open then
+function askToken(prompt){
+  if (desk && desk.google) return desk.google(prompt).then(r => { if (!r || r.error) throw fail(r && r.error || "denied"); setToken(r.access_token, r.expires_in); });
+  const tc = getTokenClient(); if (!tc) return Promise.reject(fail("loading"));
+  if (tokenWait) tokenWait.rej(fail("popup_closed"));
+  return new Promise((res, rej) => {
+    tokenWait = { res, rej };
+    const o = { prompt }; if (S.acct && S.acct.email) o.login_hint = S.acct.email;
+    tc.requestAccessToken(o);
+  });
+}
+async function gfetch(url, o = {}){
+  if (!tokenOk()) throw fail("need_auth");
   let r;
-  try { r = await fetch(API + "/api/cloud/" + path, { method: o.method || "GET", headers, body, cache: "no-store" }); }
-  catch { const e = new Error("offline"); e.code = navigator.onLine ? "unreachable" : "offline"; throw e; }
+  try { r = await fetch(url, { ...o, headers: { ...(o.headers || {}), authorization: "Bearer " + S.gtok.t } }); }
+  catch { throw fail(navigator.onLine ? "unreachable" : "offline"); }
+  if (r.status === 401){ S.gtok = null; store.set("gtok", null); throw fail("need_auth", 401); }
   if (!r.ok){
     let j = {}; try { j = await r.json(); } catch {}
-    const e = new Error(j.error || "http"); e.status = r.status; e.code = j.error || "http_" + r.status; throw e;
+    const reason = j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason;
+    throw fail(reason === "storageQuotaExceeded" ? "drive_full" : r.status === 404 ? "not_found" : reason || "http_" + r.status, r.status);
   }
-  return o.buf ? r.arrayBuffer() : r.json();
+  return r;
+}
+
+// --- the "Hum Player" folder and the library file in your Drive
+async function gfind(q){
+  const r = await gfetch(`${DRIVE}/files?spaces=drive&orderBy=createdTime&pageSize=5&fields=files(id)&q=${encodeURIComponent(q + " and trashed=false")}`);
+  return (await r.json()).files || [];
+}
+async function uploadSimple(meta, blob, fileId){ // small files, in one request (new file, or new content for fileId)
+  const b = "hum" + rid();
+  const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${b}\r\nContent-Type: ${blob.type || "application/octet-stream"}\r\n\r\n`, blob, `\r\n--${b}--`]);
+  const r = await gfetch(`${DRIVE_UP}/files${fileId ? "/" + fileId : ""}?uploadType=multipart&fields=id,version`, { method: fileId ? "PATCH" : "POST", headers: { "content-type": `multipart/related; boundary=${b}` }, body });
+  return r.json();
+}
+async function ensureLib(){
+  if (sync.folder && sync.lib) return;
+  let f = (await gfind("appProperties has { key='hum' and value='root' }"))[0];
+  if (!f){
+    const r = await gfetch(`${DRIVE}/files?fields=id`, { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "Hum Player", mimeType: "application/vnd.google-apps.folder", appProperties: { hum: "root" } }) });
+    f = await r.json();
+  }
+  let l = (await gfind("appProperties has { key='hum' and value='library' }"))[0];
+  if (!l) l = await uploadSimple({ name: "hum-library.json", parents: [f.id], appProperties: { hum: "library" }, mimeType: "application/json" },
+    new Blob([JSON.stringify({ v: 1, items: {} })], { type: "application/json" }));
+  sync.folder = f.id; sync.lib = l.id; sync.remote = null; saveSync();
+}
+async function readLib(){
+  const meta = await (await gfetch(`${DRIVE}/files/${sync.lib}?fields=version`)).json();
+  if (sync.remote && sync.ver === meta.version) return; // nothing new since last time
+  const j = await (await gfetch(`${DRIVE}/files/${sync.lib}?alt=media`, { cache: "no-store" })).json();
+  sync.remote = j && j.items ? j : { v: 1, items: {} }; sync.ver = meta.version;
+}
+async function writeLib(){
+  const r = await gfetch(`${DRIVE_UP}/files/${sync.lib}?uploadType=media&fields=version`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(sync.remote) });
+  sync.ver = (await r.json()).version;
+}
+async function flushTrash(){
+  while (sync.trash.length){
+    try { await gfetch(`${DRIVE}/files/${sync.trash[0]}`, { method: "DELETE" }); }
+    catch (e){ if (e.code !== "not_found") throw e; }
+    sync.trash.shift(); saveSync();
+  }
 }
 
 const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone"];
@@ -2546,14 +2632,14 @@ function localKeys(){
 function localItem(key){
   const i = key.indexOf(":"), kind = key.slice(0, i), id = key.slice(i + 1);
   const gone = () => sync.tomb[key] ? { key, updated: sync.tomb[key], deleted: true } : null;
-  if (kind === "song"){ const t = BYID[id]; return t && t.user ? { key, updated: t.rec.u || t.rec.added || 1, data: songData(t.rec) } : gone(); }
+  if (kind === "song"){ const t = BYID[id]; return t && t.user ? { key, updated: t.rec.u || t.rec.added || 1, data: songData(t.rec), f: t.rec.cloud || null } : gone(); }
   if (kind === "pl"){ const p = IMPORTED[id]; return p ? { key, updated: p.u || p.updated || p.added || 1, data: plData(p) } : gone(); }
   if (kind === "like") return { key, updated: S.likedU[id] || 1, deleted: !S.liked.has(id), data: {} };
   if (kind === "hide") return { key, updated: S.hiddenU[id] || 1, deleted: !S.hidden.has(id), data: {} };
   if (kind === "cover"){
     const c = COVER_V[id]; if (!c) return null;
     if (c.del) return { key, updated: c.u, deleted: true };
-    return c.up ? { key, updated: c.u, data: { v: c.v } } : null; // shared once the image is uploaded
+    return c.up ? { key, updated: c.u, data: { v: c.v, f: c.f } } : null; // shared once the image is in your Drive
   }
   return null;
 }
@@ -2561,22 +2647,33 @@ function localItem(key){
 async function doSync(){
   if (!S.acct) return;
   if (!navigator.onLine){ paintAcct(); return; }
+  if (!tokenOk()){ sync.needAuth = true; paintAcct(); return; }
   if (sync.busy){ sync.again = true; return; }
   sync.busy = true; clearTimeout(sync.timer); xfer.failed.clear(); paintAcct();
   let changed = false;
   try {
-    for (let round = 0; round < 40; round++){
-      const started = Date.now(), keys = Object.keys(sync.dirty).slice(0, 1000);
-      const items = keys.map(localItem).filter(Boolean);
-      const res = await api("sync", { method: "POST", json: { since: sync.cursor, items } });
-      keys.forEach(k => { if (sync.dirty[k] <= started){ delete sync.dirty[k]; delete sync.tomb[k]; } });
-      for (const it of res.items) if (await applyRemote(it)) changed = true;
-      sync.cursor = res.cursor; saveSync();
-      if (!res.more && keys.length < 1000) break;
+    await ensureLib();
+    await flushTrash();
+    const started = Date.now(), keys = Object.keys(sync.dirty);
+    await readLib();
+    const R = sync.remote.items; let push = false;
+    // what changed here goes into the library file (when it is newer than what is there)
+    for (const k of keys){
+      const li = localItem(k); if (!li) continue;
+      const r = R[k];
+      if (!r || li.updated > r.updated){ R[k] = { updated: li.updated, deleted: !!li.deleted, data: li.deleted ? null : li.data, f: li.deleted ? null : (li.f || (r && r.f) || null) }; push = true; }
     }
+    // audio files that finished uploading from here
+    USER.forEach(id => { const rec = BYID[id].rec, r = R["song:" + id]; if (rec.cloud && r && !r.deleted && r.f !== rec.cloud){ r.f = rec.cloud; push = true; } });
+    if (push) await writeLib();
+    keys.forEach(k => { if (sync.dirty[k] <= started){ delete sync.dirty[k]; delete sync.tomb[k]; } });
+    // and what changed elsewhere comes here
+    for (const [key, r] of Object.entries(R)) if (await applyRemote({ key, ...r, parts: r.f || null })) changed = true;
     sync.last = Date.now(); sync.err = ""; saveSync();
   } catch (e){
-    if (e.code === "signed_out") signedOut(); else sync.err = e.code || "error";
+    if (e.code === "need_auth") sync.needAuth = true;
+    else if (e.code === "not_found"){ sync.folder = sync.lib = null; sync.remote = null; saveSync(); sync.again = true; } // the folder was deleted from Drive: start a new one
+    else sync.err = e.code || "error";
   } finally {
     sync.busy = false;
     if (changed){ matchIdx = null; renderLib(); if (S.view.type !== "search") rerender(); paint(); }
@@ -2597,7 +2694,7 @@ async function applyRemote(it){
         SONG_FIELDS.forEach(k => { if (k in it.data) rec[k] = it.data[k]; });
         rec.u = it.updated; t.title = rec.title; t.artist = rec.artist; t.album.title = rec.album || "Mis canciones"; ch = true;
       }
-      if ((rec.cloud || 0) !== it.parts){ rec.cloud = it.parts; ch = true; }
+      if (it.parts && rec.cloud !== it.parts){ rec.cloud = it.parts; ch = true; }
       if (ch) putRec(rec);
       return ch;
     }
@@ -2636,30 +2733,30 @@ async function applyRemote(it){
       idbReq("readwrite", st => st.delete(id), "covers").catch(() => {});
       return true;
     }
-    const v = it.data && it.data.v; if (!v) return false;
+    const v = it.data && it.data.v, f = it.data && it.data.f; if (!v || !f) return false;
     try {
-      const blob = new Blob([await api(`cover?id=${encodeURIComponent(id)}&v=${encodeURIComponent(v)}`, { buf: true })], { type: "image/jpeg" });
+      const blob = new Blob([await (await gfetch(`${DRIVE}/files/${f}?alt=media`)).arrayBuffer()], { type: "image/jpeg" });
       await idbReq("readwrite", st => st.put({ id, blob }), "covers").catch(() => {});
       if (COVERS[id]) URL.revokeObjectURL(COVERS[id]);
-      COVERS[id] = URL.createObjectURL(blob); COVER_V[id] = { v, u: it.updated, up: true }; saveCoverV();
+      COVERS[id] = URL.createObjectURL(blob); COVER_V[id] = { v, u: it.updated, up: true, f }; saveCoverV();
       return true;
     } catch { return false; }
   }
   return false;
 }
 
-// files go up and come down one at a time; a song you press play on jumps the line
+// --- audio files go up and come down one at a time; a song you press play on jumps the line
 async function runTransfers(){
   if (xfer.running || !S.acct) return;
   xfer.running = true;
   try {
-    while (S.acct && navigator.onLine){
+    while (S.acct && navigator.onLine && tokenOk()){
       const recs = USER.map(id => BYID[id] && BYID[id].rec).filter(Boolean);
       const w = xfer.want && BYID[xfer.want] && BYID[xfer.want].rec;
       const cov = Object.keys(COVER_V).find(id => !COVER_V[id].del && !COVER_V[id].up && !xfer.failed.has("c:" + id));
       const ups = recs.filter(r => r.blob && !r.cloud && !xfer.failed.has(r.id));
-      const downs = recs.filter(r => !r.blob && r.cloud > 0 && !xfer.failed.has(r.id));
-      if (w && !w.blob && w.cloud > 0 && !xfer.failed.has(w.id)) await moveFile(w, "down", 1);
+      const downs = recs.filter(r => !r.blob && r.cloud && !xfer.failed.has(r.id));
+      if (w && !w.blob && w.cloud && !xfer.failed.has(w.id)) await moveFile(w, "down", 1);
       else if (cov) await moveCover(cov);
       else if (ups.length) await moveFile(ups[0], "up", ups.length);
       else if (downs.length) await moveFile(downs[0], "down", downs.length);
@@ -2670,26 +2767,60 @@ async function runTransfers(){
 async function guard(key, fn){
   try { await fn(); }
   catch (e){
-    if (e.code === "signed_out"){ signedOut(); throw e; }
+    if (e.code === "need_auth"){ sync.needAuth = true; throw e; }
     if (e.code === "offline" || e.code === "unreachable") throw e;
+    if (e.code === "drive_full"){ sync.err = "drive_full"; toast("Tu Google Drive está lleno: no se pueden subir más canciones. Libera espacio en Drive."); throw e; }
     xfer.failed.add(key); // try that one again on the next sync
-    if (e.code === "no_song") scheduleSync(3000);
   }
+}
+function xhrPut(url, blob, onProg){
+  return new Promise((res, rej) => {
+    const x = new XMLHttpRequest(); x.open("PUT", url);
+    x.setRequestHeader("content-type", blob.type || "application/octet-stream");
+    x.upload.onprogress = e => { if (e.lengthComputable) onProg(e.loaded / e.total); };
+    x.onload = () => {
+      if (x.status < 300){ try { res(JSON.parse(x.responseText || "{}")); } catch { res({}); } return; }
+      let reason = ""; try { reason = JSON.parse(x.responseText).error.errors[0].reason; } catch {}
+      rej(fail(x.status === 401 ? "need_auth" : reason === "storageQuotaExceeded" ? "drive_full" : "http_" + x.status, x.status));
+    };
+    x.onerror = () => rej(fail(navigator.onLine ? "unreachable" : "offline"));
+    x.send(blob);
+  });
+}
+async function uploadSong(rec, onProg){
+  await ensureLib();
+  const type = MIME[EXT(rec.name)] || rec.type || "audio/mpeg";
+  const r = await gfetch(`${DRIVE_UP}/files?uploadType=resumable&fields=id`, { method: "POST",
+    headers: { "content-type": "application/json; charset=UTF-8", "x-upload-content-type": type, "x-upload-content-length": String(rec.blob.size) },
+    body: JSON.stringify({ name: rec.name || `${rec.artist} - ${rec.title}`, parents: [sync.folder], appProperties: { hum: "song", humId: rec.id } }) });
+  const loc = r.headers.get("location"); if (!loc) throw fail("http_upload");
+  const j = await xhrPut(loc, rec.blob.type === type ? rec.blob : new Blob([rec.blob], { type }), onProg);
+  if (!j.id) throw fail("http_upload");
+  return j.id;
+}
+async function downloadSong(rec, onProg){
+  const r = await gfetch(`${DRIVE}/files/${rec.cloud}?alt=media`);
+  const total = +r.headers.get("content-length") || rec.size || 0, parts = []; let got = 0;
+  if (r.body && r.body.getReader){
+    const rd = r.body.getReader();
+    for (;;){ const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; if (total) onProg(Math.min(1, got / total)); }
+  } else parts.push(await r.arrayBuffer());
+  return new Blob(parts, { type: MIME[EXT(rec.name)] || rec.type || "audio/mpeg" });
 }
 function moveFile(rec, dir, left){
   return guard(rec.id, async () => {
-    const n = dir === "up" ? Math.max(1, Math.ceil(rec.blob.size / PART)) : rec.cloud;
-    const bufs = [];
-    for (let i = 0; i < n; i++){
-      xfer.label = `${dir === "up" ? "Subiendo" : "Descargando"} “${rec.title}”${n > 1 ? ` · ${Math.round(i / n * 100)} %` : ""}`;
-      xfer.sub = left > 1 ? `Quedan ${left} canciones por ${dir === "up" ? "subir a tu cuenta" : "bajar a este dispositivo"}` : "";
+    xfer.pct = -1;
+    const label = p => {
+      const pct = p == null ? -1 : Math.round(p * 100); if (pct === xfer.pct && xfer.label) return; xfer.pct = pct;
+      xfer.label = `${dir === "up" ? "Subiendo" : "Descargando"} “${rec.title}”${pct >= 0 ? ` · ${pct} %` : ""}`;
+      xfer.sub = left > 1 ? `Quedan ${left} canciones por ${dir === "up" ? "subir a tu Drive" : "bajar a este dispositivo"}` : "";
       paintAcct();
-      if (dir === "up") await api(`part?song=${encodeURIComponent(rec.id)}&n=${i}`, { method: "PUT", body: rec.blob.slice(i * PART, (i + 1) * PART) });
-      else bufs.push(await api(`part?song=${encodeURIComponent(rec.id)}&n=${i}`, { buf: true }));
-    }
-    if (dir === "up"){ await api(`done?song=${encodeURIComponent(rec.id)}&parts=${n}`, { method: "POST" }); rec.cloud = n; await putRec(rec); return; }
+    };
+    label(null);
+    if (dir === "up"){ rec.cloud = await uploadSong(rec, label); await putRec(rec); scheduleSync(800); return; }
+    const blob = await downloadSong(rec, label);
     const t = BYID[rec.id]; if (!t) return;
-    rec.blob = new Blob(bufs, { type: MIME[EXT(rec.name)] || rec.type || "audio/mpeg" });
+    rec.blob = blob;
     try {
       const tags = await readTags(rec.blob);
       if (tags.pic){ rec.pic = tags.pic; if (t.album.cover.startsWith("blob:")) URL.revokeObjectURL(t.album.cover); t.album.cover = URL.createObjectURL(tags.pic); }
@@ -2706,124 +2837,128 @@ function moveCover(id){
   return guard("c:" + id, async () => {
     const c = COVER_V[id], row = await idbReq("readonly", s => s.get(id), "covers").catch(() => null);
     if (!c || !row || !row.blob){ delete COVER_V[id]; saveCoverV(); return; }
-    await api(`cover?id=${encodeURIComponent(id)}&v=${c.v}`, { method: "PUT", body: row.blob });
-    c.up = true; saveCoverV(); markDirty("cover:" + id);
+    await ensureLib();
+    const j = await uploadSimple({ name: `portada-${id}.jpg`, parents: [sync.folder], appProperties: { hum: "cover", humId: id } }, row.blob);
+    if (c.f && c.f !== j.id) trashFile(c.f);
+    c.f = j.id; c.up = true; saveCoverV(); markDirty("cover:" + id);
   });
 }
-// a song you pressed play on is only in your account: download it, then play
+// a song you pressed play on is only in your Drive so far: download it, then play
 function needFile(t, sec){
-  if (!S.acct){ S.playing = false; paint(); toast(`“${t.title}” está en tu cuenta. Inicia sesión para escucharla aquí.`); return; }
-  if (!t.rec.cloud){ S.playing = false; paint(); scheduleSync(500); toast(`“${t.title}” aún se está subiendo desde tu otro dispositivo. Prueba en un momento.`); return; }
+  const stop = msg => { S.playing = false; paint(); toast(msg); };
+  if (!S.acct) return stop(`“${t.title}” está en tu Google Drive. Inicia sesión con Google para escucharla aquí.`);
+  if (!t.rec.cloud){ scheduleSync(500); return stop(`“${t.title}” aún se está subiendo desde tu otro dispositivo. Prueba en un momento.`); }
+  if (!tokenOk()){ // this runs inside the tap on play, so Google may reconnect right away
+    askToken("").then(() => needFile(t, sec)).catch(() => stop("Vuelve a conectar con Google para descargar esta canción."));
+    return;
+  }
   if (xfer.want !== t.id) toast(`Descargando “${t.title}”…`);
   xfer.want = t.id; xfer.wait.set(t.id, sec || 0); xfer.failed.delete(t.id);
   runTransfers();
 }
 
-function clearAcct(){
-  S.acct = null; S.acctMe = null; store.set("acct", null);
-  sync.dirty = {}; sync.tomb = {}; sync.cursor = 0; sync.last = 0; sync.err = ""; saveSync();
-  xfer.want = null;
-}
-function signOut(){
-  if (S.acct) api("logout", { method: "POST" }).catch(() => {});
-  clearAcct(); renderAcct(); paintAcct();
-  toast("Has cerrado sesión. Tus canciones siguen en este dispositivo.");
-}
-function signedOut(){
-  clearAcct(); paintAcct(); if ($("#acctDlg").open) renderAcct();
-  toast("Tu sesión se cerró. Vuelve a iniciar sesión para seguir sincronizando.");
-}
-const deviceName = () => isElectron ? "App de Windows" : /android/i.test(navigator.userAgent) ? "Android" : isIOS ? "iPhone o iPad" : "Navegador";
-function acctErr(code){
-  return ({ bad_login: "El correo o la contraseña no son correctos.", email_taken: "Ya hay una cuenta con ese correo. Pulsa “Ya tengo cuenta” para entrar.",
-    weak_password: "La contraseña necesita al menos 8 caracteres.",
-    signup_closed: "Esta app no admite cuentas nuevas. Puedes usarla sin cuenta: tu música se guarda en este dispositivo y funciona igual.", bad_email: "Revisa el correo: parece que le falta algo.",
-    locked: "Demasiados intentos. Espera 15 minutos y vuelve a probar.", offline: "No hay conexión. Revisa tu internet y vuelve a probar.",
-    unreachable: "No se pudo conectar con el servidor de Hum Player. Revisa tu internet; si sigue igual, la web puede estar protegida con contraseña de Netlify.",
-    http_401: "La web de Hum Player está protegida con contraseña de Netlify, así que esta app no puede entrar. Hay que abrir el acceso en Netlify." })[code]
-    || "No se pudo conectar con tu cuenta. Prueba otra vez en un momento.";
-}
-async function submitAcct(e){
-  e.preventDefault();
-  const email = $("#acctEmail").value.trim(), password = $("#acctPass").value, msg = $("#acctMsg"), btn = $("#acctGo"), up = S.acctMode === "signup";
-  const fail = t => { msg.className = "dlg-msg err"; msg.textContent = t; };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Escribe tu correo, por ejemplo nombre@gmail.com.");
-  if (password.length < 8) return fail(up ? "La contraseña necesita al menos 8 caracteres." : "Escribe tu contraseña.");
-  btn.disabled = true; msg.className = "dlg-msg"; msg.textContent = up ? "Creando tu cuenta…" : "Entrando…";
+async function signIn(){ // runs inside the tap on "Continuar con Google"
+  const msg = $("#acctMsg"); const say = (t, err) => { if (msg){ msg.className = "dlg-msg" + (err ? " err" : ""); msg.textContent = t; } };
+  if (!desk && !getTokenClient()){ say("Cargando Google… toca otra vez en un momento."); loadGsi().catch(() => say("No se pudo conectar con Google. Revisa tu internet.", true)); return; }
   try {
-    const r = await api(up ? "signup" : "login", { method: "POST", json: { email, password, device: deviceName() }, anon: true });
-    S.acct = { email: r.email, token: r.token }; store.set("acct", S.acct);
-    // everything on this device goes to the account, and everything in the account comes here
-    sync.cursor = 0; sync.tomb = {}; sync.dirty = {}; const now = Date.now(); localKeys().forEach(k => sync.dirty[k] = now); saveSync();
+    say("Esperando a Google…");
+    await askToken("select_account");
+    const me = await (await gfetch("https://www.googleapis.com/oauth2/v3/userinfo")).json();
+    S.acct = { email: me.email || "", name: me.name || "" }; store.set("gacct", S.acct);
+    // everything on this device goes to your Drive, and everything in your Drive comes here
+    sync.folder = sync.lib = null; sync.remote = null; sync.tomb = {}; sync.trash = []; sync.dirty = {};
+    const now = Date.now(); localKeys().forEach(k => sync.dirty[k] = now); saveSync();
     renderAcct(); paintAcct();
-    toast(up ? "Cuenta creada. Tu música se está guardando en ella." : "Sesión iniciada. Juntando tu música…");
-    api("me").then(m => { S.acctMe = m; if ($("#acctDlg").open) renderAcct(); }).catch(() => {});
+    toast("Conectado con Google. Guardando tu música en tu Drive…");
     doSync();
-  } catch (err){ fail(acctErr(err.code)); btn.disabled = false; }
+  } catch (e){
+    say(e.code === "no_drive" ? "Para guardar tu música hay que permitir el acceso a Google Drive. Vuelve a intentarlo y deja marcada la casilla de Drive."
+      : e.code === "popup_closed" ? "Se cerró la ventana de Google antes de terminar. Vuelve a intentarlo."
+      : e.code === "popup_failed_to_open" ? "El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio y vuelve a intentarlo."
+      : e.code === "offline" || e.code === "unreachable" ? "No hay conexión con Google. Revisa tu internet."
+      : "No se pudo iniciar sesión con Google. Vuelve a intentarlo.", true);
+  }
+}
+function reconnect(){ sync.authTried = Date.now(); askToken("").then(() => { toast("Conectado otra vez con Google."); doSync(); renderAcct(); }).catch(() => { if ($("#acctDlg").open) renderAcct(); }); }
+function signOut(){
+  S.acct = null; S.acctMe = null; S.gtok = null; store.set("gacct", null); store.set("gtok", null);
+  sync.dirty = {}; sync.tomb = {}; sync.trash = []; sync.folder = sync.lib = null; sync.remote = null; sync.last = 0; sync.err = ""; sync.needAuth = false; saveSync();
+  xfer.want = null;
+  renderAcct(); paintAcct();
+  toast("Has cerrado sesión. Tus canciones siguen en este dispositivo.");
 }
 const ago = ts => { const s = (Date.now() - ts) / 1000; return s < 60 ? "hace un momento" : s < 3600 ? `hace ${Math.round(s / 60)} min` : s < 86400 ? `hace ${Math.round(s / 3600)} h` : new Date(ts).toLocaleDateString("es"); };
 const bytes = b => b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : b >= 1e6 ? `${Math.round(b / 1e6)} MB` : `${Math.ceil(b / 1e3)} KB`;
 function acctStatus(){
   if (!navigator.onLine) return { i: "off", b: "Sin conexión", s: "Se sincroniza solo cuando vuelva internet." };
+  if (sync.needAuth && !tokenOk()) return { i: "off", b: "Hay que reconectar con Google", s: "Google pide confirmar cada cierto tiempo. Toca “Reconectar”." };
   if (xfer.label) return { i: "spin", b: xfer.label, s: xfer.sub };
   if (sync.busy) return { i: "spin", b: "Sincronizando…", s: "Juntando lo de tus dispositivos." };
+  if (sync.err === "drive_full") return { i: "off", b: "Tu Google Drive está lleno", s: "Libera espacio en Drive para subir más canciones." };
   if (sync.err) return { i: "off", b: "No se pudo sincronizar", s: "Lo intentará otra vez en un momento." };
-  const recs = USER.map(id => BYID[id].rec), upLeft = recs.filter(r => r.blob && !r.cloud).length, downLeft = recs.filter(r => !r.blob && r.cloud > 0).length;
+  const recs = USER.map(id => BYID[id].rec), upLeft = recs.filter(r => r.blob && !r.cloud).length, downLeft = recs.filter(r => !r.blob && r.cloud).length;
   if (upLeft) return { i: "off", b: `Faltan ${nc(upLeft)} por subir`, s: "Deja la app abierta con internet para terminar." };
   if (downLeft) return { i: "off", b: `Faltan ${nc(downLeft)} por bajar`, s: "Deja la app abierta con internet para terminar." };
   return { i: "ok", b: "Todo al día", s: sync.last ? `Última sincronización: ${ago(sync.last)}` : "" };
 }
 const stHTML = st => (st.i === "spin" ? `<span class="spin" aria-hidden="true"></span>` : `<span class="ok"${st.i === "ok" ? "" : ' style="background:var(--line)"'}>${ic(st.i === "ok" ? "check" : "sync")}</span>`)
   + `<div><b>${esc(st.b)}</b>${st.s ? `<small>${esc(st.s)}</small>` : ""}</div>`;
+const G_LOGO = `<svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 function renderAcct(){
   const b = $("#acctBody");
   if (!S.acct){
-    const up = S.acctMode === "signup";
-    b.innerHTML = `<div class="acct-top"><span class="acct-ic">${ic("cloud")}</span><div><h2 id="acctH">${up ? "Crea tu cuenta" : "Inicia sesión"}</h2>
-        <p>Guarda tus canciones, playlists y me gusta en tu cuenta. Entra con la misma cuenta en tu PC y en tu móvil y tendrás tu música en los dos.</p></div></div>
-      <div class="chips" role="group" aria-label="Elige una opción">
-        <button type="button" class="chip${up ? "" : " on"}" data-act="acct-mode" data-mode="login" aria-pressed="${!up}">Ya tengo cuenta</button>
-        <button type="button" class="chip${up ? " on" : ""}" data-act="acct-mode" data-mode="signup" aria-pressed="${up}">Crear cuenta</button>
-      </div>
-      <form id="acctForm" novalidate>
-        <label for="acctEmail">Correo</label>
-        <input id="acctEmail" type="email" autocomplete="email" inputmode="email" value="${esc(S.acctEmail)}">
-        <label for="acctPass" class="mt">Contraseña</label>
-        <input id="acctPass" type="password" autocomplete="${up ? "new-password" : "current-password"}">
-        ${up ? `<small class="acct-hint">Mínimo 8 caracteres. Guárdala bien: por ahora no se puede recuperar si la olvidas.</small>` : ""}
-        <p class="dlg-msg" id="acctMsg" role="status"></p>
-        <div class="dlg-act"><button type="button" class="pill" data-act="acct-close">Ahora no</button><button type="submit" class="add-top" id="acctGo">${up ? "Crear cuenta" : "Entrar"}</button></div>
-      </form>`;
-    $("#acctForm").addEventListener("submit", submitAcct);
-    $("#acctEmail").addEventListener("input", e => { S.acctEmail = e.target.value; });
+    b.innerHTML = `<div class="acct-top"><span class="acct-ic">${ic("cloud")}</span><div><h2 id="acctH">Tu música en todos tus dispositivos</h2>
+        <p>Entra con tu cuenta de Google y tus canciones, playlists y me gusta se guardan en tu propio Google Drive. Entra con la misma cuenta en tu PC y en tu móvil y tendrás lo mismo en los dos.</p></div></div>
+      ${desk && !desk.google ? `<p class="acct-st"><span>En esta versión de la app de Windows todavía no se puede entrar con Google. Para sincronizar desde el PC, abre Hum en el navegador (Chrome o Edge) y entra ahí con Google.</span></p>`
+        : `<button type="button" class="g-btn" data-act="acct-google">${G_LOGO}<span>Continuar con Google</span></button>`}
+      <p class="dlg-msg" id="acctMsg" role="status"></p>
+      <p class="mix-note">Hum solo puede ver lo que guarda él mismo en tu Drive (una carpeta llamada “Hum Player”) y usa tu propio espacio de Google: 15 GB gratis. Sin cuenta, tu música se queda solo en este dispositivo. <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
+      <div class="dlg-act"><button type="button" class="pill" data-act="acct-close">Ahora no</button></div>`;
     return;
   }
   const m = S.acctMe, here = USER.filter(id => BYID[id].rec.blob).length;
-  b.innerHTML = `<div class="acct-top"><span class="acct-ic on">${ic("cloud")}</span><div><h2 id="acctH">Tu cuenta</h2><p>${esc(S.acct.email)}</p></div></div>
-    <dl class="facts acct-facts"><div><dt>En tu cuenta</dt><dd>${m ? nc(m.songs) : "…"}</dd></div><div><dt>Espacio usado</dt><dd>${m ? bytes(m.bytes) : "…"}</dd></div><div><dt>En este equipo</dt><dd>${nc(here)}</dd></div></dl>
+  const R = sync.remote ? Object.entries(sync.remote.items).filter(([k, r]) => k.startsWith("song:") && !r.deleted && r.f) : null;
+  const need = sync.needAuth && !tokenOk();
+  b.innerHTML = `<div class="acct-top"><span class="acct-ic on">${ic("cloud")}</span><div><h2 id="acctH">${esc(S.acct.name || "Tu cuenta")}</h2><p>${esc(S.acct.email)} · Google Drive</p></div></div>
+    <dl class="facts acct-facts"><div><dt>En tu Drive</dt><dd>${R ? nc(R.length) : "…"}</dd></div><div><dt>Espacio de Google</dt><dd>${m ? `${bytes(m.used)}${m.limit ? " de " + bytes(m.limit) : ""}` : "…"}</dd></div><div><dt>En este equipo</dt><dd>${nc(here)}</dd></div></dl>
     <div class="acct-st" id="acctSt" role="status">${stHTML(acctStatus())}</div>
-    <p class="mix-note">Lo que añadas, quites o cambies aquí aparece en tus otros dispositivos al abrir la app con esta cuenta. Si cierras sesión, tus canciones se quedan en este dispositivo.</p>
-    <div class="dlg-act"><button type="button" class="pill danger" data-act="acct-out">Cerrar sesión</button><button type="button" class="pill" data-act="acct-sync">${ic("sync")}Sincronizar ahora</button><button type="button" class="add-top" data-act="acct-close">Listo</button></div>`;
+    <p class="mix-note">Lo que añadas, quites o cambies aquí aparece en tus otros dispositivos al abrir Hum con esta cuenta de Google. Si cierras sesión, tus canciones se quedan en este dispositivo y en tu Drive.</p>
+    <div class="dlg-act"><button type="button" class="pill danger" data-act="acct-out">Cerrar sesión</button>
+      ${need ? `<button type="button" class="add-top" data-act="acct-reconnect">${ic("sync")}<span>Reconectar</span></button>` : `<button type="button" class="pill" data-act="acct-sync">${ic("sync")}Sincronizar ahora</button>`}
+      <button type="button" class="${need ? "pill" : "add-top"}" data-act="acct-close">Listo</button></div>`;
+}
+async function loadMe(){
+  try { const j = await (await gfetch(`${DRIVE}/about?fields=storageQuota`)).json(); S.acctMe = { used: +j.storageQuota.usage || 0, limit: +j.storageQuota.limit || 0 }; if ($("#acctDlg").open) renderAcct(); } catch {}
 }
 function openAcct(){
   if (S.drawer){ S.drawer = false; applySide(); }
+  loadGsi().catch(() => {});
   renderAcct(); if (!$("#acctDlg").open) $("#acctDlg").showModal();
-  if (S.acct){ api("me").then(m => { S.acctMe = m; if ($("#acctDlg").open) renderAcct(); }).catch(() => {}); doSync(); }
-  else setTimeout(() => $("#acctEmail") && $("#acctEmail").focus(), 50);
+  if (S.acct && tokenOk()){ loadMe(); doSync(); }
 }
 function paintAcct(){
-  const busy = !!S.acct && (sync.busy || !!xfer.label);
-  $("#navAcct").innerHTML = ic("user") + (S.acct ? "Tu cuenta" : "Iniciar sesión") + (busy ? '<i class="sync-dot" aria-hidden="true"></i>' : "");
+  const busy = !!S.acct && (sync.busy || !!xfer.label), need = !!S.acct && sync.needAuth && !tokenOk();
+  $("#navAcct").innerHTML = ic("user") + (S.acct ? "Tu cuenta" : "Iniciar sesión") + (busy || need ? '<i class="sync-dot" aria-hidden="true"></i>' : "");
   const tb = $("#acctTop"); tb.classList.toggle("on", !!S.acct);
-  const lbl = S.acct ? `Tu cuenta: ${S.acct.email}` : "Iniciar sesión"; tb.setAttribute("aria-label", lbl); tb.title = lbl;
+  const lbl = S.acct ? `Tu cuenta: ${S.acct.email}` : "Iniciar sesión con Google"; tb.setAttribute("aria-label", lbl); tb.title = lbl;
   if ($("#acctDlg").open && S.acct){ const el = $("#acctSt"); if (el) el.innerHTML = stHTML(acctStatus()); }
 }
 function startSync(){
+  if (S.acct) loadGsi().catch(() => {});
   if (S.acct) doSync();
   setInterval(() => { if (S.acct && !document.hidden) doSync(); }, 60000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && S.acct && Date.now() - sync.last > 10000) doSync(); });
   window.addEventListener("online", () => { paintAcct(); if (S.acct) doSync(); });
   window.addEventListener("offline", paintAcct);
+  // Google tokens last about an hour: when one runs out, the next tap on a button reconnects
+  // (at most every 5 minutes, so a closed window never keeps popping up)
+  document.addEventListener("click", e => {
+    if (!S.acct || tokenOk() || !sync.needAuth || tokenWait || Date.now() - sync.authTried < 300000) return;
+    if (!e.target.closest("button,[data-act],[data-row],[data-playlist]") || e.target.closest("[data-act=acct-out],[data-act=acct-reconnect],[data-act=acct-google]")) return;
+    if (!desk && !getTokenClient()) return;
+    sync.authTried = Date.now();
+    askToken("").then(() => doSync()).catch(() => paintAcct());
+  }, true);
 }
 
 /* ---------- lock screen, notification bar and media keys ---------- */
@@ -3231,7 +3366,8 @@ document.addEventListener("click", e => {
     if (a === "welcome-acct"){ closeWelcome(); openAcct(); }
     if (a === "acct") openAcct();
     if (a === "acct-close") $("#acctDlg").close();
-    if (a === "acct-mode"){ S.acctMode = act.dataset.mode; renderAcct(); setTimeout(() => $("#acctEmail") && $("#acctEmail").focus(), 30); }
+    if (a === "acct-google") signIn();
+    if (a === "acct-reconnect") reconnect();
     if (a === "acct-out") signOut();
     if (a === "acct-sync"){ xfer.failed.clear(); doSync(); }
     if (a === "mini") openMini();
