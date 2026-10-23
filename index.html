@@ -660,6 +660,11 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .share-link{display:flex;gap:8px;margin:4px 0 6px}
 .share-link input{flex:1;min-width:0}
 
+/* ---------- game mode ---------- */
+.game-box{margin-top:6px}
+.game-box.mix-off #gmDuckRow,.game-box.mix-off #gmLevel{opacity:.5}
+#fxBtn.ducking{color:var(--accent);animation:pulse 1s ease-in-out infinite}
+
 /* ---------- narrower screens ---------- */
 @media (max-width:1100px){
   .app,.app:not(.np-open){grid-template-columns:clamp(200px,24vw,260px) minmax(0,1fr);grid-template-areas:"side main" "bar bar"}
@@ -994,6 +999,22 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <div class="mix-opt" style="margin-top:8px">
     <div><b>Karaoke</b><small>Baja la voz de la canción para que cantes tú. Funciona mejor cuando la voz va al centro, como en la mayoría del pop y el reguetón.</small></div>
     <button type="button" class="switch" id="fxKara" role="switch" aria-checked="false" aria-label="Karaoke"></button>
+  </div>
+  <div class="game-box" id="gameBox">
+    <h3 class="snd-h">Modo videojuegos</h3>
+    <div class="mix-opt">
+      <div><b>Modo videojuegos</b><small>Deja hueco en la música para pasos, disparos y voces del juego (o de Discord), y mantiene el volumen parejo para que nada tape al juego.</small></div>
+      <button type="button" class="switch" id="gmOn" role="switch" aria-checked="false" aria-label="Modo videojuegos"></button>
+    </div>
+    <div class="mix-opt" id="gmDuckRow" style="margin-top:8px">
+      <div><b>Bajar la música cuando suene el juego</b><small id="gmDuckNote"></small></div>
+      <button type="button" class="switch" id="gmDuck" role="switch" aria-checked="false" aria-label="Bajar la música cuando suene el juego"></button>
+    </div>
+    <div class="mix-row" style="margin-top:10px"><b>Cuánto se aparta la música</b></div>
+    <div class="chips snd-chips" id="gmLevel" role="group" aria-label="Intensidad del modo videojuegos">
+      <button type="button" class="chip" data-gml="suave">Suave</button><button type="button" class="chip" data-gml="normal">Normal</button><button type="button" class="chip" data-gml="fuerte">Fuerte</button>
+    </div>
+    <p class="mix-note" id="gmKeys" hidden>Atajos mientras juegas, sin salir del juego: <b>Ctrl+Alt+→</b> siguiente · <b>Ctrl+Alt+←</b> anterior · <b>Ctrl+Alt+Espacio</b> pausa · <b>Ctrl+Alt+↑ / ↓</b> volumen.</p>
   </div>
   <p class="mix-note">Slowed y sped up cambian la velocidad de tus propias canciones. A Hum también se lo puedes pedir: «Ey Hum, pon slowed».</p>
   <div class="dlg-act"><button type="button" class="add-top" data-act="fx-close">Listo</button></div>
@@ -3455,6 +3476,7 @@ function setupDesktop(){
     if (cmd === "next") next(false);
     if (cmd === "prev") prev();
     if (cmd === "mini") openMini();
+    if (cmd === "volup" || cmd === "voldown"){ S.vol = clamp(S.vol + (cmd === "volup" ? .1 : -.1), 0, 1); S.muted = false; applyVol(); store.set("vol", S.vol); }
   });
   const glyph = n => { const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.scale(32 / 24, 32 / 24); x.fillStyle = "#fff"; x.fill(new Path2D(P[n])); return c.toDataURL("image/png"); };
   desk.send("icons", { prev: glyph("prev"), next: glyph("next"), play: glyph("play"), pause: glyph("pause") });
@@ -3865,7 +3887,7 @@ function buildFx(){
   input.connect(bass); bass.connect(bassG); bassG.connect(mixBus);
   const pan = ctx.createStereoPanner(); mixBus.connect(pan); pan.connect(out);
   const rev = ctx.createConvolver(); rev.buffer = makeImpulse(2.8, 2.6); pan.connect(rev); rev.connect(wet); wet.connect(out);
-  fxN = { input, output: out, dry, karaWet, bassG, pan, wet };
+  fxN = { input, output: buildGame(out), dry, karaWet, bassG, pan, wet };
   applyFx(true);
   return fxN;
 }
@@ -3880,9 +3902,7 @@ function applyFx(silent){
     if (!S.fx.d8) fxN.pan.pan.setTargetAtTime(0, t, .2);
   }
   if (!silent) store.set("fx", S.fx);
-  const on = S.fx.mode !== "off" || S.fx.d8 || S.fx.kara;
-  const b = $("#fxBtn"); if (b){ b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); }
-  const dot = $("#navFx .eq-dot"); if (dot) dot.hidden = !on;
+  paintFxState();
   if ($("#fxDlg").open) renderFxUI();
   paintTempo();
 }
@@ -3893,6 +3913,7 @@ function renderFxUI(){
     .map(([k, n, d]) => `<button type="button" class="spk${S.fx.mode === k ? " on" : ""}" data-fxmode="${k}" aria-pressed="${S.fx.mode === k}"><b>${n}</b><small>${d}</small></button>`).join("");
   $("#fx8d").setAttribute("aria-checked", S.fx.d8);
   $("#fxKara").setAttribute("aria-checked", S.fx.kara);
+  renderGameUI();
 }
 function openFx(){ if (S.drawer){ S.drawer = false; applySide(); } renderFxUI(); $("#fxDlg").showModal(); }
 function setFx(patch, say){
@@ -4240,6 +4261,8 @@ function humExtra(c){
   if (/(quita|sin|apaga|desactiva|quitale)( los| el)? (efecto|efectos|slowed|sped|8d|karaoke)|^(normal|sonido normal)$/.test(c)){ setFx({ mode: "off", d8: false, kara: false }); reply("Quité los efectos.", true); return true; }
   if (/slowed|reverb|lento con eco|en lento/.test(c)){ setFx({ mode: "slowed" }); reply("Modo slowed y reverb.", true); return true; }
   if (/sped|acelerad|mas rapid/.test(c)){ setFx({ mode: "sped" }); reply("Modo sped up.", true); return true; }
+  if (/(quita|apaga|desactiva|sin)( el)? modo (videojuegos?|gamer|gaming|juego)/.test(c)){ setGame({ on: false }); reply("Quité el modo videojuegos.", true); return true; }
+  if (/modo (videojuegos?|gamer|gaming|juego)|voy a jugar|para jugar|estoy jugando|mientras juego/.test(c)){ setGame({ on: true }); reply("Modo videojuegos: la música deja hueco a los pasos, disparos y voces del juego." + (canHearGame() && !ear ? " Si quieres que además baje sola cuando suene el juego, actívalo en Efectos." : "")); return true; }
   if (/\b8 ?d\b|ocho d/.test(c)){ setFx({ d8: true }); reply("Audio 8D activado. Mejor con audífonos.", true); return true; }
   if (/karaoke|quita(le)? la voz|sin voz|sin la voz/.test(c)){ setFx({ kara: true }); openFp(); reply("Modo karaoke: bajé la voz. ¡Te toca cantar!"); return true; }
   if (/locutor|como (un )?(dj|locutor)|que hables entre|radio/.test(c) && !/orden/.test(c)){ const off = /(desactiva|quita|apaga|ya no|sin)/.test(c); setHost(!off); reply(off ? "Dejo de hablar entre canciones." : "Ahora te hablaré entre canciones, como en la radio."); return true; }
@@ -4504,6 +4527,137 @@ function refreshShared(id){ // when you open a shared playlist, bring the owner'
   const p = IMPORTED[id]; if (!p || !p.sharedFrom || !navigator.onLine) return;
   if (Date.now() - (sharedSeen.get(id) || 0) < 5 * 60000) return;
   sharedSeen.set(id, Date.now()); openShared(p.sharedFrom);
+}
+
+/* ---------- game mode: the music makes room for the game ----------
+   1. Room: footsteps, shots, reloads and voices live mostly between about 1.5 and 5 kHz; the music is
+      lowered only there, and kept at an even level so a loud chorus never covers a footstep.
+   2. Ducking (optional): Hum listens to the PC's sound level (never records it), subtracts its own
+      music from it, and when what's left (the game) gets loud it lowers the music for a moment. */
+const gmSaved = store.get("game", null);
+S.game = { on: !!(gmSaved && gmSaved.on), duck: !!(gmSaved && gmSaved.duck), level: gmSaved && ["suave", "normal", "fuerte"].includes(gmSaved.level) ? gmSaved.level : "normal" };
+const GM = { suave: { carve: -4, duck: -6 }, normal: { carve: -7, duck: -10 }, fuerte: { carve: -10, duck: -15 } };
+const canHearGame = () => !!desk || (!isMobile && !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia));
+let gmN = null, ear = null, earStarting = false;
+function buildGame(out){ // sits right after the effects, before your equalizer
+  const f = (type, fr, q) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = fr; if (q) b.Q.value = q; return b; };
+  const presence = f("peaking", 2600, .8), bite = f("peaking", 4800, 1.2), low = f("lowshelf", 90);
+  const comp = ctx.createDynamicsCompressor(), trim = ctx.createGain(), duckG = ctx.createGain();
+  comp.knee.value = 10; comp.attack.value = .02; comp.release.value = .3;
+  out.connect(presence); presence.connect(bite); bite.connect(low); low.connect(comp); comp.connect(trim); trim.connect(duckG);
+  gmN = { presence, bite, low, comp, trim, duckG };
+  applyGame(true);
+  return duckG;
+}
+function applyGame(silent){
+  if (gmN && ctx){
+    const t = ctx.currentTime, on = S.game.on, L = GM[S.game.level];
+    gmN.presence.gain.setTargetAtTime(on ? L.carve : 0, t, .1);
+    gmN.bite.gain.setTargetAtTime(on ? L.carve * .6 : 0, t, .1);
+    gmN.low.gain.setTargetAtTime(on ? -3 : 0, t, .1); // less sub-bass, so explosions and steps keep their weight
+    gmN.comp.threshold.setTargetAtTime(on ? -26 : 0, t, .1); gmN.comp.ratio.setTargetAtTime(on ? 3 : 1, t, .1);
+    gmN.trim.gain.setTargetAtTime(on ? 1.15 : 1, t, .1);
+    if (!on || !ear) gmN.duckG.gain.setTargetAtTime(1, t, .15);
+  }
+  if (!silent) store.set("game", S.game);
+  if (S.game.on && S.game.duck && canHearGame()){ if (!silent) startGameEar(); } else stopGameEar();
+  if (desk) desk.send("game-keys", S.game.on);
+  paintFxState();
+  if ($("#fxDlg").open) renderFxUI();
+}
+function paintFxState(){
+  const on = S.fx.mode !== "off" || S.fx.d8 || S.fx.kara || S.game.on;
+  const b = $("#fxBtn"); if (b){ b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.classList.toggle("ducking", !!(ear && ear.ducked)); }
+  const dot = $("#navFx .eq-dot"); if (dot) dot.hidden = !on;
+}
+function setGame(patch){ Object.assign(S.game, patch); if (!ctx) ensureCtx(); applyGame(); }
+// hearing the game
+async function startGameEar(){
+  if (ear || earStarting || !canHearGame()) return;
+  if (!ctx) ensureCtx();
+  earStarting = true;
+  try {
+    // the Windows app hands over the PC's sound without asking; browsers ask to share a screen with its audio
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, systemAudio: "include", selfBrowserSurface: "exclude" });
+    stream.getVideoTracks().forEach(t => t.stop());
+    if (!S.game.on || !S.game.duck){ stream.getTracks().forEach(t => t.stop()); return; } // turned off while it was starting
+    if (!stream.getAudioTracks().length) throw Object.assign(new Error("no audio"), { name: "NoAudio" });
+    const band = () => { const a = ctx.createBiquadFilter(); a.type = "bandpass"; a.frequency.value = 2800; a.Q.value = .7; return a; };
+    const src = ctx.createMediaStreamSource(stream), bG = band(), bM = band(), anG = ctx.createAnalyser(), anM = ctx.createAnalyser();
+    anG.fftSize = anM.fftSize = 2048;
+    src.connect(bG); bG.connect(anG); analyser.connect(bM); bM.connect(anM); // the PC's sound, and Hum's own output
+    ear = { stream, src, bG, bM, anG, anM, buf: new Float32Array(2048), gEst: 1, eA: 0, eM: 0, hold: 0, ducked: false };
+    stream.getAudioTracks()[0].onended = () => { S.game.duck = false; store.set("game", S.game); stopGameEar(); if ($("#fxDlg").open) renderFxUI(); };
+    ear.timer = setInterval(earTick, 50);
+    if ($("#fxDlg").open) renderFxUI();
+    toast("Modo videojuegos: la música bajará un momento cuando suene el juego.");
+  } catch (e){
+    S.game.duck = false; store.set("game", S.game); if ($("#fxDlg").open) renderFxUI();
+    toast(e && e.name === "NotAllowedError" ? "Para escuchar el juego hay que compartir la pantalla con el audio del sistema."
+      : e && e.name === "NoAudio" ? "No llegó el sonido del PC. Al compartir, activa «Compartir audio del sistema»."
+      : "Este navegador no deja escuchar el sonido del juego. Funciona en la app de Windows, o en Chrome o Edge en PC.");
+  } finally { earStarting = false; }
+}
+function stopGameEar(){
+  if (!ear) return;
+  clearInterval(ear.timer);
+  try { ear.stream.getTracks().forEach(t => t.stop()); ear.src.disconnect(); analyser.disconnect(ear.bM); } catch {}
+  ear = null; if (gmN && ctx) gmN.duckG.gain.setTargetAtTime(1, ctx.currentTime, .2); paintFxState();
+}
+function earTick(){
+  if (!ear || !gmN) return;
+  const rms = an => { an.getFloatTimeDomainData(ear.buf); let s = 0; for (let i = 0; i < ear.buf.length; i++) s += ear.buf[i] * ear.buf[i]; return s / ear.buf.length; };
+  // smoothed energy (about 150 ms)
+  ear.eA += (rms(ear.anG) - ear.eA) * .35; ear.eM += (rms(ear.anM) - ear.eM) * .35;
+  const a = Math.sqrt(ear.eA), m = Math.sqrt(ear.eM);
+  const now = performance.now();
+  if (!ear.t0){ ear.t0 = now; ear.hA = []; ear.hM = []; ear.lag = 3; ear.n = 0; }
+  // levels in log scale, last 7 seconds
+  const lg = v => Math.log10(Math.max(v, 1e-6)), H = ear.hA, Mh = ear.hM;
+  H.push(lg(a)); Mh.push(lg(m)); if (H.length > 140){ H.shift(); Mh.shift(); }
+  const N = H.length;
+  // the PC's sound arrives a little later than Hum's own output: find by how much, once a second
+  if (++ear.n % 20 === 0 && N >= 80){
+    const corr = L => { let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, k = 0;
+      for (let i = N - 60; i < N; i++){ const x = Mh[i - L], y = H[i]; sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y; k++; }
+      const vx = sxx - sx * sx / k, vy = syy - sy * sy / k; return vx > 0 && vy > 0 ? (sxy - sx * sy / k) / Math.sqrt(vx * vy) : -1; };
+    let best = -2; for (let L = 0; L <= 12; L++){ const c = corr(L); if (c > best){ best = c; ear.lag = L; } }
+  }
+  // Windows may also squeeze the volume a bit, so learn how Hum's level maps to the PC's one. Game sounds
+  // only push the PC's level up, so the baseline comes from the lower part of the differences.
+  const L = ear.lag; let sx = 0, sy = 0, sxx = 0, sxy = 0, k = 0;
+  for (let i = L; i < N; i++){ const x = Mh[i - L]; if (x < -4) continue; const y = H[i]; sx += x; sy += y; sxx += x * x; sxy += x * y; k++; }
+  let excess = 0;
+  if (k >= 40){
+    const mx = sx / k, my = sy / k, vx = sxx - sx * sx / k;
+    const slope = vx > 1e-6 ? clamp((sxy - sx * sy / k) / vx, .6, 1.1) : 1;
+    const res = []; for (let i = L; i < N; i++){ const x = Mh[i - L]; if (x >= -4) res.push(H[i] - (my + slope * (x - mx))); }
+    res.sort((p, q) => p - q);
+    const j = N - 1 - L, xNow = Math.max(Mh[Math.max(0, j - 1)], Mh[j], Mh[Math.min(N - 1, j + 1)]); // one step of slack each side
+    excess = 20 * (H[N - 1] - (my + slope * (xNow - mx) + res[Math.floor(res.length * .35)])); // dB above what the music alone explains
+    ear.slope = slope;
+  }
+  const ready = now - ear.t0 > 3000 && k >= 40; // a few seconds to learn first
+  if (ready && a > .004 && (m < 1e-4 || excess > 3)) ear.hold = now + 650; // something besides the music: the game is talking
+  if (store.get("debug", false)) window.humEar = { a: +a.toFixed(5), m: +m.toFixed(5), lag: ear.lag, slope: +(ear.slope || 0).toFixed(2), excess: +excess.toFixed(2), ready };
+  const want = now < ear.hold && S.playing;
+  if (want !== ear.ducked){
+    ear.ducked = want;
+    gmN.duckG.gain.setTargetAtTime(want ? Math.pow(10, GM[S.game.level].duck / 20) : 1, ctx.currentTime, want ? .03 : .4); // quick to lower, slow to come back
+    paintFxState();
+  }
+}
+// after reopening the app, listening to the game needs one tap first (browsers ask for it)
+if (S.game.on && S.game.duck) document.addEventListener("click", function once(){ document.removeEventListener("click", once, true); if (S.game.on && S.game.duck) startGameEar(); }, true);
+function renderGameUI(){
+  $("#gmOn").setAttribute("aria-checked", S.game.on);
+  $("#gmDuck").setAttribute("aria-checked", S.game.duck && !!ear);
+  $("#gmDuckRow").hidden = !canHearGame();
+  $("#gmDuckNote").textContent = desk ? "La app escucha el nivel del sonido de tu PC (no graba nada), le resta tu música y, cuando suena el juego, baja la música un momento."
+    : "Tu navegador te pedirá compartir pantalla: elige tu pantalla y activa «Compartir audio del sistema». Solo se usa el nivel del sonido, no se graba nada.";
+  $("#gmLevel").querySelectorAll("[data-gml]").forEach(b => { const on = b.dataset.gml === S.game.level; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  $("#gmKeys").hidden = !desk;
+  $("#gameBox").classList.toggle("mix-off", !S.game.on);
 }
 
 /* ---------- rendering ---------- */
@@ -4926,6 +5080,9 @@ $("#fxBtn").innerHTML = ic("fx");
 document.querySelector(".hum-tools [data-act=hum-search] span").innerHTML = ic("note");
 document.querySelector(".hum-tools [data-act=wx-play] span").innerHTML = ic("sun");
 $("#fx8d").addEventListener("click", () => setFx({ d8: !S.fx.d8 }));
+$("#gmOn").addEventListener("click", () => setGame({ on: !S.game.on }));
+$("#gmDuck").addEventListener("click", () => { const on = !(S.game.duck && ear); setGame(on ? { on: true, duck: true } : { duck: false }); });
+$("#gmLevel").addEventListener("click", e => { const b = e.target.closest("[data-gml]"); if (b) setGame({ level: b.dataset.gml }); });
 $("#fxKara").addEventListener("click", () => setFx({ kara: !S.fx.kara }));
 $("#humVoiceSel").addEventListener("change", e => setVoice(e.target.value));
 $("#humHost").addEventListener("click", () => { setHost(!S.host); toast(S.host ? "Hum te hablará entre canciones, como en la radio." : "Hum ya no hablará entre canciones."); });
