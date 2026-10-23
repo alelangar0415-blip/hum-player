@@ -6,6 +6,8 @@
 <meta name="description" content="Tu música y tus playlists en tu propio reproductor.">
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
+<!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -545,6 +547,44 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .row.cloud-only img{opacity:.6}
 .row.cloud-only .c-title small::after{content:" · en tu cuenta";color:var(--accent)}
 
+/* ---------- Hum, the voice assistant ---------- */
+.hum-top{color:var(--accent);position:relative}
+.hum-top.live::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+.hum{position:fixed;z-index:55;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(460px,calc(100% - 32px));
+  background:linear-gradient(160deg,hsl(var(--amb,42) 35% 17% / .97),var(--panel) 60%);border:1px solid hsl(var(--amb,42) 40% 50% / .25);border-radius:22px;
+  padding:16px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,.6);animation:humIn .22s ease;backdrop-filter:blur(14px)}
+@keyframes humIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.hum-head{display:flex;align-items:center;gap:14px}
+.hum-orb{width:52px;height:52px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;gap:4px;
+  background:radial-gradient(circle at 35% 30%,hsl(42 95% 70%),var(--accent) 45%,hsl(28 85% 42%));box-shadow:0 0 0 0 hsl(42 90% 55% / .5)}
+.hum-orb i{width:5px;height:12px;border-radius:3px;background:var(--accent-ink);transform-origin:center}
+.hum-orb i:nth-child(2){height:22px}
+.hum.listening .hum-orb{animation:orb 1.6s ease-out infinite}
+.hum.listening .hum-orb i{animation:hum 1s ease-in-out infinite}
+.hum.listening .hum-orb i:nth-child(2){animation-delay:-.33s}.hum.listening .hum-orb i:nth-child(3){animation-delay:-.66s}
+.hum.thinking .hum-orb i{animation:hum .5s ease-in-out infinite}
+@keyframes orb{0%{box-shadow:0 0 0 0 hsl(42 90% 55% / .55)}100%{box-shadow:0 0 0 18px hsl(42 90% 55% / 0)}}
+.hum-say{flex:1;min-width:0}
+.hum-say b{display:block;font:700 17px/1.25 var(--f-display)}
+.hum-say small{display:block;color:var(--muted);font-size:14px;min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hum-reply{margin:12px 2px 0;color:var(--fg);font-size:15px;min-height:0}
+.hum-reply:empty{display:none}
+.hum-form{display:flex;gap:8px;margin-top:12px}
+.hum-form input{flex:1;min-width:0;height:42px;border-radius:999px;border:1px solid var(--line);background:var(--raise);padding:0 16px;font-size:15px;color:var(--fg)}
+.hum-form input:focus{outline:2px solid var(--accent);outline-offset:0}
+.hum-mic{width:42px;height:42px;background:var(--accent);color:var(--accent-ink);flex:none}
+.hum-mic:hover{color:var(--accent-ink);transform:scale(1.05)}
+.hum-mic[disabled]{opacity:.4;cursor:default;transform:none}
+.hum-ideas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hum-ideas button{height:30px;padding:0 12px;border-radius:999px;background:var(--raise);font-size:13px;font-weight:600;color:var(--fg)}
+.hum-ideas button:hover{background:var(--line)}
+.hum-wake{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.hum-wake div{flex:1;min-width:0}
+.hum-wake b{display:block;font-size:14px}
+.hum-wake small{display:block;color:var(--muted);font-size:12px}
+@media (max-width:760px){ .hum{bottom:calc(118px + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .hum,.hum-orb,.hum-orb i{animation:none!important} }
+
 /* ---------- narrower screens ---------- */
 @media (max-width:1100px){
   .app,.app:not(.np-open){grid-template-columns:clamp(200px,24vw,260px) minmax(0,1fr);grid-template-areas:"side main" "bar bar"}
@@ -639,6 +679,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <button class="ib home-ib" data-act="home" aria-label="Inicio" id="homeIb"></button>
       <label class="search" for="q"><span id="qIcon"></span><input id="q" type="search" placeholder="Busca canciones, artistas o álbumes" autocomplete="off"></label>
       <div class="top-right">
+        <button class="ib hum-top" data-act="hum" id="humTop" aria-label="Hablar con Hum" title="Hablar con Hum"></button>
         <button class="ib top-acct" data-act="acct" id="acctTop" aria-label="Tu cuenta"></button>
         <button class="top-btn" data-act="install" id="installBtn" aria-label="Instalar app" hidden></button>
         <button class="top-btn" data-act="import" id="importBtn" aria-label="Importar playlist"></button>
@@ -833,6 +874,23 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     </div>
   </form>
 </dialog>
+<section class="hum" id="hum" hidden aria-label="Hum, tu asistente">
+  <div class="hum-head">
+    <div class="hum-orb" id="humOrb" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="hum-say"><b id="humStatus">Te escucho…</b><small id="humHeard"></small></div>
+    <button type="button" class="ib" data-act="hum-close" aria-label="Cerrar Hum" id="humClose"></button>
+  </div>
+  <p class="hum-reply" id="humReply" role="status" aria-live="polite"></p>
+  <form class="hum-form" id="humForm" autocomplete="off">
+    <input id="humInput" type="text" placeholder="O escríbelo: pon algo de…, modo melancólico…" aria-label="Escribe lo que quieres que haga Hum">
+    <button type="button" class="ib hum-mic" data-act="hum-listen" id="humMic" aria-label="Hablar"></button>
+  </form>
+  <div class="hum-ideas" id="humIdeas"></div>
+  <div class="hum-wake" id="humWakeRow">
+    <div><b>Escuchar «Ey Hum» siempre</b><small id="humWakeNote">Mientras la app esté abierta, di «Ey Hum» y lo que quieras.</small></div>
+    <button type="button" class="switch" id="humWake" role="switch" aria-checked="false" aria-label="Escuchar «Ey Hum» siempre"></button>
+  </div>
+</section>
 <dialog class="dlg" id="acctDlg" aria-labelledby="acctH"><div id="acctBody"></div></dialog>
 <dialog class="dlg" id="plDlg" aria-labelledby="plH">
   <form id="plForm" novalidate>
@@ -1048,6 +1106,7 @@ function getList(id){
 }
 function baseList(id){
   if (id === "search") return { id, title: "Search", tracks: S.searchList };
+  if (id === "hum") return { id, kind: "Playlist", title: S.humList.title, desc: "", hue: 42, cover: S.humList.tracks.length ? cover(BYID[S.humList.tracks[0]]) : FB, tracks: S.humList.tracks.filter(x => BYID[x]), by: "Hum" };
   if (PL[id]){
     const p = PL[id];
     const tracks = id === "liked" ? [...S.liked].filter(x => BYID[x]).reverse() : id === "mine" ? USER.slice().reverse() : p.tracks;
@@ -1200,6 +1259,9 @@ function playFail(e){
   if (e && e.name === "AbortError") return;
   const t = cur(); if (!t || !t.user) return;
   if (e && e.name === "NotAllowedError"){ // the browser wants a tap first (for example after the screen was locked)
+    // with the screen off, stay "playing": the next song starts as soon as the phone allows it
+    // (opening the app, or ▶ on the lock screen) instead of the whole queue stopping
+    if (document.hidden){ S.resumeOnShow = true; return; }
     S.playing = false; clearInterval(timer); paint(); toast("Toca ▶ para seguir escuchando."); return;
   }
   const src = audio.currentSrc || audio.src;
@@ -1352,6 +1414,7 @@ function addUserTrack(rec){
   BYID[t.id] = t; USER.push(t.id); matchIdx = null;
   if (!rec.bpmDone) queueBpm(rec);
   if (!rec.lyrScan) queueLyrScan(rec);
+  if (!rec.feel && rec.blob) queueFeel(rec);
   return t;
 }
 function probe(file){
@@ -1971,6 +2034,59 @@ function tempoTxt(t){
 }
 function paintTempo(){ const el = $("#fTempo"); if (el) el.textContent = tempoTxt(cur()); }
 
+/* ---------- how each of your songs feels (for "Hum, modo melancólico"), measured once on this device ----------
+   From the middle minute of the file: loudness (energy), brightness (how much treble), and whether it
+   is in a minor key (minor keys tend to sound sadder), plus the tempo measured above. */
+const feelQueue = []; let feelRunning = false;
+function queueFeel(rec){ if (rec.feel || feelQueue.includes(rec)) return; feelQueue.push(rec); setTimeout(runFeel, 3000); }
+async function runFeel(){
+  if (feelRunning) return; feelRunning = true;
+  while (feelQueue.length){
+    const rec = feelQueue.shift();
+    if (!BYID[rec.id] || !rec.blob || rec.feel) continue;
+    if (bpmRunning || asrState.id){ feelQueue.push(rec); await new Promise(r => setTimeout(r, 2000)); continue; } // one heavy job at a time
+    try { rec.feel = await analyzeFeel(rec.blob); } catch { rec.feel = { none: true }; }
+    putRec(rec);
+    await new Promise(r => setTimeout(r, 300));
+  }
+  feelRunning = false;
+}
+const KEY_MAJ = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+const KEY_MIN = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+function corr(a, b){
+  const n = a.length, ma = a.reduce((s, x) => s + x, 0) / n, mb = b.reduce((s, x) => s + x, 0) / n;
+  let num = 0, da = 0, db = 0; for (let i = 0; i < n; i++){ num += (a[i] - ma) * (b[i] - mb); da += (a[i] - ma) ** 2; db += (b[i] - mb) ** 2; }
+  return da && db ? num / Math.sqrt(da * db) : 0;
+}
+async function analyzeFeel(blob){
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC) return { none: true };
+  const sr = 11025, ab = await new OAC(1, 1, sr).decodeAudioData(await blob.arrayBuffer());
+  const c0 = ab.getChannelData(0), c1 = ab.numberOfChannels > 1 ? ab.getChannelData(1) : null;
+  const seg = Math.min(ab.length, sr * 60), s0 = Math.max(0, Math.floor((ab.length - seg) / 2));
+  const x = new Float32Array(seg); for (let i = 0; i < seg; i++) x[i] = c1 ? (c0[s0 + i] + c1[s0 + i]) * .5 : c0[s0 + i];
+  // energy and brightness
+  let e = 0, d = 0; for (let i = 1; i < seg; i++){ e += x[i] * x[i]; const df = x[i] - x[i - 1]; d += df * df; }
+  const energy = 10 * Math.log10(1e-9 + e / seg), bright = e ? d / e : 0;
+  // key: how strong each of the 12 notes is (A2 to B5), compared with major and minor key shapes
+  const N = 4096, chroma = new Float64Array(12);
+  for (let start = 0; start + N <= seg; start += N * 2){
+    const fr = new Float64Array(12); let tot = 0;
+    for (let m = 45; m <= 83; m++){
+      const f = 440 * Math.pow(2, (m - 69) / 12), w = 2 * Math.PI * f / sr, cf = 2 * Math.cos(w);
+      let s1 = 0, s2 = 0; for (let i = 0; i < N; i++){ const s = x[start + i] + cf * s1 - s2; s2 = s1; s1 = s; }
+      const p = Math.sqrt(Math.max(0, s1 * s1 + s2 * s2 - cf * s1 * s2)); fr[m % 12] += p; tot += p;
+    }
+    if (tot > 0) for (let k = 0; k < 12; k++) chroma[k] += fr[k] / tot;
+  }
+  let maj = -2, min = -2, key = 0;
+  for (let r = 0; r < 12; r++){
+    const rot = Array.from({ length: 12 }, (_, k) => chroma[(k + r) % 12]);
+    const a = corr(rot, KEY_MAJ), b = corr(rot, KEY_MIN);
+    if (a > maj){ maj = a; if (a >= min) key = r; } if (b > min){ min = b; if (b > maj) key = r; }
+  }
+  return { energy: Math.round(energy * 10) / 10, bright: Math.round(bright * 1000) / 1000, minor: min > maj, keyConf: Math.round(Math.abs(min - maj) * 100) / 100, key };
+}
+
 /* ---------- DJ transitions: the next song fades in, optionally at the same tempo, then glides back to its own ---------- */
 const mixSaved = store.get("mix", null);
 S.mix = { on: !!(mixSaved && mixSaved.on), secs: mixSaved && isFinite(mixSaved.secs) ? clamp(Math.round(+mixSaved.secs), 2, 16) : 8, sync: !mixSaved || mixSaved.sync !== false };
@@ -2018,6 +2134,8 @@ async function startMix(t, nt, ni, fade){
   gi.setValueAtTime(0, now); go.setValueAtTime(1, now);
   gi.setValueCurveAtTime(up, now + .05, fade); go.setValueCurveAtTime(dn, now + .05, fade);
   try { await inc.play(); } catch { deckGain(from, 1); deckGain(inc, 1); inc.pause(); return; }
+  // the old song ended (and the app already moved on) while the new one was starting: drop this mix
+  if (audio !== from || cur() !== t){ inc.pause(); deckGain(inc, 1); deckGain(from, 1); return; }
   mix = { from, r, end: now + .05 + fade };
   glide = null; audio = inc; S.qi = ni; paint();
 }
@@ -2047,6 +2165,25 @@ async function mixTick(){
   finally { mixBusy = false; }
 }
 setInterval(mixTick, 100);
+// Safety net for moving on to the next song. Some files never send the "ended" signal (often MP3s
+// whose length is written wrong in the file: they freeze in their last second), and a song can end
+// right while a DJ mix is starting. Once a second: if the song is at its end and nothing moved, go on.
+let endAt = -1, endStuck = 0;
+setInterval(() => {
+  const t = cur();
+  if (!S.playing || !t || !t.user || mix || mixBusy || !t.rec.blob || audio.dataset.id !== t.id){ endStuck = 0; return; }
+  if (audio.ended){ endStuck = 0; next(true); return; }
+  const d = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : t.dur;
+  if (d > 0 && d - audio.currentTime < 1.5){
+    endStuck = audio.currentTime === endAt ? endStuck + 1 : 0; endAt = audio.currentTime;
+    if (endStuck >= 3){ endStuck = 0; next(true); }
+  } else endStuck = 0;
+}, 1000);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || !S.resumeOnShow) return;
+  S.resumeOnShow = false;
+  const t = cur(); if (S.playing && t && t.user && audio.paused) audio.play().catch(playFail);
+});
 function renderMixUI(){
   const active = S.mix.on;
   const b = $("#mixBtn"); b.classList.toggle("on", active); b.setAttribute("aria-pressed", active);
@@ -2617,7 +2754,7 @@ async function flushTrash(){
   }
 }
 
-const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone"];
+const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone", "feel"];
 function songData(rec){ const d = {}; SONG_FIELDS.forEach(k => { if (rec[k] !== undefined && rec[k] !== null) d[k] = rec[k]; }); return d; }
 function plData(p){ const { genCover, hue, u, ...d } = p; return d; }
 function localKeys(){
@@ -2647,7 +2784,11 @@ function localItem(key){
 async function doSync(){
   if (!S.acct) return;
   if (!navigator.onLine){ paintAcct(); return; }
-  if (!tokenOk()){ sync.needAuth = true; paintAcct(); return; }
+  if (!tokenOk()){
+    // the Windows app keeps a long-lived session and renews it quietly; the web needs a tap
+    if (!(desk && desk.google)){ sync.needAuth = true; paintAcct(); return; }
+    try { await askToken(""); } catch { sync.needAuth = true; paintAcct(); return; }
+  }
   if (sync.busy){ sync.again = true; return; }
   sync.busy = true; clearTimeout(sync.timer); xfer.failed.clear(); paintAcct();
   let changed = false;
@@ -2827,6 +2968,7 @@ function moveFile(rec, dir, left){
     } catch {}
     await putRec(rec);
     if (!rec.bpmDone) queueBpm(rec);
+    if (!rec.feel) queueFeel(rec);
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
     document.querySelectorAll(`.row[data-row="${rec.id}"]`).forEach(r => { r.classList.remove("cloud-only"); const im = r.querySelector("img"); if (im) im.src = cover(t); });
     if (xfer.want === rec.id){ xfer.want = null; const at = xfer.wait.get(rec.id) || 0; xfer.wait.delete(rec.id); if (cur() === t && S.playing){ loadAt(at); paint(); } }
@@ -2861,7 +3003,7 @@ async function signIn(){ // runs inside the tap on "Continuar con Google"
   const msg = $("#acctMsg"); const say = (t, err) => { if (msg){ msg.className = "dlg-msg" + (err ? " err" : ""); msg.textContent = t; } };
   if (!desk && !getTokenClient()){ say("Cargando Google… toca otra vez en un momento."); loadGsi().catch(() => say("No se pudo conectar con Google. Revisa tu internet.", true)); return; }
   try {
-    say("Esperando a Google…");
+    say(desk ? "Termina de iniciar sesión en el navegador que se abrió y vuelve aquí…" : "Esperando a Google…");
     await askToken("select_account");
     const me = await (await gfetch("https://www.googleapis.com/oauth2/v3/userinfo")).json();
     S.acct = { email: me.email || "", name: me.name || "" }; store.set("gacct", S.acct);
@@ -2881,6 +3023,7 @@ async function signIn(){ // runs inside the tap on "Continuar con Google"
 }
 function reconnect(){ sync.authTried = Date.now(); askToken("").then(() => { toast("Conectado otra vez con Google."); doSync(); renderAcct(); }).catch(() => { if ($("#acctDlg").open) renderAcct(); }); }
 function signOut(){
+  if (desk && desk.googleSignOut) desk.googleSignOut().catch(() => {});
   S.acct = null; S.acctMe = null; S.gtok = null; store.set("gacct", null); store.set("gtok", null);
   sync.dirty = {}; sync.tomb = {}; sync.trash = []; sync.folder = sync.lib = null; sync.remote = null; sync.last = 0; sync.err = ""; sync.needAuth = false; saveSync();
   xfer.want = null;
@@ -3108,6 +3251,272 @@ function setupDesktop(){
   deskState();
 }
 
+/* ---------- Hum, the voice assistant: "Ey Hum, pon…", "Hum, modo melancólico" ----------
+   Understands simple orders in Spanish, entirely in this app. Listening uses the browser's own
+   speech recognition (in Chrome that is Google's service); in the Windows app, where it isn't
+   available, a small speech model runs on the PC (the same one used for lyrics). */
+S.humList = { title: "Hum", tracks: [] };
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const humLang = /^es/i.test(navigator.language || "") ? navigator.language : "es-MX";
+const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || isIOS;
+const canWebSpeech = !!SR && !isElectron;
+const canWhisper = !canWebSpeech && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+const canListen = canWebSpeech || canWhisper;
+const canWake = canWebSpeech && !isMobile; // phones beep every time listening restarts, so there it is tap-to-talk
+const H = { listening: false, rec: null, wakeOn: canWake && !!store.get("humWake", false), wakeRec: null, armedUntil: 0, byWake: false, closeT: 0, mediaRec: null };
+const nrm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[¿?¡!.,;:"“”«»()]/g, " ").replace(/\s+/g, " ").trim();
+const WAKE = /\b(ey|hey|hei|ei|oye|ok|okey|okay|hola|e)\s+(hum|jum|jam|gum|um|hom|hun|jun|hump|humm)\b/;
+
+// --- moods: each one says what kind of sound fits it (0..1 values, relative to your own library)
+const midTempo = x => 1 - Math.abs(x - .6) * 1.6;
+const MOODS = [
+  { title: "Modo melancólico", say: "Te pongo canciones melancólicas.", words: /melanc|trist|nostalg|llor|deprim|desamor|despech|bajon|\bsad\b|melancholy/,
+    lyr: /\b(llor\w*|trist\w*|adios|dolor|sol[oa]|soledad|extran\w*|olvid\w*|perd\w*|lagrim\w*|vacio|cry|tears|alone|lonely|goodbye|broken)\b/g,
+    score: f => 1.3 * f.minor + (1 - f.energy) + .8 * (1 - f.bpm) + .5 * (1 - f.bright) },
+  { title: "Modo alegre", say: "Algo alegre, ¡vamos!", words: /alegr|feliz|happy|content|animad|buen (rollo|humor|dia)|positiv/,
+    lyr: /\b(feliz|alegr\w*|sonri\w*|verano|happy|smile|sunshine)\b/g,
+    score: f => 1.2 * (1 - f.minor) + .7 * f.bright + .6 * f.energy + .5 * midTempo(f.bpm) },
+  { title: "Modo fiesta", say: "¡Modo fiesta!", words: /fiest|baila|bailar|perre|party|antro|energ|gym|ejercicio|entren|correr|motiva/,
+    lyr: /\b(fiesta|bail\w*|perre\w*|party|dance|disco|club)\b/g,
+    score: f => 1.3 * f.energy + 1.1 * f.bpm + .4 * f.bright },
+  { title: "Modo relajado", say: "Algo tranquilo para relajarte.", words: /relaj|tranquil|chill|calm|dormir|sueno|estudi|concentr|lofi|zen|leer|descans/, lyr: null,
+    score: f => 1.3 * (1 - f.energy) + .9 * (1 - f.bpm) + .4 * (1 - f.bright) },
+  { title: "Modo romántico", say: "Te pongo algo romántico.", words: /romant|enamor|\bamor\b|\blove\b|una cita|pareja/,
+    lyr: /\b(amor|te amo|te quiero|besos?|enamor\w*|coraz\w*|love|baby|kiss|heart)\b/g,
+    score: f => .5 * (1 - f.bpm) + .3 * (1 - f.minor) + .3 * (1 - f.energy) },
+  { title: "Modo intenso", say: "Algo con fuerza.", words: /intens|enoj|rabia|coraje|fuerte|agresiv|\brock\b|metal/, lyr: null,
+    score: f => 1.2 * f.energy + .8 * f.bright + .4 * f.minor + .3 * f.bpm }
+];
+const STYLE_FEEL = { lofi: [-24, .05], chill: [-23, .06], bright: [-19, .1], synthpop: [-16, .14], house: [-14, .12] };
+function rawFeel(t){
+  if (!t.user){ const s = STYLE_FEEL[t.album.style] || [-20, .1]; return { energy: s[0], bright: s[1], bpm: t.bpm, minor: t.mode === "major" ? 0 : 1 }; }
+  const f = t.rec.feel || {}, ok = !f.none && f.energy != null, c = Math.min(.5, (f.keyConf || 0) * 3);
+  return { energy: ok ? f.energy : null, bright: ok ? f.bright : null, bpm: t.rec.bpm || null, minor: ok ? (f.minor ? .5 + c : .5 - c) : .5 };
+}
+function playMood(md){
+  const ids = USER.length >= 6 ? USER.slice() : [...USER, ...TRACKS.map(t => t.id)];
+  const pool = ids.map(id => BYID[id]).filter(Boolean);
+  if (!pool.length) return reply("Aún no tienes canciones. Añade las tuyas y te armo el ambiente.");
+  const raws = pool.map(rawFeel);
+  const rank = key => { const vals = raws.map(r => r[key]).filter(v => v != null).sort((a, b) => a - b);
+    return v => v == null || vals.length < 2 ? .5 : vals.filter(x => x < v).length / (vals.length - 1); };
+  const rE = rank("energy"), rB = rank("bright"), rT = rank("bpm");
+  const scored = pool.map((t, i) => {
+    const r = raws[i]; let s = md.score({ energy: rE(r.energy), bright: rB(r.bright), bpm: rT(r.bpm), minor: r.minor });
+    if (md.lyr && t.user && t.rec.lyrics && t.rec.lyrics.plain) s += Math.min(1.5, (nrm(t.rec.lyrics.plain).match(md.lyr) || []).length * .3);
+    return { id: t.id, s };
+  }).sort((a, b) => b.s - a.s);
+  const n = Math.max(Math.min(6, scored.length), Math.min(30, Math.ceil(scored.length * .35)));
+  const waiting = USER.filter(id => BYID[id].rec.blob && !BYID[id].rec.feel).length;
+  S.humList = { title: md.title, tracks: shuffled(scored.slice(0, n).map(x => x.id)) };
+  if (S.shuffle) setShuffle(false);
+  playContext("hum");
+  reply(md.say + (waiting ? ` Aún estoy conociendo ${nc(waiting)} de las tuyas, así que la próxima vez acertaré mejor.` : ""));
+}
+
+// --- find a song, an artist or a playlist by name
+const STOP = new Set(["de", "del", "la", "el", "los", "las", "un", "una", "y", "a", "al", "por", "favor", "me", "mi", "mis", "cancion", "canciones", "rola", "tema", "musica",
+  "algo", "porfa", "que", "se", "llama", "playlist", "lista", "album", "disco", "en", "tu", "su"]);
+function findMusic(q){
+  const n = nrm(q), toks = n.split(" ").filter(w => w.length > 1 && !STOP.has(w));
+  if (!toks.length) return null;
+  const has = (text, w) => text.split(" ").some(x => x === w || (w.length >= 4 && x.startsWith(w)) || (x.length >= 4 && w.startsWith(x)));
+  const frac = text => { const T = nrm(text); return toks.filter(w => has(T, w)).length / toks.length; };
+  let list = null;
+  for (const id of ["mine", "liked", ...IMP_ORDER, ...PLAYLISTS.filter(p => !p.art).map(p => p.id), ...ALBUMS.map(a => a.id)]){
+    const s = frac(getList(id).title); if (s > (list ? list.s : 0)) list = { id, s };
+  }
+  const all = [...USER.map(id => BYID[id]), ...TRACKS];
+  let song = null;
+  for (const t of all){ const s = frac(t.title + " " + t.artist) + frac(t.title) * .01 + (t.user ? .001 : 0); if (!song || s > song.s) song = { id: t.id, s }; }
+  const arts = new Map();
+  all.forEach(t => { const a = (t.artist || "").trim(); if (a && a !== "Artista desconocido"){ if (!arts.has(a)) arts.set(a, []); arts.get(a).push(t.id); } });
+  let art = null;
+  for (const [name, ids] of arts) if (frac(name) === 1 && (!art || ids.length > art.ids.length)) art = { name, ids };
+  const titleHit = song && frac(BYID[song.id].title) === 1;
+  if (art && !titleHit) return { type: "artist", name: art.name, ids: art.ids };
+  if (list && list.s === 1 && (!titleHit || /\b(playlist|lista|album|disco)\b/.test(n))) return { type: "list", id: list.id };
+  if (song && song.s >= .6) return { type: "song", id: song.id };
+  if (list && list.s >= .75) return { type: "list", id: list.id };
+  return null;
+}
+function playFound(f){
+  if (f.type === "list"){ playContext(f.id); return reply(`Pongo “${getList(f.id).title}”.`); }
+  if (f.type === "artist"){ S.humList = { title: f.name, tracks: shuffled(f.ids) }; playContext("hum"); return reply(`Pongo canciones de ${f.name}.`); }
+  const t = BYID[f.id]; playContext(t.user ? "mine" : t.album.id, t.id); reply(`Pongo “${t.title}”, de ${t.artist}.`);
+}
+
+// --- what Hum understands
+function runCommand(raw){
+  const c = nrm(raw).replace(WAKE, "").replace(/^(por favor|porfa|hum)\s+/, "").replace(/\s+(por favor|porfa)$/, "").trim();
+  if (!c) return reply("¿Qué quieres escuchar?");
+  const t = cur();
+  if (/^(siguiente|la siguiente|otra|otra cancion|salta(la)?|skip|cambia(la)?|pasa(la)?|next)\b/.test(c)){ next(false); return reply("Siguiente.", true); }
+  if (/^(anterior|la anterior|atras|regresa|vuelve|la de antes)\b/.test(c)){ prev(); return reply("La anterior.", true); }
+  if (/^(pausa|pausala|para|parala|deten|detente|stop|callate|silencio|quita la musica)\b/.test(c)){ pause(); return reply("En pausa.", true); }
+  if (/^(sigue|continua|reanuda|play|dale|reproduce|ponle play)$/.test(c)){ play(); return reply("Sigo.", true); }
+  if (/(sube|subele|aumenta|mas alto|mas fuerte)/.test(c) && /(volumen|alto|fuerte|subele)/.test(c)){ S.vol = clamp(S.vol + .15, 0, 1); S.muted = false; applyVol(); store.set("vol", S.vol); return reply(`Volumen al ${Math.round(S.vol * 100)} %.`, true); }
+  if (/(baja|bajale|disminuye|mas bajo|mas despacio|bajito)/.test(c) && /(volumen|bajo|despacio|bajito|bajale)/.test(c)){ S.vol = clamp(S.vol - .15, 0, 1); applyVol(); store.set("vol", S.vol); return reply(`Volumen al ${Math.round(S.vol * 100)} %.`, true); }
+  if (/(me gusta|dale like|guarda(la)?|favorit)/.test(c) && !/^pon/.test(c) && t){ if (!S.liked.has(t.id)) toggleLike(t.id); return reply(`Guardé “${t.title}” en Tus me gusta.`); }
+  if (/(aleatori|mezcla|revuelve|shuffle)/.test(c)){ setShuffle(!S.shuffle); return reply(S.shuffle ? "Modo aleatorio activado." : "Modo aleatorio desactivado.", true); }
+  if (/(que|cual) (cancion |rola |tema )?(es esta|suena|esta sonando|estoy escuchando)|^que suena/.test(c)) return reply(t ? `Suena “${t.title}”, de ${t.artist}.` : "No está sonando nada.");
+  if (/(que puedes hacer|que sabes hacer|ayuda|como funciona|que haces)/.test(c))
+    return reply("Puedo poner canciones, artistas o playlists: di «pon» y el nombre. También ánimos: «modo melancólico», «modo fiesta», «algo relajado». Y controlo la música: siguiente, anterior, pausa, sube o baja el volumen, «me gusta esta».");
+  const mood = MOODS.find(md => md.words.test(c));
+  const m = c.match(/^(pon(me|nos|le)?|reproduce|toca(me)?|quiero (escuchar|oir)|escuchar|play|busca)\s+(.+)$/);
+  const what = m ? m[5] : c;
+  if (mood){ // "modo melancólico", "pon algo triste", "estoy triste"… unless it is exactly the name of one of your playlists
+    const f = findMusic(what);
+    if (!(f && f.type === "list" && nrm(getList(f.id).title) === nrm(what))) return playMood(mood);
+  }
+  const f = findMusic(what);
+  if (f) return playFound(f);
+  return reply(m ? `No encontré “${what}” en tu música.` : "No te entendí. Prueba con «pon …» o «modo melancólico».");
+}
+
+// --- talking back
+let humVoice = null;
+function pickVoice(){
+  if (!("speechSynthesis" in window)) return null;
+  const vs = speechSynthesis.getVoices().filter(v => /^es/i.test(v.lang));
+  return vs.find(v => v.lang === humLang) || vs.find(v => /mx|419|us/i.test(v.lang)) || vs[0] || null;
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { humVoice = pickVoice(); };
+function duck(on){ // music softer while Hum listens or talks
+  H.ducked = on;
+  if (master && ctx) master.gain.setTargetAtTime((S.muted ? 0 : S.vol * S.vol) * (on ? .22 : 1), ctx.currentTime, .08);
+  else audio.volume = on ? .3 : 1;
+}
+function reply(text, short){
+  $("#humReply").textContent = text; $("#humStatus").textContent = "Hum"; setListening(false);
+  if (!("speechSynthesis" in window) || !H.viaVoice){ autoClose(); return; } // answers out loud only when you talked to Hum
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = humLang; u.rate = 1.05;
+    humVoice = humVoice || pickVoice(); if (humVoice) u.voice = humVoice;
+    u.onstart = () => duck(true); u.onend = u.onerror = () => { duck(false); autoClose(); };
+    speechSynthesis.speak(u);
+  } catch { autoClose(); }
+}
+function autoClose(){ clearTimeout(H.closeT); if (H.byWake) H.closeT = setTimeout(() => { if (document.activeElement !== $("#humInput")) closeHum(); }, 4000); }
+
+// --- listening
+function setListening(on){
+  H.listening = on; $("#hum").classList.toggle("listening", on);
+  if (on){ $("#humStatus").textContent = "Te escucho…"; $("#humHeard").textContent = ""; }
+}
+function setThinking(on){ $("#hum").classList.toggle("thinking", on); }
+function heard(text, voice){ H.viaVoice = !!voice; $("#humHeard").textContent = `«${text.trim()}»`; runCommand(text); }
+function listenOnce(){
+  if (H.rec){ try { H.rec.stop(); } catch {} return; }
+  if (H.mediaRec){ H.mediaRec.stop(); return; }
+  if (canWhisper) return recordWhisper();
+  if (!canWebSpeech) return reply("En este navegador no puedo escucharte. Escríbeme lo que quieres.");
+  stopWake(); // one microphone listener at a time
+  const r = new SR(); r.lang = humLang; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+  H.rec = r; let final = "";
+  setListening(true); duck(true); $("#humReply").textContent = "";
+  r.onresult = e => { let txt = ""; for (let i = 0; i < e.results.length; i++){ txt += e.results[i][0].transcript; if (e.results[i].isFinal) final = txt; } $("#humHeard").textContent = `«${txt.trim()}»`; };
+  r.onerror = e => {
+    if (e.error === "not-allowed" || e.error === "service-not-allowed") reply("Necesito permiso para usar el micrófono. Actívalo en el candado de la barra de direcciones.");
+    else if (e.error === "no-speech") reply("No te oí. Toca el micrófono y vuelve a intentarlo.", true);
+    else if (e.error === "network") reply("Para entender tu voz hace falta internet. Mientras, puedes escribirme.");
+  };
+  r.onend = () => { H.rec = null; setListening(false); duck(false); if (final) heard(final, true); startWake(); };
+  try { r.start(); } catch { H.rec = null; setListening(false); duck(false); }
+}
+// always listening for "Ey Hum" (while the app is open)
+function startWake(){
+  if (!H.wakeOn || !canWake || H.wakeRec || H.rec || document.hidden) return;
+  const r = new SR(); r.lang = humLang; r.continuous = true; r.interimResults = true;
+  H.wakeRec = r;
+  r.onresult = e => {
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const res = e.results[i], txt = res[0].transcript, n = nrm(txt), w = n.match(WAKE);
+      if (w){ if ($("#hum").hidden) openHum(true); setListening(true); duck(true); $("#humHeard").textContent = `«${txt.trim()}»`; }
+      if (!res.isFinal) continue;
+      if (w){
+        const rest = n.slice(w.index + w[0].length).trim();
+        if (rest){ H.armedUntil = 0; duck(false); heard(rest, true); }
+        else { H.armedUntil = Date.now() + 8000; $("#humStatus").textContent = "Dime…"; }
+      } else if (Date.now() < H.armedUntil){ H.armedUntil = 0; duck(false); heard(txt, true); }
+    }
+  };
+  r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed"){ H.wakeOn = false; store.set("humWake", false); paintHum(); toast("Hum necesita permiso para usar el micrófono."); } };
+  r.onend = () => { H.wakeRec = null; if (H.wakeOn && !H.rec) setTimeout(startWake, 400); };
+  try { r.start(); } catch { H.wakeRec = null; }
+}
+function stopWake(){ const r = H.wakeRec; if (!r) return; H.wakeRec = null; r.onend = null; try { r.abort(); } catch {} }
+document.addEventListener("visibilitychange", () => { if (document.hidden) stopWake(); else startWake(); });
+// Windows app (and browsers without speech recognition): record a few seconds and let the on-device model write it down
+async function recordWhisper(){
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch { return reply("Necesito permiso para usar el micrófono."); }
+  const chunks = [], mr = new MediaRecorder(stream); H.mediaRec = mr;
+  setListening(true); duck(true); $("#humReply").textContent = ""; $("#humStatus").textContent = "Te escucho… toca el micrófono al terminar";
+  mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  const auto = setTimeout(() => { if (mr.state !== "inactive") mr.stop(); }, 6000);
+  mr.onstop = async () => {
+    clearTimeout(auto); H.mediaRec = null; stream.getTracks().forEach(t => t.stop()); duck(false); setListening(false); setThinking(true);
+    $("#humStatus").textContent = modelReady ? "Entendiendo…" : "Preparando la voz de Hum… (solo la primera vez, unos 80 MB)";
+    try {
+      const text = await asrText(await prepAudio(new Blob(chunks, { type: mr.mimeType })));
+      setThinking(false); text ? heard(text, true) : reply("No te entendí. Vuelve a intentarlo.");
+    } catch { setThinking(false); reply("No pude escucharte en este equipo. Puedes escribirme."); }
+  };
+  mr.start();
+}
+function asrText(pcm){
+  if (!asrWorker) asrWorker = new Worker(URL.createObjectURL(new Blob([ASR_WORKER], { type: "text/javascript" })), { type: "module" });
+  return new Promise((res, rej) => {
+    const id = ++asrSeq;
+    const on = e => {
+      const m = e.data; if (m.id !== id) return;
+      if (m.type === "listening") modelReady = true;
+      if (m.type === "done"){ asrWorker.removeEventListener("message", on); res((m.chunks || []).map(c => c.text).join(" ").replace(/\s+/g, " ").trim()); }
+      if (m.type === "error"){ asrWorker.removeEventListener("message", on); rej(new Error(m.message)); }
+    };
+    asrWorker.addEventListener("message", on);
+    asrWorker.postMessage({ id, audio: pcm, lang: "spanish" }, [pcm.buffer]);
+  });
+}
+
+// --- the panel
+function humIdeas(){
+  const arts = {}; USER.forEach(id => { const a = BYID[id].artist; if (a && a !== "Artista desconocido") arts[a] = (arts[a] || 0) + 1; });
+  const top = Object.entries(arts).sort((a, b) => b[1] - a[1])[0];
+  const ideas = ["Modo melancólico", top ? `Pon algo de ${top[0]}` : "Pon algo de Juno Atlas", "Modo fiesta", "Siguiente", "¿Qué suena?"];
+  $("#humIdeas").innerHTML = ideas.map(x => `<button type="button" data-humsay="${esc(x)}">${esc(x)}</button>`).join("");
+}
+function paintHum(){
+  $("#humTop").classList.toggle("live", H.wakeOn);
+  $("#humWakeRow").hidden = !canWake;
+  $("#humWake").setAttribute("aria-checked", H.wakeOn);
+  $("#humMic").disabled = !canListen;
+  $("#humWakeNote").textContent = H.wakeOn ? "Activado: di «Ey Hum» y lo que quieras, mientras la app esté abierta." : "Mientras la app esté abierta, di «Ey Hum» y lo que quieras.";
+}
+function openHum(byWake){
+  if (S.drawer){ S.drawer = false; applySide(); }
+  H.byWake = !!byWake; clearTimeout(H.closeT);
+  const p = $("#hum"); p.hidden = false; humIdeas(); paintHum();
+  if (!byWake){ $("#humReply").textContent = ""; $("#humHeard").textContent = ""; if (canListen) listenOnce(); else $("#humStatus").textContent = "Escríbeme qué quieres escuchar"; }
+}
+function closeHum(){
+  $("#hum").hidden = true; clearTimeout(H.closeT);
+  if (H.rec){ try { H.rec.abort(); } catch {} }
+  if (H.mediaRec && H.mediaRec.state !== "inactive") H.mediaRec.stop();
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  if (H.ducked) duck(false);
+  setListening(false);
+}
+$("#humForm").addEventListener("submit", e => { e.preventDefault(); const v = $("#humInput").value.trim(); if (!v) return; $("#humInput").value = ""; H.byWake = false; heard(v, false); });
+$("#humWake").addEventListener("click", () => {
+  H.wakeOn = !H.wakeOn; store.set("humWake", H.wakeOn); paintHum();
+  if (H.wakeOn){ startWake(); toast("Hum te escucha: di «Ey Hum» y lo que quieras."); } else stopWake();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#hum").hidden && !document.querySelector("dialog[open]")) closeHum(); });
+
 /* ---------- rendering ---------- */
 function likeBtn(b){
   const id = b.dataset.like, on = S.liked.has(id);
@@ -3326,6 +3735,8 @@ document.addEventListener("click", e => {
   if (pa){ toggleInPl(S.pickPl, pa.dataset.pickadd, true); pa.setAttribute("aria-pressed", IMPORTED[S.pickPl] ? plHas(IMPORTED[S.pickPl], pa.dataset.pickadd) : false); return; }
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
+  const hs = e.target.closest("[data-humsay]");
+  if (hs){ H.byWake = false; heard(hs.dataset.humsay, false); return; }
   const like = e.target.closest("[data-like]");
   if (like){ e.stopPropagation(); toggleLike(like.dataset.like); return; }
   const pl = e.target.closest("[data-playlist]");
@@ -3371,6 +3782,9 @@ document.addEventListener("click", e => {
     if (a === "acct-out") signOut();
     if (a === "acct-sync"){ xfer.failed.clear(); doSync(); }
     if (a === "mini") openMini();
+    if (a === "hum") $("#hum").hidden ? openHum() : closeHum();
+    if (a === "hum-close") closeHum();
+    if (a === "hum-listen") listenOnce();
     if (a === "pl-new") openPlDlg({});
     if (a === "pl-new-with"){ $("#aplDlg").close(); openPlDlg({ withSong: S.aplFor }); }
     if (a === "pl-edit") openPlDlg({ id: act.dataset.id });
@@ -3475,6 +3889,7 @@ $("#lyrBtn").innerHTML = ic("mic"); $("#lyrClose").innerHTML = ic("close");
 $("#fpClose").innerHTML = ic("chevDown"); $("#fpQueue").innerHTML = ic("queue");
 $("#navApp").innerHTML = ic("install") + (isElectron ? "Acerca de Hum" : "Descargar la app");
 $("#miniBtn").innerHTML = ic("pip"); $("#miniBtn").hidden = !canMini();
+$("#humTop").innerHTML = ic("mic"); $("#humMic").innerHTML = ic("mic"); $("#humClose").innerHTML = ic("close"); paintHum(); startWake();
 $("#fpApl").innerHTML = ic("plAdd"); $("#acctTop").innerHTML = ic("user"); $("#pickIcon").innerHTML = ic("search");
 paintAcct(); setupMediaSession(); setupDesktop();
 if (!store.get("welcomed", false)) openWelcome();
