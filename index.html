@@ -579,6 +579,12 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .hum-ideas button{height:30px;padding:0 12px;border-radius:999px;background:var(--raise);font-size:13px;font-weight:600;color:var(--fg)}
 .hum-ideas button:hover{background:var(--line)}
 .hum-wake{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.hum-voice{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.hum-voice b{font-size:14px}
+.hum-voice-row{display:flex;gap:8px;margin-top:6px}
+.hum-voice select{flex:1;min-width:0;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--raise);color:var(--fg);padding:0 12px;font:inherit;font-size:13px}
+.hum-voice .pill{height:36px;flex:none}
+.hum-voice small{display:block;color:var(--accent);font-size:12px;margin-top:6px}
 .hum-wake div{flex:1;min-width:0}
 .hum-wake b{display:block;font-size:14px}
 .hum-wake small{display:block;color:var(--muted);font-size:12px}
@@ -947,6 +953,11 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <div class="hum-wake">
     <div><b>Hum locutor</b><small>Entre canciones te habla como en la radio: qué sonó, qué viene, la hora o el clima.</small></div>
     <button type="button" class="switch" id="humHost" role="switch" aria-checked="false" aria-label="Hum locutor"></button>
+  </div>
+  <div class="hum-voice">
+    <label for="humVoiceSel"><b>Voz de Hum</b></label>
+    <div class="hum-voice-row"><select id="humVoiceSel" aria-label="Voz de Hum"></select><button type="button" class="pill" data-act="voice-try">Probar</button></div>
+    <small id="humVoiceNote" hidden></small>
   </div>
   <div class="hum-wake" id="humWakeRow">
     <div><b>Escuchar «Ey Hum» siempre</b><small id="humWakeNote">Mientras la app esté abierta, di «Ey Hum» y lo que quieras.</small></div>
@@ -2885,6 +2896,28 @@ async function doSync(){
     const started = Date.now(), keys = Object.keys(sync.dirty);
     await readLib();
     const R = sync.remote.items; let push = false;
+    const email = S.acct.email;
+    // never mix accounts: what belongs to another Google account leaves this device instead of going into this one
+    for (const id of USER.slice()){
+      const rec = BYID[id].rec, inLib = !!R["song:" + id];
+      if ((rec.owner && rec.owner !== email) || (!rec.owner && rec.cloud && !inLib)){ delete sync.dirty["song:" + id]; await removeSong(id, { remote: true }); changed = true; }
+      else if (!rec.owner){ rec.owner = email; putRec(rec); }
+    }
+    for (const id of IMP_ORDER.slice()){
+      const p = IMPORTED[id];
+      if (p.acct && p.acct !== email){ delete sync.dirty["pl:" + id]; dropPl(id); if (S.ctxId === id) S.ctxId = null; changed = true; }
+      else if (!p.acct){ p.acct = email; savePl(p); }
+    }
+    // once per session: files this account can't open (left there by another account) are uploaded again from here
+    if (sync.checked !== email){
+      sync.checked = email;
+      const mine = await listSongFiles();
+      for (const [k, r] of Object.entries(R)){
+        if (!k.startsWith("song:") || r.deleted || !r.f || mine.has(r.f)) continue;
+        r.f = null; push = true;
+        const t = BYID[k.slice(5)]; if (t && t.user && t.rec.blob){ t.rec.cloud = null; putRec(t.rec); }
+      }
+    }
     // what changed here goes into the library file (when it is newer than what is there)
     for (const k of keys){
       const li = localItem(k); if (!li) continue;
@@ -2893,6 +2926,7 @@ async function doSync(){
     }
     // audio files that finished uploading from here
     USER.forEach(id => { const rec = BYID[id].rec, r = R["song:" + id]; if (rec.cloud && r && !r.deleted && r.f !== rec.cloud){ r.f = rec.cloud; push = true; } });
+    if (await dedupe(R)) { push = true; changed = true; } // the same file twice (same name and size): keep one
     if (push) await writeLib();
     keys.forEach(k => { if (sync.dirty[k] <= started){ delete sync.dirty[k]; delete sync.tomb[k]; } });
     // and what changed elsewhere comes here
@@ -2923,12 +2957,14 @@ async function applyRemote(it){
         rec.u = it.updated; t.title = rec.title; t.artist = rec.artist; t.album.title = rec.album || "Mis canciones"; ch = true;
       }
       if (it.parts && rec.cloud !== it.parts){ rec.cloud = it.parts; ch = true; }
+      if (!it.parts && rec.cloud && rec.blob){ rec.cloud = null; ch = true; } // its file was lost from the Drive: upload it again from here
+      if (!rec.owner && S.acct){ rec.owner = S.acct.email; ch = true; }
       if (ch) putRec(rec);
       return ch;
     }
     if (t) return false;
     const d = it.data || {};
-    const rec = { ...songData(d), id, u: it.updated, cloud: it.parts, blob: null, pic: null, lyrScan: true,
+    const rec = { ...songData(d), id, u: it.updated, cloud: it.parts, blob: null, pic: null, lyrScan: true, owner: S.acct && S.acct.email,
       title: d.title || "Canción", artist: d.artist || "Artista desconocido", added: d.added || Date.now(), name: d.name || "" };
     await putRec(rec); addUserTrack(rec);
     return true;
@@ -2941,7 +2977,7 @@ async function applyRemote(it){
     }
     if (p && (p.u || 0) >= it.updated) return false;
     const d = it.data || {};
-    const rec = { ...d, id, u: it.updated, items: Array.isArray(d.items) ? d.items : [] };
+    const rec = { ...d, id, u: it.updated, items: Array.isArray(d.items) ? d.items : [], acct: S.acct && S.acct.email };
     addImported(rec); savePl(rec);
     return true;
   }
@@ -3045,7 +3081,7 @@ function moveFile(rec, dir, left){
       paintAcct();
     };
     label(null);
-    if (dir === "up"){ rec.cloud = await uploadSong(rec, label); await putRec(rec); scheduleSync(800); return; }
+    if (dir === "up"){ rec.cloud = await uploadSong(rec, label); rec.owner = S.acct && S.acct.email; await putRec(rec); scheduleSync(800); return; }
     const blob = await downloadSong(rec, label);
     const t = BYID[rec.id]; if (!t) return;
     rec.blob = blob;
@@ -3110,13 +3146,62 @@ async function signIn(){ // runs inside the tap on "Continuar con Google"
   }
 }
 function reconnect(){ sync.authTried = Date.now(); askToken("").then(() => { toast("Conectado otra vez con Google."); doSync(); renderAcct(); }).catch(() => { if ($("#acctDlg").open) renderAcct(); }); }
-function signOut(){
+async function signOut(){
+  const email = S.acct && S.acct.email, R = sync.remote ? sync.remote.items : {};
   if (desk && desk.googleSignOut) desk.googleSignOut().catch(() => {});
+  // this account's music leaves this device: it stays in that Google Drive and comes back when you sign in again
+  const songs = USER.filter(id => { const r = BYID[id].rec; return r.owner ? r.owner === email : !!(r.cloud || R["song:" + id]); });
+  for (const id of songs) await removeSong(id, { remote: true });
+  const pls = IMP_ORDER.filter(id => IMPORTED[id].acct ? IMPORTED[id].acct === email : !!R["pl:" + id]);
+  pls.forEach(id => { dropPl(id); if (S.ctxId === id) S.ctxId = null; });
+  if (pls.length){ renderLib(); if (S.view.type === "list" && !getList.ok(S.view.id)) go({ type: "home" }); else rerender(); }
   S.acct = null; S.acctMe = null; S.gtok = null; store.set("gacct", null); store.set("gtok", null);
   sync.dirty = {}; sync.tomb = {}; sync.trash = []; sync.folder = sync.lib = null; sync.remote = null; sync.last = 0; sync.err = ""; sync.needAuth = false; saveSync();
   xfer.want = null;
   renderAcct(); paintAcct();
-  toast("Has cerrado sesión. Tus canciones siguen en este dispositivo.");
+  toast(songs.length || pls.length ? "Cerraste sesión. La música de tu cuenta se quitó de este dispositivo; sigue guardada en tu Google Drive." : "Has cerrado sesión.");
+}
+// every audio file Hum keeps in this account's Drive
+async function listSongFiles(){
+  const ids = new Set(); let page = "";
+  do {
+    const r = await (await gfetch(`${DRIVE}/files?spaces=drive&pageSize=1000&fields=nextPageToken,files(id)&q=${encodeURIComponent("appProperties has { key='hum' and value='song' } and trashed=false")}${page ? "&pageToken=" + encodeURIComponent(page) : ""}`)).json();
+    (r.files || []).forEach(f => ids.add(f.id)); page = r.nextPageToken || "";
+  } while (page);
+  return ids;
+}
+// the same file added twice (same name and size, e.g. from two devices): keep one, move likes and playlists to it
+async function dedupe(R){
+  const groups = new Map(), now = Date.now(); let ch = false;
+  for (const [k, r] of Object.entries(R)){
+    if (!k.startsWith("song:") || r.deleted || !r.data || !r.data.name || !(r.data.size > 0)) continue;
+    const g = r.data.name + "|" + r.data.size; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(k);
+  }
+  for (const ks of groups.values()){
+    if (ks.length < 2) continue;
+    const local = k => { const t = BYID[k.slice(5)]; return t && t.user ? t : null; };
+    ks.sort((a, b) => ((R[b].f ? 4 : 0) + (local(b) && local(b).rec.blob ? 2 : 0) - (R[b].data.added || 0) / 1e14) - ((R[a].f ? 4 : 0) + (local(a) && local(a).rec.blob ? 2 : 0) - (R[a].data.added || 0) / 1e14));
+    const keepK = ks[0], keep = keepK.slice(5);
+    for (const k of ks.slice(1)){
+      const id = k.slice(5), dup = local(k);
+      // keep the audio this device already has, under the id that stays (no need to download it again)
+      if (dup && dup.rec.blob && !BYID[keep]){
+        const rec = { ...dup.rec, id: keep, cloud: R[keepK].f || null, u: R[keepK].updated, owner: S.acct && S.acct.email };
+        await putRec(rec); addUserTrack(rec);
+      }
+      if (R[k].f && R[k].f !== R[keepK].f) trashFile(R[k].f);
+      R[k] = { updated: now, deleted: true, data: null, f: null };
+      const lk = R["like:" + id];
+      if (lk && !lk.deleted){ R["like:" + keep] = { updated: now, deleted: false, data: {}, f: null }; R["like:" + id] = { updated: now, deleted: true, data: null, f: null }; }
+      for (const [pk, p] of Object.entries(R)){
+        if (!pk.startsWith("pl:") || p.deleted || !p.data || !Array.isArray(p.data.items)) continue;
+        let hit = false; p.data.items.forEach(it => { if (it.link === id){ it.link = keep; hit = true; } });
+        if (hit) p.updated = now;
+      }
+      ch = true;
+    }
+  }
+  return ch;
 }
 const ago = ts => { const s = (Date.now() - ts) / 1000; return s < 60 ? "hace un momento" : s < 3600 ? `hace ${Math.round(s / 60)} min` : s < 86400 ? `hace ${Math.round(s / 3600)} h` : new Date(ts).toLocaleDateString("es"); };
 const bytes = b => b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : b >= 1e6 ? `${Math.round(b / 1e6)} MB` : `${Math.ceil(b / 1e3)} KB`;
@@ -3153,7 +3238,7 @@ function renderAcct(){
   b.innerHTML = `<div class="acct-top"><span class="acct-ic on">${ic("cloud")}</span><div><h2 id="acctH">${esc(S.acct.name || "Tu cuenta")}</h2><p>${esc(S.acct.email)} · Google Drive</p></div></div>
     <dl class="facts acct-facts"><div><dt>En tu Drive</dt><dd>${R ? nc(R.length) : "…"}</dd></div><div><dt>Espacio de Google</dt><dd>${m ? `${bytes(m.used)}${m.limit ? " de " + bytes(m.limit) : ""}` : "…"}</dd></div><div><dt>En este equipo</dt><dd>${nc(here)}</dd></div></dl>
     <div class="acct-st" id="acctSt" role="status">${stHTML(acctStatus())}</div>
-    <p class="mix-note">Lo que añadas, quites o cambies aquí aparece en tus otros dispositivos al abrir Hum con esta cuenta de Google. Si cierras sesión, tus canciones se quedan en este dispositivo y en tu Drive.</p>
+    <p class="mix-note">Lo que añadas, quites o cambies aquí aparece en tus otros dispositivos al abrir Hum con esta cuenta de Google. Cada cuenta tiene su propia música: si cierras sesión, la de esta cuenta se quita de este dispositivo y sigue en tu Drive.</p>
     <div class="dlg-act"><button type="button" class="pill danger" data-act="acct-out">Cerrar sesión</button>
       ${need ? `<button type="button" class="add-top" data-act="acct-reconnect">${ic("sync")}<span>Reconectar</span></button>` : `<button type="button" class="pill" data-act="acct-sync">${ic("sync")}Sincronizar ahora</button>`}
       <button type="button" class="${need ? "pill" : "add-top"}" data-act="acct-close">Listo</button></div>`;
@@ -3465,12 +3550,24 @@ function runCommand(raw){
 
 // --- talking back
 let humVoice = null;
-function pickVoice(){
-  if (!("speechSynthesis" in window)) return null;
-  const vs = speechSynthesis.getVoices().filter(v => /^es/i.test(v.lang));
-  return vs.find(v => v.lang === humLang) || vs.find(v => /mx|419|us/i.test(v.lang)) || vs[0] || null;
+const VOICE_F = /dalia|ximena|paloma|elvira|laura|sabina|helena|paulina|m[oó]nica|marisol|luc[ií]a|esperanza|elena|isabel|renata|larissa|abril|irene|camila|valentina|triana|carlota|beatriz|pen[eé]lope|mar[ií]a|sof[ií]a|catalina|andrea|carmen|carla|alba|julia|google espa|female|mujer/i;
+const VOICE_M = /ra[uú]l|jorge|pablo|[aá]lvaro|diego|juan|carlos|gonzalo|enrique|miguel|arnau|dar[ií]o|gerardo|liam|andr[eé]s|alonso|tom[aá]s|jos[eé]|antonio|manuel|alfredo|lorenzo|sergio|\bmale\b|hombre/i;
+function voiceScore(v){
+  let s = 0;
+  if (/natural|neural|online|premium|enhanced|mejorad|wavenet/i.test(v.name)) s += 6; // the newer, human-sounding voices
+  if (!v.localService) s += 1;
+  if (VOICE_F.test(v.name)) s += 4;
+  if (VOICE_M.test(v.name)) s -= 8;
+  if (/mx|419|us/i.test(v.lang)) s += 2; else if (/es-es/i.test(v.lang)) s += 1;
+  return s;
 }
-if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { humVoice = pickVoice(); };
+const esVoices = () => "speechSynthesis" in window ? speechSynthesis.getVoices().filter(v => /^es/i.test(v.lang)).sort((a, b) => voiceScore(b) - voiceScore(a)) : [];
+function pickVoice(){
+  const vs = esVoices(); if (!vs.length) return null;
+  const sel = S.voiceSel || "";
+  return (sel.startsWith("sys:") && vs.find(v => v.name === sel.slice(4))) || vs[0];
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { humVoice = pickVoice(); if (!$("#hum").hidden) paintVoices(); };
 function duck(on){ // music softer while Hum listens or talks
   H.ducked = on;
   if (master && ctx) master.gain.setTargetAtTime((S.muted ? 0 : S.vol * S.vol) * (on ? .22 : 1), ctx.currentTime, .08);
@@ -3478,16 +3575,99 @@ function duck(on){ // music softer while Hum listens or talks
 }
 function reply(text, short){
   $("#humReply").textContent = text; $("#humStatus").textContent = "Hum"; setListening(false);
-  if (!("speechSynthesis" in window) || !H.viaVoice){ autoClose(); return; } // answers out loud only when you talked to Hum
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = humLang; u.rate = 1.05;
-    humVoice = humVoice || pickVoice(); if (humVoice) u.voice = humVoice;
-    u.onstart = () => duck(true); u.onend = u.onerror = () => { duck(false); autoClose(); };
-    speechSynthesis.speak(u);
-  } catch { autoClose(); }
+  if (!H.viaVoice){ autoClose(); return; } // answers out loud only when you talked to Hum
+  humSpeak(text, autoClose);
 }
 function autoClose(){ clearTimeout(H.closeT); if (H.byWake) H.closeT = setTimeout(() => { if (document.activeElement !== $("#humInput")) closeHum(); }, 4000); }
+
+// --- Hum's natural voice: a Mexican woman's neural voice (Piper "es_MX-claude-high", Apache-2.0)
+// that runs on this device. Downloaded once (about 90 MB with its engine), then it works offline.
+S.voiceSel = store.get("humVoiceSel", "auto"); // "auto" | "natural" | "sys:<voice name>"
+const vozAudio = new Audio();
+let vozWorker = null, vozSeq = 0, vozWant = 0, vozState = store.get("humNatural", false) ? "saved" : "none"; // none | loading | saved | ready | failed
+const useNatural = () => S.voiceSel === "natural" || (S.voiceSel === "auto" && vozState !== "none" && vozState !== "failed");
+function vozCall(text){
+  if (!vozWorker) vozWorker = new Worker("voz/voz-worker.js?v=2", { type: "module" });
+  return new Promise((res, rej) => {
+    const id = ++vozSeq;
+    const on = e => {
+      const m = e.data; if (!m || m.id !== id) return;
+      if (m.type === "progress" && m.total && vozState === "loading") paintVoiceNote(`Descargando la voz natural… ${Math.round(m.loaded / m.total * 100)} %`);
+      if (m.type === "done" || m.type === "ready"){ vozWorker.removeEventListener("message", on); if (vozState !== "ready"){ vozState = "ready"; store.set("humNatural", true); paintVoiceNote(""); } res(m.wav); }
+      if (m.type === "error"){ vozWorker.removeEventListener("message", on); rej(new Error(m.message)); }
+    };
+    vozWorker.addEventListener("message", on);
+    vozWorker.postMessage({ id, text });
+  });
+}
+function loadNatural(){ // download (first time) or wake up the natural voice
+  if (vozState === "ready") return Promise.resolve();
+  if (vozState !== "saved") { vozState = "loading"; paintVoiceNote("Descargando la voz natural… (solo esta vez, unos 90 MB)"); }
+  return vozCall("").catch(() => { vozState = "failed"; store.set("humNatural", false); paintVoiceNote("No se pudo descargar la voz natural. Revisa tu internet y vuelve a elegirla."); throw new Error("voz"); });
+}
+function systemSpeak(text, fin){
+  if (!("speechSynthesis" in window)){ fin(); return; }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = humLang; u.rate = .98; u.pitch = 1.04;
+    humVoice = pickVoice(); if (humVoice){ u.voice = humVoice; u.lang = humVoice.lang; }
+    u.onstart = () => duck(true); u.onend = u.onerror = fin;
+    speechSynthesis.speak(u);
+  } catch { fin(); }
+}
+async function humSpeak(text, done){
+  stopSpeaking();
+  const my = vozWant, fin = () => { if (my === vozWant) duck(false); done && done(); };
+  if (useNatural()){
+    try {
+      const wav = await vozCall(text);
+      if (my !== vozWant) return; // something newer is being said
+      if (vozAudio.src) URL.revokeObjectURL(vozAudio.src);
+      vozAudio.src = URL.createObjectURL(wav); vozAudio.volume = 1;
+      vozAudio.onplay = () => duck(true); vozAudio.onended = vozAudio.onerror = fin;
+      vozWarm();
+      await vozAudio.play(); return;
+    } catch { if (my !== vozWant) return; } // fall back to the device's voice
+  }
+  systemSpeak(text, fin);
+}
+function stopSpeaking(){ vozWant++; vozAudio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel(); }
+// a soft, warm finish for the natural voice (its own little sound chain, separate from the music):
+// a touch more body, less harshness in the highs and a hint of room, so it sounds close and calm
+let vozCtx = null;
+function vozWarm(){
+  try {
+    if (!vozCtx){
+      const AC = window.AudioContext || window.webkitAudioContext; vozCtx = new AC();
+      const src = vozCtx.createMediaElementSource(vozAudio), f = (type, freq, gain, q) => { const b = vozCtx.createBiquadFilter(); b.type = type; b.frequency.value = freq; if (gain != null) b.gain.value = gain; if (q) b.Q.value = q; return b; };
+      const hp = f("highpass", 90, null, .7), body = f("lowshelf", 240, 1.5), harsh = f("peaking", 3200, -2.5, 1), air = f("highshelf", 7500, -3);
+      const comp = vozCtx.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 2.5; comp.knee.value = 12; comp.attack.value = .01; comp.release.value = .2;
+      const room = vozCtx.createConvolver(), wet = vozCtx.createGain(), out = vozCtx.createGain();
+      const len = Math.round(vozCtx.sampleRate * .6), ir = vozCtx.createBuffer(2, len, vozCtx.sampleRate);
+      for (let c = 0; c < 2; c++){ const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5); }
+      room.buffer = ir; wet.gain.value = .07; out.gain.value = 1;
+      src.connect(hp); hp.connect(body); body.connect(harsh); harsh.connect(air); air.connect(comp); comp.connect(out);
+      comp.connect(room); room.connect(wet); wet.connect(out); out.connect(vozCtx.destination);
+    }
+    if (vozCtx.state !== "running") vozCtx.resume().catch(() => {});
+  } catch {}
+}
+function paintVoiceNote(t){ const el = $("#humVoiceNote"); if (el){ el.textContent = t; el.hidden = !t; } }
+function paintVoices(){
+  const sel = $("#humVoiceSel"); if (!sel) return;
+  const vs = esVoices();
+  sel.innerHTML = `<option value="natural">Natural de Hum · mujer (${vozState === "ready" || vozState === "saved" ? "descargada" : "se descarga una vez, 90 MB"})</option>`
+    + `<option value="auto">Automática${vs[0] ? " · " + esc(vs[0].name.replace(/^Microsoft |^Google /, "").replace(/ - .*$/, "")) : ""}</option>`
+    + vs.map(v => `<option value="sys:${esc(v.name)}">${esc(v.name.replace(/ - .*$/, ""))}${VOICE_M.test(v.name) ? " · hombre" : VOICE_F.test(v.name) ? " · mujer" : ""}</option>`).join("");
+  sel.value = S.voiceSel; if (sel.value !== S.voiceSel) sel.value = "auto";
+}
+function setVoice(v){
+  S.voiceSel = v; store.set("humVoiceSel", v); paintVoices();
+  if (v === "natural") loadNatural().then(() => { paintVoices(); H.viaVoice = true; humSpeak("Hola, soy Hum. Así sueno ahora, con una voz más natural."); }).catch(() => {});
+  else { H.viaVoice = true; humSpeak("Hola, soy Hum. Así sueno con esta voz."); }
+}
+// once chosen, the natural voice wakes up quietly a few seconds after the app opens, so answers come right away
+if (useNatural()) setTimeout(() => { if (vozState !== "ready") loadNatural().catch(() => {}); }, 6000);
 
 // --- listening
 function setListening(on){
@@ -3590,14 +3770,14 @@ function paintHum(){
 function openHum(byWake){
   if (S.drawer){ S.drawer = false; applySide(); }
   H.byWake = !!byWake; clearTimeout(H.closeT);
-  const p = $("#hum"); p.hidden = false; humIdeas(); paintHum();
+  const p = $("#hum"); p.hidden = false; humIdeas(); paintHum(); paintVoices();
   if (!byWake){ $("#humReply").textContent = ""; $("#humHeard").textContent = ""; if (canWebSpeech) listenOnce(); else $("#humStatus").textContent = canWhisper ? "Toca el micrófono para hablar, o escríbeme" : "Escríbeme qué quieres escuchar"; }
 }
 function closeHum(){
   $("#hum").hidden = true; clearTimeout(H.closeT);
   if (H.rec){ try { H.rec.abort(); } catch {} }
   if (H.mediaRec && H.mediaRec.state !== "inactive") H.mediaRec.stop();
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  stopSpeaking();
   if (H.ducked) duck(false);
   setListening(false);
 }
@@ -3695,16 +3875,7 @@ function hostTalk(prev, t){
   if (Math.random() < .3) extra.push(`Son las ${hh % 12 || 12}${mm ? ":" + String(mm).padStart(2, "0") : ""} ${hh < 12 ? "de la mañana" : hh < 20 ? "de la tarde" : "de la noche"}.`);
   speakHost([was, ...extra.slice(0, 1), now].join(" "));
 }
-function speakHost(text){
-  if (!("speechSynthesis" in window)) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = humLang; u.rate = 1.05;
-    humVoice = humVoice || pickVoice(); if (humVoice) u.voice = humVoice;
-    u.onstart = () => duck(true); u.onend = u.onerror = () => duck(false);
-    speechSynthesis.speak(u);
-  } catch {}
-}
+function speakHost(text){ humSpeak(text); }
 function setHost(on){ S.host = on; store.set("host", on); paintHumExtras(); }
 
 /* ---------- weather: music for the weather where you are (Open-Meteo, free and without keys) ---------- */
@@ -4315,6 +4486,7 @@ document.addEventListener("click", e => {
     if (a === "hum-close") closeHum();
     if (a === "hum-listen") listenOnce();
     if (a === "hum-search") humSearch();
+    if (a === "voice-try"){ H.viaVoice = true; if (S.voiceSel === "natural" && vozState !== "ready") loadNatural().then(() => humSpeak("Hola, soy Hum. Así sueno.")).catch(() => {}); else humSpeak("Hola, soy Hum. Así sueno."); }
     if (a === "fx") openFx();
     if (a === "fx-close") $("#fxDlg").close();
     if (a === "wx-play"){ if ($("#hum").hidden) openHum(true); H.viaVoice = false; playWeather(); }
@@ -4442,6 +4614,7 @@ document.querySelector(".hum-tools [data-act=hum-search] span").innerHTML = ic("
 document.querySelector(".hum-tools [data-act=wx-play] span").innerHTML = ic("sun");
 $("#fx8d").addEventListener("click", () => setFx({ d8: !S.fx.d8 }));
 $("#fxKara").addEventListener("click", () => setFx({ kara: !S.fx.kara }));
+$("#humVoiceSel").addEventListener("change", e => setVoice(e.target.value));
 $("#humHost").addEventListener("click", () => { setHost(!S.host); toast(S.host ? "Hum te hablará entre canciones, como en la radio." : "Hum ya no hablará entre canciones."); });
 applyFx(true); paintHumExtras();
 renderMixUI();
