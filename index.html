@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o2RG+uu6jputErT07iez15qABS98LPvJizwVtDUrnRg=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-09Scrm0VRTDq1ksOnEotb07LYcyBY1KOlOid7x8Ip1w=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -342,7 +342,7 @@ body{background:radial-gradient(900px 520px at 85% 108%,hsl(var(--amb,42) 70% 45
 .switch[aria-checked="true"]{background:var(--accent)}
 .switch[aria-checked="true"]::after{transform:translateX(20px);background:var(--accent-ink)}
 .eq-auto{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin:14px 0 0;
-  background:linear-gradient(120deg,hsl(42 85% 52% / .18),hsl(285 70% 60% / .14));border:1px solid hsl(42 85% 60% / .3)}
+  background:linear-gradient(120deg,hsl(var(--hue,42) 85% 52% / .18),hsl(285 70% 60% / .14));border:1px solid hsl(var(--hue,42) 85% 60% / .3)}
 .eq-auto-ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink)}
 .eq-auto-txt{min-width:0}
 .eq-auto-txt b{display:block}
@@ -463,7 +463,7 @@ body{background:radial-gradient(900px 520px at 85% 108%,hsl(var(--amb,42) 70% 45
 .spk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
 .spk{display:flex;flex-direction:column;gap:3px;text-align:left;padding:12px 14px;border-radius:10px;background:var(--raise);border:1px solid transparent}
 .spk:hover{border-color:var(--line)}
-.spk.on{border-color:var(--accent);background:hsl(42 85% 52% / .12)}
+.spk.on{border-color:var(--accent);background:hsl(var(--hue,42) 85% 52% / .12)}
 .spk b{font-size:14px}
 .spk small{color:var(--muted);font-size:12px;line-height:1.35}
 .mix-dlg{width:min(540px,calc(100% - 32px))}
@@ -556,14 +556,14 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 @keyframes humIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
 .hum-head{display:flex;align-items:center;gap:14px}
 .hum-orb{width:52px;height:52px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;gap:4px;
-  background:radial-gradient(circle at 35% 30%,hsl(42 95% 70%),var(--accent) 45%,hsl(28 85% 42%));box-shadow:0 0 0 0 hsl(42 90% 55% / .5)}
+  background:radial-gradient(circle at 35% 30%,hsl(var(--hue,42) 95% 70%),var(--accent) 45%,hsl(28 85% 42%));box-shadow:0 0 0 0 hsl(var(--hue,42) 90% 55% / .5)}
 .hum-orb i{width:5px;height:12px;border-radius:3px;background:var(--accent-ink);transform-origin:center}
 .hum-orb i:nth-child(2){height:22px}
 .hum.listening .hum-orb{animation:orb 1.6s ease-out infinite}
 .hum.listening .hum-orb i{animation:hum 1s ease-in-out infinite}
 .hum.listening .hum-orb i:nth-child(2){animation-delay:-.33s}.hum.listening .hum-orb i:nth-child(3){animation-delay:-.66s}
 .hum.thinking .hum-orb i{animation:hum .5s ease-in-out infinite}
-@keyframes orb{0%{box-shadow:0 0 0 0 hsl(42 90% 55% / .55)}100%{box-shadow:0 0 0 18px hsl(42 90% 55% / 0)}}
+@keyframes orb{0%{box-shadow:0 0 0 0 hsl(var(--hue,42) 90% 55% / .55)}100%{box-shadow:0 0 0 18px hsl(var(--hue,42) 90% 55% / 0)}}
 .hum-say{flex:1;min-width:0}
 .hum-say b{display:block;font:700 17px/1.25 var(--f-display)}
 .hum-say small{display:block;color:var(--muted);font-size:14px;min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -601,8 +601,8 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .hx small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hx span:last-child{min-width:0}
 .hum-tools{display:flex;gap:8px;margin-top:10px}
-.hum-tools button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 10px;border-radius:999px;border:1px solid hsl(42 85% 60% / .45);color:var(--accent);font-weight:700;font-size:13px}
-.hum-tools button:hover{background:hsl(42 85% 52% / .12)}
+.hum-tools button{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px 0 10px;border-radius:999px;border:1px solid hsl(var(--hue,42) 85% 60% / .45);color:var(--accent);font-weight:700;font-size:13px}
+.hum-tools button:hover{background:hsl(var(--hue,42) 85% 52% / .12)}
 .hum-tools svg{width:18px;height:18px}
 .hum-found{display:flex;flex-direction:column;gap:4px}
 .hum-found button{display:grid;grid-template-columns:40px minmax(0,1fr) 24px;gap:12px;align-items:center;text-align:left;padding:6px;border-radius:8px}
@@ -655,7 +655,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .sel-bar b{flex:1;min-width:120px}
 .sel-bar .add-top{margin-left:0;height:36px}
 .tl.selecting .row{cursor:pointer}
-.tl.selecting .row.picked{background:hsl(42 85% 52% / .16);box-shadow:inset 3px 0 0 var(--accent)}
+.tl.selecting .row.picked{background:hsl(var(--hue,42) 85% 52% / .16);box-shadow:inset 3px 0 0 var(--accent)}
 .tl.selecting .row.picked .c-title b{color:var(--accent)}
 .share-link{display:flex;gap:8px;margin:4px 0 6px}
 .share-link input{flex:1;min-width:0}
@@ -791,9 +791,29 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   *{transition:none!important}
   .eq i{animation:none;transform:scaleY(.7)}
 }
+/* ---------- your look: background picture behind the app ---------- */
+#lookBg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:center/cover no-repeat;opacity:0;transition:opacity .6s}
+html.look-img{background:#07070a}
+html.look-img body{background:transparent}
+html.look-img #lookBg{opacity:1}
+html.look-cover #lookBg{filter:blur(46px) saturate(1.35);transform:scale(1.18)}
+html.look-img .pane{background:rgba(13,14,19,var(--look-dim,.72))}
+html.look-img .topbar{background:rgba(13,14,19,min(.96,calc(var(--look-dim,.72) + .12)))}
+html.look-dark body{background:var(--bg)}
+.look-sw{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 2px}
+.look-sw button,.look-sw label{width:40px;height:40px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);cursor:pointer;display:grid;place-items:center;position:relative}
+.look-sw .on{border-color:var(--fg)}
+.look-sw .auto{background:conic-gradient(#f2b544,#ff6b9a,#9b7bff,#4ab3ff,#4fd1a5,#f2b544)}
+.look-sw label input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.look-sw label svg{width:18px;height:18px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.look-name{color:var(--muted);font-size:13px;margin:4px 0 0}
+.look-dlg .snd-h{margin-top:18px}
+.look-photo{display:flex;align-items:center;gap:12px;margin-top:10px}
+.look-photo img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:var(--raise)}
 </style>
 </head>
 <body>
+<div id="lookBg" aria-hidden="true"></div>
 <div class="app" id="app">
   <aside class="pane side" id="side" aria-label="Menú y biblioteca">
     <div class="brand"><span class="brand-mark" id="brandMark"></span>hum<button class="ib side-close" data-act="menu" aria-label="Cerrar menú" id="sideClose"></button></div>
@@ -804,6 +824,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <button class="nav-btn" id="navMix" data-act="mix"></button>
       <button class="nav-btn" id="navFx" data-act="fx"></button>
       <button class="nav-btn" id="navSnd" data-act="snd"></button>
+      <button class="nav-btn" id="navLook" data-act="look"></button>
       <button class="nav-btn" id="navAcct" data-act="acct"></button>
       <button class="nav-btn" id="navApp" data-act="welcome"></button>
       <button class="nav-btn" id="navPro" data-act="pro"></button>
@@ -1127,6 +1148,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <p class="mix-note">Mediciones de laboratorio de <a href="https://github.com/jaakkopasanen/AutoEq" target="_blank" rel="noopener">AutoEq</a> (Jaakko Pasanen, licencia MIT).</p>
   <div class="dlg-act"><button type="button" class="add-top" data-act="hp-close">Listo</button></div>
 </dialog>
+<dialog class="dlg look-dlg" id="lookDlg" aria-labelledby="lookH"><div id="lookBody"></div><input type="file" id="lookFile" accept="image/*" hidden></dialog>
 <dialog class="dlg" id="sleepDlg" aria-labelledby="sleepH">
   <h2 id="sleepH">Modo dormir</h2>
   <p id="sleepState">Elige cuándo quieres que se detenga la música.</p>
@@ -1218,6 +1240,7 @@ const P = {
   mix:"M22 8l-4-4v3H3v2h15v3l4-4zM2 16l4 4v-3h15v-2H6v-3l-4 4z",
   chevDown:"M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z",
   mic:"M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
+  palette:"M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
   spkr:"M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 1.99 2 1.99L17 22c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 2c1.1 0 2 .9 2 2s-.9 2-2 2c-1.11 0-2-.9-2-2s.89-2 2-2zm0 16c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z",
   spark:"M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z",
   tune:"M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z",
@@ -2579,13 +2602,16 @@ function backFromBg(){ // back in the app: the full sound (equalizer, effects) t
 }
 bgEl.addEventListener("ended", () => { if (bgOn && S.playing) next(true); });
 bgEl.addEventListener("error", () => { if (bgOn && S.playing && bgEl.getAttribute("src") && bgEl.src !== keep.src){ bgOn = false; playFail({ name: "MediaError" }); } });
-// signs that the phone stopped the sound right as the screen went off (later pauses, like an incoming call, are left alone)
+// signs that the phone stopped the sound while Hum is in the background. Right after leaving the app any stop counts;
+// later (you switched apps and turned the screen off a while after) only a stop of the sound engine counts, never
+// a pause of the song itself, which is what a call or another app playing sound does (those are left alone)
 let bgHidAt = 0; const justOff = ms => performance.now() - bgHidAt < ms;
 document.addEventListener("visibilitychange", () => { if (document.hidden) bgHidAt = performance.now(); });
 function watchCtx(){
   if (!ctx || !ctx.addEventListener) return;
   ctx.addEventListener("statechange", () => {
-    if (!document.hidden || !S.playing || ctx.state === "running" || !justOff(4000)) return;
+    if (!document.hidden || !S.playing || ctx.state === "running") return;
+    if (!justOff(4000) && audio.paused) return;
     ctx.resume().catch(() => {});
     setTimeout(() => { if (document.hidden && S.playing && ctx.state !== "running") startBg(); }, 700);
   });
@@ -2597,7 +2623,7 @@ function watchCtx(){
 let bgLastT = -1, bgStall = 0;
 setInterval(() => { // the song is "playing" but its time stands still
   const t = cur();
-  if (!document.hidden || !justOff(20000) || !S.playing || bgOn || !bgCan() || !t || !t.user || mix || audio.dataset.id !== t.id || audio.paused){ bgStall = 0; bgLastT = -1; return; }
+  if (!document.hidden || !S.playing || bgOn || !bgCan() || !t || !t.user || mix || audio.dataset.id !== t.id || audio.paused){ bgStall = 0; bgLastT = -1; return; }
   const ct = audio.currentTime, d = isFinite(audio.duration) ? audio.duration : t.dur;
   bgStall = ct === bgLastT && d - ct > 2 ? bgStall + 1 : 0; bgLastT = ct;
   if (bgStall >= 3){ bgStall = 0; startBg(); }
@@ -3706,6 +3732,7 @@ const artCache = new Map();
 // lock screens want a normal image: copy the cover into a 512 px picture once
 function artFor(t){
   const src = cover(t);
+  if (LOOK.lock !== "cover") return lockArt(src);
   if (artCache.has(src)) return Promise.resolve(artCache.get(src));
   return new Promise(res => {
     const im = new Image();
@@ -3759,7 +3786,7 @@ html.desk .m{margin:6px;height:calc(100% - 12px);border-radius:16px;border:1px s
 .m-ctl{display:flex;align-items:center;gap:4px;margin-top:7px}
 button{-webkit-app-region:no-drag;background:none;border:0;color:#cfcdd9;cursor:pointer;padding:0;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;font:inherit}
 button:hover{color:#fff;background:rgba(255,255,255,.09)}
-button:focus-visible{outline:2px solid #f2b544;outline-offset:1px}
+button:focus-visible{outline:2px solid var(--acc,#f2b544);outline-offset:1px}
 .m-pp{width:34px;height:34px;background:#eceaf3;color:#0d0e13;margin:0 2px}
 .m-pp:hover{background:#fff;color:#0d0e13;transform:scale(1.06)}
 svg{width:18px;height:18px;fill:currentColor;display:block}
@@ -3771,8 +3798,13 @@ svg{width:18px;height:18px;fill:currentColor;display:block}
 .m-win svg{width:15px;height:15px}
 .m-bar{position:absolute;left:0;right:0;bottom:0;height:12px;display:flex;align-items:flex-end;cursor:pointer;-webkit-app-region:no-drag}
 .m-bar::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.1)}
-.m-bar i{position:relative;display:block;height:3px;width:0;background:#f2b544;border-radius:0 2px 2px 0;transition:height .12s}
+.m-bar i{position:relative;display:block;height:3px;width:0;background:var(--acc,#f2b544);border-radius:0 2px 2px 0;transition:height .12s}
 .m-bar:hover i,.m-bar:hover::before{height:5px}
+.m-bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;pointer-events:none}
+html.mb-img .m-bg{opacity:1}
+html.mb-cover .m-bg{filter:blur(16px) saturate(1.3);transform:scale(1.3)}
+html.mb-img .m-bg::after{content:"";position:absolute;inset:0;background:rgba(10,10,14,.5)}
+.m > .m-art,.m > .m-mid,.m > .m-win{position:relative}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}`;
 async function openMini(){
   if (miniWin && !miniWin.closed){ try { miniWin.focus(); } catch {} return; }
@@ -3794,7 +3826,7 @@ function buildMini(w){
   d.documentElement.lang = "es"; if (desk) d.documentElement.className = "desk";
   d.head.innerHTML = `<meta charset="utf-8"><title>Hum Player</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Figtree:wght@400;600&family=JetBrains+Mono&display=swap"><style>${MINI_CSS}</style>`;
-  d.body.innerHTML = `<div class="m" role="region" aria-label="Mini reproductor">
+  d.body.innerHTML = `<div class="m" role="region" aria-label="Mini reproductor"><div class="m-bg" id="mBg"></div>
     <img class="m-art" id="mArt" alt="">
     <div class="m-mid"><b id="mT"></b><small id="mA"></small>
       <div class="m-ctl"><button id="mPrev" aria-label="Anterior">${ic("prev")}</button><button class="m-pp" id="mPP" aria-label="Reproducir"></button><button id="mNext" aria-label="Siguiente">${ic("next")}</button><span class="m-time" id="mTime"></span></div></div>
@@ -3819,6 +3851,7 @@ function paintMini(){
   if (w.humFor !== t.id){
     w.humFor = t.id; g("mArt").src = cover(t); g("mT").textContent = t.title; g("mA").textContent = t.artist;
     d.documentElement.style.setProperty("--h", t.album && t.album.hue != null ? t.album.hue : hash(t.id) % 360);
+    lookMini(w, t);
     d.title = `${t.title} · ${t.artist}`;
   }
   const s = S.playing ? "pause" : "play";
@@ -6002,6 +6035,7 @@ function paintMarks(){
 function paint(){
   const t = cur(); if (!t) return;
   document.documentElement.style.setProperty("--amb", t.album && t.album.hue != null ? t.album.hue : hash(t.id) % 360);
+  if (lookFor !== t.id){ lookFor = t.id; if (LOOK.color === "auto" || LOOK.bg === "cover") applyLook(); }
   paintLyrBtn(); renderFp(); maybeAutoAi(t);
   $("#npLyr").innerHTML = ic("mic") + (t.user && t.rec.lyrics ? "Ver letra" : "Letra");
   if ($("#lyrDlg").open && lyrFor !== t.id){ lyrFor = t.id; S.lyrEdit = false; renderLyrics(); }
@@ -6032,6 +6066,131 @@ function paint(){
   paintMarks(); paintMediaSession(); paintMini(); deskState(); trackChanged(t);
 }
 
+/* ---------- your look (this device only) ----------
+   Color: a few to pick from, any color you like, "automatic" (each song's cover colors) or the colors of your photo.
+   Background: plain dark, the glow of the song (as before), the song's cover blurred, or your own photo.
+   The mini player on a PC and the picture on the lock screen can follow it too. */
+const LOOK_DEF = { color: "amber", custom: "#f2b544", bg: "glow", dim: .72, mini: "theme", lock: "cover" };
+let LOOK = { ...LOOK_DEF, ...((store.get("look", {}) || {})) }, lookPhoto = "", lookFor = null, LOOKACC = "";
+try { lookPhoto = localStorage.getItem("hum:lookPhoto") || ""; } catch {}
+if (!/^data:image\/jpeg;base64,/.test(lookPhoto)) lookPhoto = "";
+const LOOK_COLORS = [["auto", "Automático", null], ["amber", "Ámbar", 39], ["rose", "Rosa", 335], ["violet", "Violeta", 262], ["blue", "Azul", 208], ["mint", "Menta", 158], ["red", "Rojo", 4], ["lime", "Lima", 84]];
+function hslHex(h, s, l){
+  s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const c = n => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)))).toString(16).padStart(2, "0");
+  return "#" + c(0) + c(8) + c(4);
+}
+function hexHue(hex){
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (!d) return 39;
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return Math.round((h * 60 + 360) % 360);
+}
+function songHue(t){ return t ? (t.album && t.album.hue != null ? t.album.hue : hash(t.id) % 360) : 39; }
+function lookHue(){
+  if (LOOK.color === "auto") return songHue(cur());
+  if (LOOK.color === "custom" || LOOK.color === "photo") return hexHue(LOOK.custom);
+  return (LOOK_COLORS.find(c => c[0] === LOOK.color) || LOOK_COLORS[1])[2];
+}
+function lookAccent(){
+  if (LOOK.color === "amber") return "#f2b544";
+  if (LOOK.color === "custom" || LOOK.color === "photo") return LOOK.custom;
+  return hslHex(lookHue(), 80, 62);
+}
+function inkFor(hex){ const n = parseInt(hex.slice(1), 16), L = (.2126 * (n >> 16 & 255) + .7152 * (n >> 8 & 255) + .0722 * (n & 255)) / 255; return L > .5 ? "#1b1400" : "#ffffff"; }
+function applyLook(){
+  const root = document.documentElement, acc = lookAccent(), bg = LOOK.bg === "photo" && !lookPhoto ? "glow" : LOOK.bg;
+  LOOKACC = acc;
+  root.style.setProperty("--accent", acc); root.style.setProperty("--accent-ink", inkFor(acc)); root.style.setProperty("--hue", lookHue());
+  root.style.setProperty("--look-dim", clamp(+LOOK.dim || .72, .3, .95));
+  const t = cur(), img = bg === "photo" ? lookPhoto : bg === "cover" && t ? cover(t) : "";
+  root.classList.toggle("look-img", !!img); root.classList.toggle("look-cover", bg === "cover" && !!img); root.classList.toggle("look-dark", bg === "dark");
+  const el = $("#lookBg"); if (el) el.style.backgroundImage = img ? `url("${img}")` : "none";
+  if (miniWin && !miniWin.closed) lookMini(miniWin, t);
+}
+function lookMini(w, t){
+  const d = w.document, r = d.documentElement, bgEl2 = d.getElementById("mBg"); if (!bgEl2) return;
+  r.style.setProperty("--acc", lookAccent());
+  if (LOOK.mini === "theme") r.style.setProperty("--h", lookHue());
+  const img = LOOK.mini === "photo" && lookPhoto ? lookPhoto : LOOK.mini === "cover" && t ? cover(t) : "";
+  r.classList.toggle("mb-img", !!img); r.classList.toggle("mb-cover", LOOK.mini === "cover" && !!img);
+  bgEl2.style.backgroundImage = img ? `url("${img}")` : "none";
+}
+// lock screen and notification: a 512 px picture made in the chosen style
+function lockArt(src){
+  const key = [src, LOOK.lock, lookAccent(), LOOK.lock !== "cover" ? lookPhoto.length : 0].join("|");
+  if (artCache.has(key)) return Promise.resolve(artCache.get(key));
+  const load = u => new Promise(res => { if (!u) return res(null); const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = u; });
+  return Promise.all([load(src), load(lookPhoto)]).then(([cv, ph]) => {
+    try {
+      const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d");
+      const fill = (im, a = 1) => { const s2 = Math.min(im.width, im.height); x.globalAlpha = a; x.drawImage(im, (im.width - s2) / 2, (im.height - s2) / 2, s2, s2, 0, 0, 512, 512); x.globalAlpha = 1; };
+      if (LOOK.lock === "photo" && ph) fill(ph);
+      else {
+        if (ph) fill(ph); else { const g = x.createLinearGradient(0, 0, 512, 512); g.addColorStop(0, hslHex(lookHue(), 55, 30)); g.addColorStop(1, "#0d0e13"); x.fillStyle = g; x.fillRect(0, 0, 512, 512); }
+        x.fillStyle = "rgba(8,8,12,.35)"; x.fillRect(0, 0, 512, 512);
+        if (cv){ x.save(); x.shadowColor = "rgba(0,0,0,.55)"; x.shadowBlur = 40; x.shadowOffsetY = 14; x.beginPath(); x.roundRect(106, 96, 300, 300, 26); x.fillStyle = "#000"; x.fill(); x.restore();
+          x.save(); x.beginPath(); x.roundRect(106, 96, 300, 300, 26); x.clip(); const s2 = Math.min(cv.width, cv.height); x.drawImage(cv, (cv.width - s2) / 2, (cv.height - s2) / 2, s2, s2, 106, 96, 300, 300); x.restore(); }
+        x.fillStyle = lookAccent(); [[-26, 30], [0, 52], [26, 30]].forEach(([dx, h]) => { x.beginPath(); x.roundRect(256 + dx - 6, 452 - h / 2, 12, h, 6); x.fill(); });
+      }
+      const d = c.toDataURL("image/jpeg", .88); artCache.set(key, d); return d;
+    } catch { return ""; }
+  });
+}
+// your photo: kept small on this device, and its main color becomes the app color
+function photoColor(im){
+  const c = document.createElement("canvas"); c.width = c.height = 48; const x = c.getContext("2d"); x.drawImage(im, 0, 0, 48, 48);
+  const p = x.getImageData(0, 0, 48, 48).data, bins = new Float64Array(36), sums = new Float64Array(36);
+  for (let i = 0; i < p.length; i += 4){
+    const r = p[i] / 255, g = p[i + 1] / 255, b = p[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    if (mx < .2 || d < .12) continue;
+    let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360;
+    const wgt = (d / mx) * mx, k = Math.floor(h / 10) % 36; bins[k] += wgt; sums[k] += h * wgt;
+  }
+  let best = -1, bw = 0; bins.forEach((v, k) => { if (v > bw){ bw = v; best = k; } });
+  return best < 0 ? "#f2b544" : hslHex(Math.round(sums[best] / bins[best]), 78, 62);
+}
+$("#lookFile").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0]; e.target.value = ""; if (!file) return;
+  const u = URL.createObjectURL(file), im = new Image();
+  im.onload = () => {
+    URL.revokeObjectURL(u);
+    const k = Math.min(1, 1440 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    let data = c.toDataURL("image/jpeg", .8);
+    try { localStorage.setItem("hum:lookPhoto", data); } catch { try { data = c.toDataURL("image/jpeg", .6); localStorage.setItem("hum:lookPhoto", data); } catch { toast("Esa foto es muy grande para guardarla aquí. Prueba con otra."); return; } }
+    lookPhoto = data; LOOK.bg = "photo"; LOOK.custom = photoColor(im); LOOK.color = "photo";
+    saveLook(); toast("Listo: tu foto es el fondo y la app tomó sus colores.");
+  };
+  im.onerror = () => { URL.revokeObjectURL(u); toast("No se pudo abrir esa imagen."); };
+  im.src = u;
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "lookPick"){ LOOK.custom = e.target.value; LOOK.color = "custom"; applyLook(); clearTimeout(saveLook.t); saveLook.t = setTimeout(saveLook, 300); }
+  if (e.target.id === "lookDim"){ LOOK.dim = +e.target.value / 100; applyLook(); const o = $("#lookDimOut"); if (o) o.textContent = e.target.value + " %"; clearTimeout(saveLook.t); saveLook.t = setTimeout(() => store.set("look", LOOK), 300); }
+});
+function saveLook(){ store.set("look", LOOK); artCache.clear(); msFor = null; applyLook(); try { paintMediaSession(); } catch {} if ($("#lookDlg").open) renderLook(); }
+function resetLook(){ LOOK = { ...LOOK_DEF }; lookPhoto = ""; try { localStorage.removeItem("hum:lookPhoto"); } catch {} saveLook(); toast("Volviste al estilo original de Hum."); }
+function renderLook(){
+  const opt = (attr, cur2, list) => list.map(([k, n, d]) => `<button type="button" class="spk${cur2 === k ? " on" : ""}" data-${attr}="${k}" aria-pressed="${cur2 === k}"><b>${n}</b>${d ? `<small>${d}</small>` : ""}</button>`).join("");
+  const named = LOOK.color === "custom" ? "Tu color" : LOOK.color === "photo" ? "Colores de tu foto" : (LOOK_COLORS.find(c => c[0] === LOOK.color) || [0, ""])[1];
+  const img = LOOK.bg === "cover" || (LOOK.bg === "photo" && lookPhoto);
+  $("#lookBody").innerHTML = `<h2 id="lookH">Apariencia</h2>
+    <p>Hazla tuya. Estos ajustes son solo de este dispositivo.</p>
+    <h3 class="snd-h">Color</h3>
+    <div class="look-sw" role="group" aria-label="Color de la app">${LOOK_COLORS.map(([k, n, h]) => `<button type="button" class="${k === "auto" ? "auto" : ""}${LOOK.color === k ? " on" : ""}" data-lookc="${k}" aria-label="${n}" title="${n}" aria-pressed="${LOOK.color === k}"${h != null ? ` style="background:${k === "amber" ? "#f2b544" : hslHex(h, 80, 62)}"` : ""}></button>`).join("")}
+      <label class="${LOOK.color === "custom" ? "on" : ""}" title="Elegir cualquier color" style="background:${LOOK.color === "custom" ? LOOK.custom : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)"}">${ic("palette")}<input type="color" id="lookPick" value="${LOOK.custom}" aria-label="Elegir cualquier color"></label></div>
+    <p class="look-name">${esc(named)}${LOOK.color === "auto" ? " · cambia con la portada de cada canción" : ""}</p>
+    <h3 class="snd-h">Fondo</h3>
+    <div class="spk-grid" role="group" aria-label="Fondo">${opt("lookbg", LOOK.bg, [["dark", "Oscuro", "Negro liso, sin brillos."], ["glow", "Brillo de la canción", "Un brillo suave con el color de lo que suena."], ["cover", "Portada difuminada", "La portada de la canción, desenfocada detrás de todo."], ["photo", "Tu foto", lookPhoto ? "Tu imagen detrás de la app." : "Elige una imagen y Hum toma sus colores."]])}</div>
+    <div class="look-photo">${lookPhoto ? `<img src="${lookPhoto}" alt="Tu foto de fondo">` : ""}<button type="button" class="pill" data-act="look-photo">${ic("image")}${lookPhoto ? "Cambiar foto" : "Elegir foto"}</button></div>
+    ${img ? `<div class="eq-voice" style="margin-top:12px"><div class="mix-row"><label for="lookDim">Oscurecer el fondo</label><output id="lookDimOut">${Math.round(LOOK.dim * 100)} %</output></div><input type="range" id="lookDim" min="30" max="95" value="${Math.round(LOOK.dim * 100)}"></div>` : ""}
+    ${canMini() ? `<h3 class="snd-h">Mini reproductor</h3><div class="spk-grid" role="group" aria-label="Mini reproductor">${opt("lookmini", LOOK.mini, [["theme", "Color del tema"], ["cover", "Portada"], ["photo", "Tu foto"]])}</div>` : ""}
+    ${MS ? `<h3 class="snd-h">${isMobile ? "Pantalla de bloqueo" : "Controles de música del sistema"}</h3><div class="spk-grid" role="group" aria-label="Imagen en la pantalla de bloqueo">${opt("looklock", LOOK.lock, [["cover", "Portada de la canción"], ["card", "Tarjeta con tu estilo", "La portada sobre tu fondo y tu color."], ["photo", "Tu foto", "Tu imagen mientras suena la música."]])}</div>` : ""}
+    <div class="dlg-act"><button type="button" class="pill" data-act="look-reset">Restablecer</button><button type="button" class="add-top" data-act="look-close">Listo</button></div>`;
+}
+function openLook(){ if (S.drawer){ S.drawer = false; applySide(); } renderLook(); if (!$("#lookDlg").open) $("#lookDlg").showModal(); }
+applyLook();
+
 /* ---------- visualizer + progress loop ---------- */
 const viz = $("#viz"), vx = viz.getContext("2d"), freq = new Uint8Array(64);
 const css = getComputedStyle(document.documentElement);
@@ -6060,7 +6219,7 @@ function frame(){
       const live = analyser && S.playing ? freq[Math.min(63, Math.floor(i * 1.4) + 1)] / 255 : 0;
       const v = S.playing ? Math.max(.04, live) : .05 + .03 * Math.sin(idle + i * .35);
       const bh = Math.max(3, v * h);
-      vx.fillStyle = S.playing ? ACC : DIM;
+      vx.fillStyle = S.playing ? (LOOKACC || ACC) : DIM;
       vx.globalAlpha = S.playing ? .45 + v * .55 : 1;
       vx.beginPath(); vx.roundRect ? vx.roundRect(i * (bw + gap), h - bh, bw, bh, 2) : vx.rect(i * (bw + gap), h - bh, bw, bh); vx.fill();
     }
@@ -6105,6 +6264,8 @@ document.addEventListener("click", e => {
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
   const kp = e.target.closest("[data-keep]"); if (kp){ setKeep(kp.dataset.keep); return; }
+  const lk = e.target.closest("[data-lookc],[data-lookbg],[data-lookmini],[data-looklock]");
+  if (lk){ const d = lk.dataset; if (d.lookc) LOOK.color = d.lookc; if (d.lookbg){ if (d.lookbg === "photo" && !lookPhoto){ $("#lookFile").click(); return; } LOOK.bg = d.lookbg; } if (d.lookmini) LOOK.mini = d.lookmini; if (d.looklock) LOOK.lock = d.looklock; saveLook(); return; }
   const fm = e.target.closest("[data-fxmode]");
   if (fm){ setFx({ mode: fm.dataset.fxmode }); return; }
   const hp = e.target.closest("[data-humplay]");
@@ -6138,6 +6299,10 @@ document.addEventListener("click", e => {
     if (a === "lyr-save") saveLyrics($("#lyrText").value);
     if (a === "lyr-del") saveLyrics("");
     if (a === "snd") openSnd();
+    if (a === "look") openLook();
+    if (a === "look-close") $("#lookDlg").close();
+    if (a === "look-photo") $("#lookFile").click();
+    if (a === "look-reset") resetLook();
     if (a === "snd-close") $("#sndDlg").close();
     if (a === "snd-reload") location.reload();
     if (a === "mix") openMix();
@@ -6298,6 +6463,7 @@ paintAcct(); setupMediaSession(); setupDesktop();
 if (!store.get("welcomed", false)) openWelcome();
 $("#fpPrev").innerHTML = ic("prev"); $("#fpNext").innerHTML = ic("next"); $("#fpShuf").innerHTML = ic("shuffle");
 $("#navSnd").innerHTML = ic("spkr") + "Calidad y bocinas" + '<i class="eq-dot" hidden></i>';
+$("#navLook").innerHTML = ic("palette") + "Apariencia";
 renderSndUI();
 $("#navMix").innerHTML = ic("mix") + "Transiciones" + '<i class="eq-dot" hidden></i>';
 $("#navFx").innerHTML = ic("fx") + "Efectos" + '<i class="eq-dot" hidden></i>';
