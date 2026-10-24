@@ -13,18 +13,51 @@ ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/di
 let proc = null, loading = null, gpu = false, noGpu = false;
 const say = m => postMessage(m);
 
-async function modelBytes(){ // downloaded once (172 MB), then kept on this device
+// The model is downloaded once (181 MB) in 8 MB pieces. Each piece is kept on this device as soon as it
+// arrives, so a dropped connection or a closed app continues where it stopped instead of starting over,
+// and a piece that stalls is tried again. Only one copy of the model is ever in memory.
+const SIZE = 180534758, PART = 8 * 1024 * 1024, PARTS = Math.ceil(SIZE / PART);
+const partKey = i => `https://hum.local/ia/htdemucs/${SIZE}/part-${i}`;
+async function fetchPart(i){
+  const from = i * PART, to = Math.min(SIZE, from + PART) - 1;
+  for (let attempt = 1; ; attempt++){
+    const ctl = new AbortController(); let timer = setTimeout(() => ctl.abort(), 45000); // 45 s without data: try again
+    try {
+      const r = await fetch(MODEL, { headers: { range: `bytes=${from}-${to}` }, signal: ctl.signal });
+      if (r.status !== 206 && !(r.status === 200 && PARTS === 1)) throw new Error("model " + r.status);
+      const rd = r.body.getReader(), chunks = []; let got = 0;
+      for (;;){
+        const { done, value } = await rd.read(); if (done) break;
+        chunks.push(value); got += value.length; clearTimeout(timer); timer = setTimeout(() => ctl.abort(), 45000);
+        say({ type: "progress", phase: "model", p: Math.min(1, (from + got) / SIZE), mb: Math.round((from + got) / 1e6), total: Math.round(SIZE / 1e6) });
+      }
+      clearTimeout(timer);
+      if (got !== to - from + 1) throw new Error("short");
+      return new Blob(chunks);
+    } catch (e){
+      clearTimeout(timer);
+      if (attempt >= 4) throw new Error(navigator.onLine === false ? "offline" : "stalled");
+      await new Promise(r => setTimeout(r, 2000 * attempt));
+    }
+  }
+}
+async function modelBytes(){
   let c = null; try { c = await caches.open(CACHE); } catch {}
-  const hit = c && await c.match(MODEL);
-  if (hit) return hit.arrayBuffer();
-  const r = await fetch(MODEL);
-  if (!r.ok) throw new Error("model " + r.status);
-  const total = +r.headers.get("content-length") || 172e6, parts = []; let got = 0;
-  const rd = r.body.getReader();
-  for (;;){ const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; say({ type: "progress", phase: "model", p: Math.min(1, got / total) }); }
-  const blob = new Blob(parts);
-  if (c) try { await c.put(MODEL, new Response(blob, { headers: { "content-type": "application/octet-stream" } })); } catch {}
-  return blob.arrayBuffer();
+  // a model saved whole by the previous version of Hum
+  const old = c && await c.match(MODEL); if (old) return old.arrayBuffer();
+  if (c && navigator.storage && navigator.storage.estimate){
+    try { const { quota, usage } = await navigator.storage.estimate(); if (quota - usage < SIZE * 1.3) throw new Error("space"); } catch (e){ if (e.message === "space") throw e; }
+  }
+  const out = new Uint8Array(SIZE);
+  for (let i = 0; i < PARTS; i++){
+    let blob = c && await c.match(partKey(i)).then(r => r && r.blob()).catch(() => null);
+    if (!blob || blob.size !== Math.min(SIZE, (i + 1) * PART) - i * PART){
+      blob = await fetchPart(i);
+      if (c) try { await c.put(partKey(i), new Response(blob)); } catch {}
+    } else say({ type: "progress", phase: "model", p: Math.min(1, (i + 1) * PART / SIZE), mb: Math.round(Math.min(SIZE, (i + 1) * PART) / 1e6), total: Math.round(SIZE / 1e6) });
+    out.set(new Uint8Array(await blob.arrayBuffer()), i * PART);
+  }
+  return out.buffer;
 }
 function load(){
   if (proc) return Promise.resolve(proc);
@@ -32,7 +65,9 @@ function load(){
     try { gpu = !noGpu && !!(self.navigator && navigator.gpu && await navigator.gpu.requestAdapter()); } catch { gpu = false; }
     const p = new DemucsProcessor({ ort, sessionOptions: { executionProviders: gpu ? ["webgpu"] : ["wasm"] },
       onProgress: i => say({ type: "progress", phase: "sep", p: i.progress }) });
-    await p.loadModel(await modelBytes());
+    const bytes = await modelBytes();
+    say({ type: "progress", phase: "load", p: 0 }); // starting the AI on this device: the first time takes a little longer
+    await p.loadModel(bytes);
     proc = p; return p;
   })().catch(e => { loading = null; throw e; }));
 }

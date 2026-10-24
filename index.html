@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v2gvciUQkTPihHBbv66zbnmeqzKCwIox0YYkn8PGnDQ=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-iaX6OYyqf5aM0LqyE10Kct5Bc3EjkVtspdIIzHWBRa8=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3257,9 +3257,10 @@ async function doSync(){
     keys.forEach(k => { if (sync.dirty[k] <= started){ delete sync.dirty[k]; delete sync.tomb[k]; } });
     // and what changed elsewhere comes here
     for (const [key, r] of Object.entries(R)) if (await applyRemote({ key, ...r, parts: r.f || null })) changed = true;
-    sync.last = Date.now(); sync.err = ""; saveSync();
+    sync.last = Date.now(); sync.err = ""; sync.backoff = 0; saveSync();
   } catch (e){
     if (e.code === "need_auth") sync.needAuth = true;
+    else if (/rateLimit|quota|http_429/i.test(e.code || "")){ sync.err = ""; sync.backoff = Math.min(300000, (sync.backoff || 2500) * 2); setTimeout(() => scheduleSync(0), sync.backoff); }
     else if (e.code === "not_found"){ sync.folder = sync.lib = null; sync.remote = null; saveSync(); sync.again = true; } // the folder was deleted from Drive: start a new one
     else sync.err = e.code || "error";
   } finally {
@@ -5325,8 +5326,12 @@ function tgJoin(fid){
   if (!/^[\w-]{10,200}$/.test(fid)) return;
   if (TG.role === "host") tgEnd();
   TG.role = "guest"; TG.fid = fid; TG.joined = false; TG.miss = ""; TG.lo = -Infinity; TG.hi = Infinity; TG.fails = 0;
-  clearInterval(TG.timer); TG.timer = setInterval(tgGuestTick, 2500); tgGuestTick();
+  clearInterval(TG.timer); TG.wait = 5000; tgGuestLoop();
   openTg();
+}
+function tgGuestLoop(){ // asks again after a pause that depends on what is happening (see TG.wait)
+  if (TG.role !== "guest") return;
+  Promise.resolve(tgGuestTick()).finally(() => { if (TG.role === "guest"){ clearTimeout(TG.timer); TG.timer = setTimeout(tgGuestLoop, TG.wait || 5000); } });
 }
 async function tgGuestTick(){
   if (TG.role !== "guest" || TG.busy) return;
@@ -5334,10 +5339,15 @@ async function tgGuestTick(){
   try {
     const sent = Date.now();
     const r = await fetch(`${DRIVE}/files/${TG.fid}?alt=media&key=${GKEY}`, { cache: "no-store" });
+    if (r.status === 429 || r.status === 403){ // Google asks to slow down: wait longer, the session goes on
+      let why = ""; try { why = JSON.stringify(await r.clone().json()); } catch {}
+      if (r.status === 429 || /rateLimit|quota/i.test(why)){ TG.wait = Math.min(60000, (TG.wait || 5000) * 2); return; }
+    }
     if (r.status === 404 || r.status === 403){ toast("La sesión de «Escuchar juntos» terminó."); tgEnd(); return; }
     if (!r.ok) throw new Error(r.status);
     tgClock(r, sent, Date.now());
     const j = await r.json(); TG.fails = 0;
+    TG.wait = j.playing && !document.hidden ? 5000 : 15000;
     TG.by = str(j.by, 40) || "tu amigo";
     if (j.title == null){ TG.miss = ""; renderTgChip(); if ($("#tgDlg").open) renderTg(); return; }
     const it = { title: str(j.title, 300), artists: j.artist ? [str(j.artist, 300)] : [], album: str(j.album, 300), dur: clamp(+j.dur || 0, 0, 86400) };
@@ -5540,7 +5550,8 @@ function karaForget(id, remote){ // the song was removed
 }
 // --- preparing: one song at a time, in the background
 const PREP = { q: [], cur: null, p: 0, phase: "", worker: null, t0: 0, sepT0: 0, eta: 0, arm: false };
-const canPrep = () => typeof Worker !== "undefined" && typeof OfflineAudioContext !== "undefined";
+// a phone without graphics acceleration would take hours per song: there, songs are prepared on a PC with the same account
+const canPrep = () => typeof Worker !== "undefined" && typeof OfflineAudioContext !== "undefined" && !(isMobile && !("gpu" in navigator));
 function prepWorker(){
   if (!PREP.worker){
     PREP.worker = new Worker("ia/separar.js", { type: "module" });
@@ -5550,7 +5561,7 @@ function prepWorker(){
   return PREP.worker;
 }
 function prepQueue(ids, quiet){
-  if (!canPrep()){ toast("Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta."); return 0; }
+  if (!canPrep()){ toast(isMobile ? "En este teléfono sería muy lento. Prepara tus canciones en tu PC con tu misma cuenta y aquí sonarán perfectas." : "Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta."); return 0; }
   const add = ids.filter(id => { const t = BYID[id]; return t && t.user && t.rec.blob && !karaReady(id) && PREP.cur !== id && !PREP.q.includes(id); });
   PREP.q.push(...add);
   if (add.length && !quiet) toast(add.length === 1 ? `Preparando el karaoke de “${BYID[add[0]].title}”…` : `Preparando ${add.length} canciones para karaoke…`);
@@ -5576,12 +5587,14 @@ function onPrep(m){
   if (m.type === "gpu-bad"){ store.set("iaNoGpu", true); return; } // this graphics chip gets it wrong: the processor from now on
   if (m.type === "progress"){
     if (m.phase === "sep" && PREP.phase !== "sep"){ PREP.sepT0 = performance.now(); }
-    PREP.phase = m.phase; PREP.p = m.p || 0;
+    PREP.phase = m.phase; PREP.p = m.p || 0; if (m.mb != null){ PREP.mb = m.mb; PREP.total = m.total; }
     if (m.phase === "sep" && PREP.p > .02){ const el = (performance.now() - PREP.sepT0) / 1000; PREP.eta = el / PREP.p * (1 - PREP.p); }
     if (performance.now() - prepPaint > 500){ prepPaint = performance.now(); renderKaraUI(); }
     return;
   }
-  if (m.type === "error") return prepFail(/model|fetch|network/i.test(m.msg) ? "No se pudo descargar la IA. Revisa tu internet." : "La IA no pudo con esta canción.");
+  if (m.type === "error") return prepFail(/space/.test(m.msg) ? "No hay espacio en este dispositivo para la IA (necesita unos 240 MB). Libera espacio y vuelve a intentarlo."
+    : /stalled|offline/.test(m.msg) ? "La descarga de la IA se detuvo. Revisa tu internet: al volver a intentarlo seguirá donde se quedó."
+    : /model|fetch|network/i.test(m.msg) ? "No se pudo descargar la IA. Revisa tu internet: al volver a intentarlo seguirá donde se quedó." : "La IA no pudo con esta canción.");
   if (m.type === "done") prepDone(m);
 }
 async function prepDone(m){
@@ -5598,7 +5611,7 @@ async function prepDone(m){
 function prepFail(msg){
   const t = BYID[PREP.cur];
   if (PREP.cur) toast(`${t ? `“${t.title}”: ` : ""}${msg}`);
-  if (PREP.worker && /IA/.test(msg)){ PREP.worker.terminate(); PREP.worker = null; }
+  if (PREP.worker && /IA|descarga/i.test(msg)){ PREP.worker.terminate(); PREP.worker = null; }
   PREP.cur = null; PREP.phase = ""; renderKaraUI(); setTimeout(prepNext, 500);
 }
 function prepStop(){
@@ -5634,15 +5647,16 @@ function renderKaraUI(){
   let note;
   if (PREP.cur){
     const pt = BYID[PREP.cur], ph = PREP.phase;
-    note = ph === "model" ? `Descargando la IA (una sola vez, 172 MB)… ${Math.round(PREP.p * 100)} %`
-      : ph === "sep" ? `Preparando “${pt ? pt.title : ""}”… ${Math.round(PREP.p * 100)} %${PREP.eta > 5 ? ` · faltan unos ${mins(PREP.eta)}` : ""}`
+    note = ph === "model" ? `Descargando la IA (una sola vez)… ${Math.round(PREP.p * 100)} %${PREP.total ? ` · ${PREP.mb} de ${PREP.total} MB` : ""}`
+      : ph === "load" ? "Iniciando la IA en este equipo (la primera vez tarda hasta un minuto)…"
+      : ph === "sep" ? (PREP.p > 0 ? `Separando la voz de “${pt ? pt.title : ""}”… ${Math.round(PREP.p * 100)} %${PREP.eta > 5 ? ` · faltan unos ${mins(PREP.eta)}` : ""}` : `Separando la voz de “${pt ? pt.title : ""}”… calculando el tiempo`)
       : ph === "save" ? `Guardando “${pt ? pt.title : ""}”…` : `Preparando “${pt ? pt.title : ""}”…`;
     if (PREP.q.length) note += ` · ${PREP.q.length} en cola`;
-  } else if (!canPrep()) note = "Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta y aquí sonarán perfectas.";
+  } else if (!canPrep()) note = isMobile ? "En este teléfono prepararlas sería muy lento. Prepáralas en tu PC con tu misma cuenta y aquí sonarán perfectas, sin esperar." : "Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta y aquí sonarán perfectas.";
   else if (t && t.user && karaReady(t.id)) note = `“${t.title}” ya tiene karaoke perfecto${KARA[t.id].f ? ", también en tus otros dispositivos" : ""}.`;
   else note = `La IA separa la voz de verdad. Cada canción se prepara una vez${isMobile ? " (en el teléfono es lento: mejor en tu PC con tu misma cuenta)" : ` (en este equipo, unos ${mins((t && t.dur || 210) / speed)} por canción)`} y después funciona en todos tus dispositivos con tu cuenta.`;
   $("#karaIaNote").textContent = note;
-  const pb = $("#karaProgBox"); pb.hidden = !PREP.cur; $("#karaProg").style.width = (PREP.phase === "sep" || PREP.phase === "model" ? PREP.p * 100 : PREP.phase === "save" ? 100 : 2) + "%";
+  const pb = $("#karaProgBox"); pb.hidden = !PREP.cur; $("#karaProg").style.width = (PREP.phase === "sep" || PREP.phase === "model" ? Math.max(2, PREP.p * 100) : PREP.phase === "save" ? 100 : PREP.phase === "load" ? 4 : 2) + "%";
   const one = $("#karaPrepOne"); one.hidden = !canPrep() || !t || !t.user || !t.rec.blob || karaReady(t.id) || PREP.cur === t.id || PREP.q.includes(t.id);
   const all = $("#karaPrepAll"); all.hidden = !canPrep() || pending.length < 2;
   if (!all.hidden){ const secs = pending.reduce((s, id) => s + (BYID[id].dur || 210), 0) / speed; all.textContent = PREP.arm ? `Pulsa otra vez: ${pending.length} canciones, unas ${secs >= 5400 ? Math.round(secs / 3600) + " h" : mins(secs)}` : `Preparar todas (${pending.length})`; all.classList.toggle("armed", PREP.arm); }
@@ -5751,7 +5765,7 @@ async function proDeactivate(){
   setTimeout(() => location.reload(), 1200);
 }
 async function proCheck(){ // now and then, make sure the key is still good (refunds, etc.); offline it keeps working
-  if (!LIC || !navigator.onLine || Date.now() - (LIC.checked || 0) < 3 * 864e5) return;
+  if (!LIC || !navigator.onLine || Date.now() - (LIC.checked || 0) < (6 + ((LIC.inst || "").charCodeAt(2) % 3)) * 864e5) return;
   try {
     const r = await fetch(`${PRO.api}/validate`, { method: "POST", headers: { accept: "application/json" }, body: new URLSearchParams({ license_key: LIC.key, instance_id: LIC.inst }) });
     const j = await r.json().catch(() => ({}));
