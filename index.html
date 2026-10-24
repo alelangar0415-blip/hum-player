@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RN0qMBUFDLQkA3JAIJlvlkvCisD23q9y0kJEc6NxVYo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o2RG+uu6jputErT07iez15qABS98LPvJizwVtDUrnRg=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1571,6 +1571,7 @@ function loadAt(sec){
   cancelMix();
   if (t.user){
     killBus(); keep.pause();
+    noteRecent(t); if (S.acct && keepMode() === "drive") setTimeout(runTransfers, 1500);
     if (!t.rec.blob){ // only in your account so far: bring it to this device first
       if (audio.dataset.id !== t.id){ audio.pause(); audio.removeAttribute("src"); audio.load(); audio.dataset.id = ""; }
       needFile(t, sec); return;
@@ -2326,6 +2327,13 @@ function toggleMenu(){
   applySide();
 }
 
+/* ---------- heavy measurements never run under your music on a phone ----------
+   Measuring a song (tempo, feel, melody) decodes the whole file, which keeps a phone's processor busy for a few
+   seconds and could make the song that is playing stutter. On a phone these wait while music plays and run as soon
+   as you pause; on a computer they run right away. */
+const PHONE = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+async function calm(){ while (PHONE && S.playing) await new Promise(r => setTimeout(r, 5000)); }
+
 /* ---------- tempo (BPM) and beat position of your own songs, measured once on this device ---------- */
 const bpmQueue = []; let bpmRunning = false;
 function queueBpm(rec){ if (rec.bpmDone || bpmQueue.includes(rec)) return; bpmQueue.push(rec); runBpm(); }
@@ -2334,6 +2342,7 @@ async function runBpm(){
   while (bpmQueue.length){
     const rec = bpmQueue.shift();
     if (!BYID[rec.id] || !rec.blob) continue;
+    await calm(); if (!BYID[rec.id] || !rec.blob) continue;
     try { const r = await analyzeBpm(rec.blob); rec.bpm = r ? r.bpm : null; rec.beat = r ? r.beat : 0; } catch { rec.bpm = null; }
     rec.bpmDone = true;
     try { await idbReq("readwrite", s => s.put(rec)); } catch {}
@@ -2396,6 +2405,7 @@ async function runFeel(){
     const rec = feelQueue.shift();
     if (!BYID[rec.id] || !rec.blob || rec.feel) continue;
     if (bpmRunning || asrState.id){ feelQueue.push(rec); await new Promise(r => setTimeout(r, 2000)); continue; } // one heavy job at a time
+    await calm(); if (!BYID[rec.id] || !rec.blob || rec.feel) continue;
     try { rec.feel = await analyzeFeel(rec.blob); } catch { rec.feel = { none: true }; }
     putRec(rec);
     await new Promise(r => setTimeout(r, 300));
@@ -3384,12 +3394,18 @@ async function runTransfers(){
       const w = xfer.want && BYID[xfer.want] && BYID[xfer.want].rec;
       const cov = Object.keys(COVER_V).find(id => !COVER_V[id].del && !COVER_V[id].up && !xfer.failed.has("c:" + id));
       const ups = recs.filter(r => r.blob && !r.cloud && !xfer.failed.has(r.id));
-      const downs = recs.filter(r => !r.blob && r.cloud && !xfer.failed.has(r.id));
+      const onlyDrive = keepMode() === "drive", pre = onlyDrive ? nextNeeded() : null;
+      const downs = onlyDrive ? [] : recs.filter(r => !r.blob && r.cloud && !xfer.failed.has(r.id));
       if (w && !w.blob && w.cloud && !xfer.failed.has(w.id)) await moveFile(w, "down", 1);
       else if (cov) await moveCover(cov);
       else if (ups.length) await moveFile(ups[0], "up", ups.length);
-      else if (downs.length) await moveFile(downs[0], "down", downs.length);
+      else if (pre) await moveFile(pre, "down", 1); // the next song in line, so it plays with no wait
+      else if (downs.length){
+        await moveFile(downs[0], "down", downs.length);
+        if (PHONE && S.playing) await new Promise(r => setTimeout(r, 4000)); // gentle on a phone that is playing
+      }
       else break;
+      if (onlyDrive) trimCache();
     }
   } catch {} finally { xfer.running = false; xfer.label = ""; xfer.sub = ""; paintAcct(); }
 }
@@ -3577,10 +3593,48 @@ function acctStatus(){
   if (sync.busy) return { i: "spin", b: "Sincronizando…", s: "Juntando lo de tus dispositivos." };
   if (sync.err === "drive_full") return { i: "off", b: "Tu Google Drive está lleno", s: "Libera espacio en Drive para subir más canciones." };
   if (sync.err) return { i: "off", b: "No se pudo sincronizar", s: "Lo intentará otra vez en un momento." };
-  const recs = USER.map(id => BYID[id].rec), upLeft = recs.filter(r => r.blob && !r.cloud).length, downLeft = recs.filter(r => !r.blob && r.cloud).length;
+  const recs = USER.map(id => BYID[id].rec), upLeft = recs.filter(r => r.blob && !r.cloud).length, downLeft = keepMode() === "drive" ? 0 : recs.filter(r => !r.blob && r.cloud).length;
   if (upLeft) return { i: "off", b: `Faltan ${nc(upLeft)} por subir`, s: "Deja la app abierta con internet para terminar." };
   if (downLeft) return { i: "off", b: `Faltan ${nc(downLeft)} por bajar`, s: "Deja la app abierta con internet para terminar." };
   return { i: "ok", b: "Todo al día", s: sync.last ? `Última sincronización: ${ago(sync.last)}` : "" };
+}
+/* ---------- where your music is kept on this device ----------
+   "device": every song in your Drive is also saved here, so it plays without internet.
+   "drive": songs stay in your Drive and each one comes to this device when you play it (the next one in line too,
+   so there is no wait); only the last 25 you played stay here. A song is only taken off this device when it is
+   safe in your Drive. */
+function keepMode(){ return store.get("keepMode", "device") === "drive" ? "drive" : "device"; }
+function noteRecent(t){
+  if (!t || !t.user) return;
+  const r = store.get("recent", {}) || {}; r[t.id] = Date.now();
+  const o = {}; Object.keys(r).sort((a, b) => r[b] - r[a]).slice(0, 300).forEach(i => o[i] = r[i]); store.set("recent", o);
+}
+function nextNeeded(){ const t = BYID[S.queue[S.qi + 1]]; return t && t.user && !t.rec.blob && t.rec.cloud && !xfer.failed.has(t.id) ? t.rec : null; }
+function safeInDrive(rec){ const r = sync.remote && sync.remote.items && sync.remote.items["song:" + rec.id]; return !!(rec.cloud && r && !r.deleted && r.f === rec.cloud); }
+function trimCache(){
+  if (keepMode() !== "drive" || !S.acct) return 0;
+  const recent = store.get("recent", {}) || {}, c = cur();
+  const busy = new Set([c && c.id, S.queue[S.qi + 1], audio.dataset.id, deckB.dataset.id, bgEl.dataset.id, xfer.want].filter(Boolean));
+  const held = USER.map(id => BYID[id]).filter(t => t && t.rec.blob);
+  const kept = new Set(held.slice().sort((a, b) => (recent[b.id] || 0) - (recent[a.id] || 0)).slice(0, 25).map(t => t.id));
+  let freed = 0;
+  held.forEach(t => {
+    if (kept.has(t.id) || busy.has(t.id) || !safeInDrive(t.rec)) return;
+    freed += t.rec.blob.size || 0;
+    t.rec.blob = null; if (t.url){ URL.revokeObjectURL(t.url); t.url = null; }
+    putRec(t.rec);
+    document.querySelectorAll(`.row[data-row="${t.id}"]`).forEach(r => r.classList.add("cloud-only"));
+  });
+  return freed;
+}
+function setKeep(m){
+  if (m === keepMode()) return;
+  store.set("keepMode", m === "drive" ? "drive" : "device");
+  if (m === "drive"){
+    const f = trimCache();
+    toast(f ? `Listo: liberaste ${bytes(f)} en este equipo. Tus canciones siguen en tu Drive.` : "Listo: cada canción se bajará a este equipo cuando la pongas.");
+  } else { toast("Listo: todas tus canciones se guardarán en este equipo."); runTransfers(); }
+  renderAcct(); paintAcct();
 }
 const stHTML = st => (st.i === "spin" ? `<span class="spin" aria-hidden="true"></span>` : `<span class="ok"${st.i === "ok" ? "" : ' style="background:var(--line)"'}>${ic(st.i === "ok" ? "check" : "sync")}</span>`)
   + `<div><b>${esc(st.b)}</b>${st.s ? `<small>${esc(st.s)}</small>` : ""}</div>`;
@@ -3603,6 +3657,9 @@ function renderAcct(){
   b.innerHTML = `<div class="acct-top"><span class="acct-ic on">${ic("cloud")}</span><div><h2 id="acctH">${esc(S.acct.name || "Tu cuenta")}</h2><p>${esc(S.acct.email)} · Google Drive</p></div></div>
     <dl class="facts acct-facts"><div><dt>En tu Drive</dt><dd>${R ? nc(R.length) : "…"}</dd></div><div><dt>Espacio de Google</dt><dd>${m ? `${bytes(m.used)}${m.limit ? " de " + bytes(m.limit) : ""}` : "…"}</dd></div><div><dt>En este equipo</dt><dd>${nc(here)}</dd></div></dl>
     <div class="acct-st" id="acctSt" role="status">${stHTML(acctStatus())}</div>
+    <h3 class="snd-h">Dónde se guarda tu música en este equipo</h3>
+    <div class="spk-grid" role="group" aria-label="Dónde se guarda tu música en este equipo">${[["device", "En este equipo", "Todas tus canciones se guardan aquí y suenan sin internet."], ["drive", "Solo en tu Drive", "Ahorra espacio: cada canción se baja al ponerla y aquí se quedan las últimas 25. Necesitas internet."]]
+      .map(([k, n, d]) => `<button type="button" class="spk${keepMode() === k ? " on" : ""}" data-keep="${k}" aria-pressed="${keepMode() === k}"><b>${n}</b><small>${d}</small></button>`).join("")}</div>
     <p class="mix-note">Lo que añadas, quites o cambies aquí aparece en tus otros dispositivos al abrir Hum con esta cuenta de Google. Cada cuenta tiene su propia música: si cierras sesión, la de esta cuenta se quita de este dispositivo y sigue en tu Drive.</p>
     <div class="dlg-act"><button type="button" class="pill danger" data-act="acct-out">Cerrar sesión</button>
       ${need ? `<button type="button" class="add-top" data-act="acct-reconnect">${ic("sync")}<span>Reconectar</span></button>` : `<button type="button" class="pill" data-act="acct-sync">${ic("sync")}Sincronizar ahora</button>`}
@@ -4358,6 +4415,7 @@ async function runMelody(){
     const rec = melQueue.shift();
     if (!BYID[rec.id] || !rec.blob || rec.melody) continue;
     if (bpmRunning || feelRunning || asrState.id){ melQueue.push(rec); await new Promise(r => setTimeout(r, 2500)); continue; }
+    await calm(); if (!BYID[rec.id] || !rec.blob || rec.melody) continue;
     try { rec.melody = await melodyOf(rec.blob); } catch { rec.melody = "-"; }
     putRec(rec);
     await new Promise(r => setTimeout(r, 300));
@@ -6046,6 +6104,7 @@ document.addEventListener("click", e => {
   if (pa){ toggleInPl(S.pickPl, pa.dataset.pickadd, true); pa.setAttribute("aria-pressed", IMPORTED[S.pickPl] ? plHas(IMPORTED[S.pickPl], pa.dataset.pickadd) : false); return; }
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
+  const kp = e.target.closest("[data-keep]"); if (kp){ setKeep(kp.dataset.keep); return; }
   const fm = e.target.closest("[data-fxmode]");
   if (fm){ setFx({ mode: fm.dataset.fxmode }); return; }
   const hp = e.target.closest("[data-humplay]");
