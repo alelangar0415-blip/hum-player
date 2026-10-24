@@ -74,6 +74,9 @@ a{color:var(--accent)}
   <li>La página solo ejecuta el código de Hum: si alguien intentara colar código (por ejemplo en el nombre de una canción o de una playlist compartida), el navegador lo bloquea.</li>
   <li>Lo que llega de otras personas o de la sincronización se revisa antes de mostrarse: solo texto, números e imágenes hechas por la app.</li>
   <li>Hum no se puede abrir dentro de otra página (así se evitan los clics engañosos).</li>
+  <li>Las herramientas de IA que Hum descarga vienen de versiones fijas y verificadas; la página no acepta código de ninguna otra versión ni de otros sitios.</li>
+  <li>La clave de Google de Hum solo funciona desde el sitio de Hum y solo para Google Drive: no sirve en ningún otro lugar.</li>
+  <li>Cada versión de la app de Windows publica su huella digital (SHA-256) en <a href="https://github.com/alelangar0415-blip/hum-player/releases" rel="noopener">la página de descargas</a>: así puedes comprobar que tu instalador es el original. En Windows: abre PowerShell y escribe <code>Get-FileHash HumPlayer-Setup.exe</code>; el resultado debe ser igual al publicado.</li>
   <li>La app de Windows solo muestra Hum: no puede convertirse en un navegador, solo pide los permisos que usa (micrófono, ubicación para el clima y el sonido del PC para el modo videojuegos) y su programa no se puede usar para ejecutar otro código.</li>
 </ul>
 

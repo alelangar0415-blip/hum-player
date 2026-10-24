@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Tu música y tus playlists en tu propio reproductor.">
 <meta name="theme-color" content="#0d0e13">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jZfN1XMVrNcAwZNBAxE1BfioCtOBbF2c4wm8vK5ykR8=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+UssJ9YWploLyyGFB7qNAkfXjXW16/nBOQWz+f6SjbU=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3231,6 +3232,27 @@ async function flushTrash(){
 }
 
 const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone", "feel"];
+function cleanSongData(d){ // a song's details that came from the sync file: only the expected kinds of values
+  if (!d || typeof d !== "object") return {};
+  const o = {}, num = (v, lo, hi) => v != null && isFinite(+v) ? clamp(+v, lo, hi) : undefined;
+  ["name", "title", "artist", "album"].forEach(k => { if (d[k] != null) o[k] = str(d[k], 400); });
+  o.dur = num(d.dur, 0, 86400); o.size = num(d.size, 0, 2e10); o.added = num(d.added, 0, 1e15);
+  o.bpm = d.bpm === null ? null : num(d.bpm, 30, 300); o.beat = num(d.beat, 0, 600);
+  if (d.bpmDone != null) o.bpmDone = !!d.bpmDone;
+  if (typeof d.type === "string" && /^[\w.+-]{1,40}\/[\w.+-]{1,60}$/.test(d.type)) o.type = d.type;
+  if (typeof d.lang === "string" && /^[a-z]{2,3}$/.test(d.lang)) o.lang = d.lang;
+  if (d.feel && typeof d.feel === "object" && !Array.isArray(d.feel)){
+    o.feel = {}; Object.entries(d.feel).slice(0, 24).forEach(([k, v]) => { if (/^\w{1,24}$/.test(k) && (typeof v === "boolean" || (typeof v === "number" && isFinite(v)))) o.feel[k] = v; });
+  }
+  if (d.lyrics && typeof d.lyrics === "object" && !Array.isArray(d.lyrics)){
+    const L = d.lyrics;
+    o.lyrics = { raw: str(L.raw, 30000), plain: str(L.plain, 30000), src: typeof L.src === "string" && /^[a-z]{1,12}$/.test(L.src) ? L.src : "",
+      synced: Array.isArray(L.synced) ? L.synced.slice(0, 3000).filter(l => l && typeof l === "object" && isFinite(+l.t)).map(l => ({ t: clamp(+l.t, 0, 86400), text: str(l.text, 600) })) : null };
+    if (o.lyrics.synced && !o.lyrics.synced.length) o.lyrics.synced = null;
+  }
+  Object.keys(o).forEach(k => o[k] === undefined && delete o[k]);
+  return o;
+}
 function songData(rec){ const d = {}; SONG_FIELDS.forEach(k => { if (rec[k] !== undefined && rec[k] !== null) d[k] = rec[k]; }); return d; }
 function plData(p){ const { genCover, hue, u, ...d } = p; return d; }
 function localKeys(){
@@ -3356,7 +3378,7 @@ async function applyRemote(it){
     if (t && t.user){
       const rec = t.rec; let ch = false;
       if (it.updated > (rec.u || 0) && it.data){
-        SONG_FIELDS.forEach(k => { if (k in it.data) rec[k] = ["title", "artist", "album", "name"].includes(k) ? str(it.data[k], 400) : it.data[k]; });
+        const cd = cleanSongData(it.data); SONG_FIELDS.forEach(k => { if (k in cd) rec[k] = cd[k]; });
         rec.u = it.updated; t.title = rec.title; t.artist = rec.artist; t.album.title = rec.album || "Mis canciones"; ch = true;
       }
       if (it.parts && rec.cloud !== it.parts){ rec.cloud = it.parts; ch = true; }
@@ -3367,7 +3389,7 @@ async function applyRemote(it){
     }
     if (t) return false;
     const d = it.data && typeof it.data === "object" ? it.data : {};
-    const rec = { ...songData(d), id, u: it.updated, cloud: it.parts, blob: null, pic: null, lyrScan: true, owner: S.acct && S.acct.email,
+    const rec = { ...songData(cleanSongData(d)), id, u: it.updated, cloud: it.parts, blob: null, pic: null, lyrScan: true, owner: S.acct && S.acct.email,
       title: str(d.title, 300) || "Canción", artist: str(d.artist, 300) || "Artista desconocido", album: str(d.album, 300), added: +d.added || Date.now(), name: str(d.name, 400) };
     await putRec(rec); addUserTrack(rec);
     return true;
@@ -6412,7 +6434,8 @@ document.addEventListener("click", e => {
 const LOOK_DEF = { color: "amber", custom: "#f2b544", bg: "glow", dim: .72, mini: "theme", lock: "cover" };
 let LOOK = { ...LOOK_DEF, ...((store.get("look", {}) || {})) }, lookPhoto = "", lookFor = null, LOOKACC = "";
 try { lookPhoto = localStorage.getItem("hum:lookPhoto") || ""; } catch {}
-if (!/^data:image\/jpeg;base64,/.test(lookPhoto)) lookPhoto = "";
+if (!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(lookPhoto)) lookPhoto = "";
+const cssUrl = u => `url("${String(u).replace(/["\\\n\r]/g, c => encodeURIComponent(c))}")`;
 const LOOK_COLORS = [["auto", "Automático", null], ["amber", "Ámbar", 39], ["rose", "Rosa", 335], ["violet", "Violeta", 262], ["blue", "Azul", 208], ["mint", "Menta", 158], ["red", "Rojo", 4], ["lime", "Lima", 84]];
 function hslHex(h, s, l){
   s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
@@ -6443,7 +6466,7 @@ function applyLook(){
   root.style.setProperty("--look-dim", clamp(+LOOK.dim || .72, .3, .95));
   const t = cur(), img = bg === "photo" ? lookPhoto : bg === "cover" && t ? cover(t) : "";
   root.classList.toggle("look-img", !!img); root.classList.toggle("look-cover", bg === "cover" && !!img); root.classList.toggle("look-dark", bg === "dark");
-  const el = $("#lookBg"); if (el) el.style.backgroundImage = img ? `url("${img}")` : "none";
+  const el = $("#lookBg"); if (el) el.style.backgroundImage = img ? cssUrl(img) : "none";
   if (miniWin && !miniWin.closed) lookMini(miniWin, t);
 }
 function lookMini(w, t){
@@ -6452,7 +6475,7 @@ function lookMini(w, t){
   if (LOOK.mini === "theme") r.style.setProperty("--h", lookHue());
   const img = LOOK.mini === "photo" && lookPhoto ? lookPhoto : LOOK.mini === "cover" && t ? cover(t) : "";
   r.classList.toggle("mb-img", !!img); r.classList.toggle("mb-cover", LOOK.mini === "cover" && !!img);
-  bgEl2.style.backgroundImage = img ? `url("${img}")` : "none";
+  bgEl2.style.backgroundImage = img ? cssUrl(img) : "none";
 }
 // lock screen and notification: a 512 px picture made in the chosen style
 function lockArt(src){
