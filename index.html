@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Bzw3VCWeKlu5NN4gWfY/0NqkEJ0Ztj2l5irPT5T7Wpo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v2gvciUQkTPihHBbv66zbnmeqzKCwIox0YYkn8PGnDQ=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -672,6 +672,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .pro-price{margin:4px 0 14px}
 .pro-buy{margin:0 0 16px;display:inline-flex;text-decoration:none}
 .pro-key label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+.pro-legal a,.w-legal a{color:inherit;text-decoration:underline}
 #navPro{color:var(--accent)}
 
 /* ---------- perfect karaoke (AI) ---------- */
@@ -941,6 +942,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <a class="w-ghost" id="wWin" href="https://github.com/alelangar0415-blip/hum-player/releases/latest/download/HumPlayer-Setup.exe" hidden>Descargar para Windows</a>
     </div>
     <p class="w-small" id="wHelp">En el móvil: en Android, menú ⋮ › Instalar app. En iPhone, Compartir › Añadir a pantalla de inicio.</p>
+    <p class="w-small w-legal"><a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">Términos y reembolsos</a> · <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
   </div>
 </section>
 <section class="fp" id="fp" hidden aria-label="Canción en grande">
@@ -5715,6 +5717,7 @@ function renderPro(){
       <div class="share-link"><input id="proKey" type="text" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><button type="button" class="pill" data-act="pro-activate"${PRO.busy ? " disabled" : ""}>${PRO.busy ? "Activando…" : "Activar"}</button></div>
       <p class="dlg-msg${/no |ya está|otro|Revisa|lleno/i.test(PRO.msg) ? " err" : ""}" id="proMsg" role="status">${esc(PRO.msg)}</p>
     </div>
+    <p class="mix-note pro-legal">Al comprar aceptas los <a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">términos</a>. Reembolso completo dentro de los 14 días. <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a>.</p>
     <div class="dlg-act"><button type="button" class="pill" data-act="pro-close">Ahora no</button></div>`;
 }
 async function proActivate(key, quiet){
