@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-AkD6bftoZDAUR6R05jJbI4xa8DFBwg+0p2OUQFdEoXE=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-GBIdPH8FDPr7p3CiEzZrWRMnC3o9spEvXldaZ22BmZo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -821,6 +821,16 @@ html.look-dark body{background:var(--bg)}
 .sing-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px))}
 .sing-msg{width:100%;text-align:center;color:var(--muted);font-size:14px;margin:0}
 .sing-bar .pill.on{border-color:var(--accent);color:var(--accent)}
+.upd-bar{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;
+  padding:8px 8px 8px 16px;border-radius:999px;background:var(--panel);border:1px solid var(--accent);box-shadow:0 12px 30px rgba(0,0,0,.5);max-width:calc(100% - 24px)}
+.upd-bar span{font-weight:600;font-size:14px}
+/* ---------- ambient mode ---------- */
+.ambient{position:fixed;inset:0;z-index:80;background:#000;cursor:none}
+.ambient.show-ui{cursor:default}
+.ambient canvas{width:100%;height:100%;display:block}
+.amb-ui{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;display:flex;gap:8px;opacity:0;transition:opacity .3s}
+.ambient.show-ui .amb-ui{opacity:1}
+.amb-ui .ib{background:rgba(0,0,0,.45);color:#fff}
 </style>
 </head>
 <body>
@@ -867,7 +877,7 @@ html.look-dark body{background:var(--bg)}
     <canvas class="viz" id="viz" aria-hidden="true"></canvas>
     <dl class="facts" id="facts"></dl>
     <button type="button" class="pill np-lyr" data-act="lyrics" id="npLyr"></button>
-    <div class="np-x"><button type="button" class="pill" data-act="sing" id="npSing"></button><button type="button" class="pill" data-act="sleep" id="npSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="npTg"></button></div>
+    <div class="np-x"><button type="button" class="pill" data-act="sing" id="npSing"></button><button type="button" class="pill" data-act="ambient" id="npAmb"></button><button type="button" class="pill" data-act="story" id="npStory"></button><button type="button" class="pill" data-act="sleep" id="npSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="npTg"></button></div>
     <h4>A continuación</h4>
     <ol class="upnext" id="upnext"></ol>
   </aside>
@@ -975,6 +985,7 @@ html.look-dark body{background:var(--bg)}
       <a class="w-ghost" id="wWin" data-umami-event="descargar-windows" href="https://github.com/alelangar0415-blip/hum-player/releases/latest/download/HumPlayer-Setup.exe" hidden>Descargar para Windows</a>
     </div>
     <p class="w-small" id="wHelp">En el móvil: en Android, menú ⋮ › Instalar app. En iPhone, Compartir › Añadir a pantalla de inicio.</p>
+    <p class="w-small" id="wVer"></p>
     <p class="w-small w-legal"><a href="https://alelangar0415-blip.github.io/hum-player/precios.html" target="_blank" rel="noopener">Precios</a> · <a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">Términos y reembolsos</a> · <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
   </div>
 </section>
@@ -998,7 +1009,7 @@ html.look-dark body{background:var(--bg)}
       <button type="button" class="ib big" id="fpNext" aria-label="Siguiente"></button>
       <button type="button" class="ib tog" id="fpRep" aria-label="Repetir"></button>
     </div>
-    <div class="fp-extra"><button type="button" class="pill" data-act="sing" id="fpSing"></button><button type="button" class="pill" data-act="sleep" id="fpSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="fpTg"></button></div>
+    <div class="fp-extra"><button type="button" class="pill" data-act="sing" id="fpSing"></button><button type="button" class="pill" data-act="ambient" id="fpAmb"></button><button type="button" class="pill" data-act="story" id="fpStory"></button><button type="button" class="pill" data-act="sleep" id="fpSleep" aria-pressed="false"></button><button type="button" class="pill" data-act="tg-open" id="fpTg"></button></div>
     <div class="fp-lyr" id="fpLyr"></div>
   </div>
 </section>
@@ -1161,6 +1172,8 @@ html.look-dark body{background:var(--bg)}
   <div class="dlg-act"><button type="button" class="add-top" data-act="hp-close">Listo</button></div>
 </dialog>
 <dialog class="dlg look-dlg" id="lookDlg" aria-labelledby="lookH"><div id="lookBody"></div><input type="file" id="lookFile" accept="image/*" hidden></dialog>
+<div class="ambient" id="ambient" hidden aria-label="Modo ambiente"><canvas id="ambCv"></canvas>
+  <div class="amb-ui"><button type="button" class="ib" data-act="amb-pp" id="ambPP" aria-label="Pausar o reproducir"></button><button type="button" class="ib" data-act="amb-next" aria-label="Siguiente"></button><button type="button" class="ib" data-act="amb-close" aria-label="Salir del modo ambiente"></button></div></div>
 <dialog class="sing-dlg" id="singDlg" aria-label="Cantar con puntuación">
   <div class="sing-stage"><canvas id="singCv" width="1080" height="1920" aria-label="Tu karaoke: la melodía, tu voz, la letra y tus puntos"></canvas><video id="singVid" playsinline controls hidden></video></div>
   <div class="sing-bar" id="singBar"></div>
@@ -5592,6 +5605,8 @@ $("#earDlg").addEventListener("close", () => { if (ET.busy){ ET.busy = false; cl
 $("#sleepBtn").innerHTML = ic("moon");
 [$("#fpTg"), $("#npTg")].forEach(b => { if (b) b.innerHTML = ic("group") + "<span>Escuchar juntos</span>"; });
 [$("#fpSing"), $("#npSing")].forEach(b => { if (b) b.innerHTML = ic("mic") + "<span>Cantar</span>"; });
+[$("#fpAmb"), $("#npAmb")].forEach(b => { if (b) b.innerHTML = ic("spark") + "<span>Ambiente</span>"; });
+[$("#fpStory"), $("#npStory")].forEach(b => { if (b) b.innerHTML = ic("share") + "<span>Compartir</span>"; });
 renderPersUI(); renderSleepUI(); renderRunUI(); renderTgChip();
 
 // --- Hum understands it
@@ -5610,6 +5625,8 @@ function humModes(c){
     setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
   }
   if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c) && !/cantar|puntos/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
+  if (/(modo ambiente|pantalla completa|modo fiesta visual)/.test(c)){ openAmbient(); reply("Modo ambiente. Toca la pantalla para ver los controles."); return true; }
+  if (/(comparte|compartir|publica) (lo que (estoy escuchando|escucho)|esta cancion|la cancion)/.test(c)){ storyCard(); reply("Te preparo la imagen para tus historias."); return true; }
   if (/(quiero cantar|vamos a cantar|cantar y (sacar|ganar) puntos|califica(me)? (como canto|mi voz)|karaoke con puntos)/.test(c)){ openSing(); reply("¡A cantar! Usa audífonos para mejor resultado."); return true; }
   if (/(prueba de oido|ajusta(lo)? a mi oido|mi oido)/.test(c)){ openEar(); reply("Vamos con la prueba de oído."); return true; }
   if (/(escuchar|escuchemos|oir) (juntos|con alguien|con un amigo|con mi)/.test(c)){ openTg(); reply("Comparte el enlace y escuchen lo mismo al mismo tiempo."); return true; }
@@ -5700,7 +5717,13 @@ function prepWorker(){
   if (!PREP.worker){
     PREP.worker = new Worker("ia/separar.js", { type: "module" });
     PREP.worker.onmessage = e => onPrep(e.data);
-    PREP.worker.onerror = () => prepFail("No se pudo cargar la IA. Revisa tu internet.");
+    PREP.worker.onerror = e => {
+      try { e.preventDefault(); } catch {}
+      stat("ia-error", { donde: isMobile ? "telefono" : "pc", motivo: String((e && e.message) || "inicio").slice(0, 60) });
+      prepFail(navigator.onLine === false ? "No hay internet para descargar la IA. Conéctate y vuelve a intentarlo."
+        : isMobile ? "Tu teléfono no pudo iniciar la IA (suele faltarle memoria). Prepara la canción en tu PC con tu misma cuenta, o canta igual: toca «Cantar» y Hum usa el modo básico."
+        : "No se pudo iniciar la IA en este equipo. Cierra otras pestañas y vuelve a intentarlo.");
+    };
   }
   return PREP.worker;
 }
@@ -6461,6 +6484,107 @@ document.addEventListener("click", e => {
   if (a === "sing-watch"){ const v = $("#singVid"), show = v.hidden; v.hidden = !show; SING.cv.hidden = show; if (show) v.play().catch(() => {}); else v.pause(); renderSingBar(); }
 });
 
+/* ---------- "now listening": a picture for stories (1080×1920), made on this device ---------- */
+const loadImg = u => new Promise(r => { if (!u) return r(null); const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = u; });
+function blurInto(x, im, W, H){ // a soft blurred copy of the picture filling the area (shrink and enlarge: works in every browser)
+  const s = document.createElement("canvas"); s.width = 16; s.height = Math.max(8, Math.round(16 * H / W)); const sx = s.getContext("2d");
+  const ar = W / H, q = Math.min(im.width, im.height * ar), qh = q / ar; sx.drawImage(im, (im.width - q) / 2, (im.height - qh) / 2, q, qh, 0, 0, s.width, s.height);
+  x.imageSmoothingQuality = "high"; x.drawImage(s, -W * .08, -H * .08, W * 1.16, H * 1.16);
+}
+async function storyCard(){
+  const t = cur(); if (!t){ toast("Pon una canción primero."); return; }
+  stat("compartir-cancion");
+  const c = document.createElement("canvas"); c.width = 1080; c.height = 1920; const x = c.getContext("2d"), acc = LOOKACC || "#f2b544";
+  const im = await loadImg(cover(t));
+  x.fillStyle = "#08080c"; x.fillRect(0, 0, 1080, 1920);
+  if (im) blurInto(x, im, 1080, 1920);
+  const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, "rgba(6,6,10,.35)"); g.addColorStop(.6, "rgba(6,6,10,.55)"); g.addColorStop(1, "rgba(6,6,10,.88)"); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+  x.textAlign = "center"; x.fillStyle = acc; x.font = singFont(800, 34); x.letterSpacing = "6px"; x.fillText("ESTOY ESCUCHANDO", 540, 300); x.letterSpacing = "0px";
+  x.save(); x.shadowColor = "rgba(0,0,0,.6)"; x.shadowBlur = 70; x.shadowOffsetY = 30; x.beginPath(); x.roundRect(160, 380, 760, 760, 44); x.fillStyle = "#000"; x.fill(); x.restore();
+  if (im){ x.save(); x.beginPath(); x.roundRect(160, 380, 760, 760, 44); x.clip(); const q = Math.min(im.width, im.height); x.drawImage(im, (im.width - q) / 2, (im.height - q) / 2, q, q, 160, 380, 760, 760); x.restore(); }
+  x.fillStyle = "#fff"; x.font = singFont(800, 72, "d"); const tl = wrapText(x, t.title, 900, 2); tl.forEach((ln, i) => x.fillText(ln, 540, 1270 + i * 84));
+  let y = 1270 + (tl.length - 1) * 84 + 70; x.fillStyle = "rgba(235,233,243,.75)"; x.font = singFont(600, 44); x.fillText(fitText(x, t.artist, 900), 540, y);
+  const p = clamp(pos() / (t.dur || 1), 0, 1); y += 90;
+  x.fillStyle = "rgba(255,255,255,.22)"; x.beginPath(); x.roundRect(160, y, 760, 10, 5); x.fill();
+  x.fillStyle = acc; x.beginPath(); x.roundRect(160, y, Math.max(10, 760 * p), 10, 5); x.fill(); x.beginPath(); x.arc(160 + 760 * p, y + 5, 14, 0, 7); x.fill();
+  x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(500, 30, "m"); x.textAlign = "left"; x.fillText(fmt(pos()), 160, y + 60); x.textAlign = "right"; x.fillText(fmt(t.dur || 0), 920, y + 60);
+  x.textAlign = "center"; x.fillStyle = acc; [[-22, 30], [0, 52], [22, 30]].forEach(([dx, h]) => { x.beginPath(); x.roundRect(470 + dx - 6, 1790 - h / 2, 12, h, 6); x.fill(); });
+  x.fillStyle = "#fff"; x.font = singFont(800, 52, "d"); x.textAlign = "left"; x.fillText("hum", 512, 1808);
+  x.textAlign = "center"; x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(500, 26); x.fillText("alelangar0415-blip.github.io/hum-player", 540, 1868);
+  const blob = await new Promise(r => c.toBlob(r, "image/png")); if (!blob){ toast("No se pudo crear la imagen."); return; }
+  const name = `Hum - ${t.title}.png`.replace(/[\\/:*?"<>|]/g, ""), file = new File([blob], name, { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })){
+    try { await navigator.share({ files: [file], title: "Estoy escuchando en Hum", text: `Estoy escuchando “${t.title}” de ${t.artist} en Hum Player` }); return; } catch (e){ if (e && e.name === "AbortError") return; }
+  }
+  const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+  toast("Listo: guardé la imagen para tus historias.");
+}
+
+/* ---------- ambient mode: full screen, the cover in the middle, light that moves with the music, big lyrics ---------- */
+const AMB = { on: false, raf: 0, for: null, im: null, blur: null, f: new Uint8Array(64), lock: null, ui: 0, lv: 0 };
+function openAmbient(){
+  const t = cur(); if (!t){ toast("Pon una canción primero."); return; }
+  const el = $("#ambient"); el.hidden = false; AMB.on = true; AMB.for = null; stat("modo-ambiente");
+  $("#ambPP").innerHTML = ic(S.playing ? "pause" : "play"); el.querySelector("[data-act=amb-next]").innerHTML = ic("next"); el.querySelector("[data-act=amb-close]").innerHTML = ic("close");
+  try { if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); } catch {}
+  try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(l => { AMB.lock = l; }).catch(() => {}); } catch {}
+  ambUi(); cancelAnimationFrame(AMB.raf); const go = () => { if (!AMB.on) return; ambDraw(); AMB.raf = requestAnimationFrame(go); }; AMB.raf = requestAnimationFrame(go);
+}
+function closeAmbient(){
+  if (!AMB.on) return; AMB.on = false; cancelAnimationFrame(AMB.raf); $("#ambient").hidden = true;
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  if (AMB.lock){ try { AMB.lock.release(); } catch {} AMB.lock = null; }
+}
+function ambUi(){ const el = $("#ambient"); el.classList.add("show-ui"); clearTimeout(AMB.ui); AMB.ui = setTimeout(() => el.classList.remove("show-ui"), 2600); }
+async function ambCover(t){
+  AMB.for = t.id; const im = await loadImg(cover(t)); if (AMB.for !== t.id) return; AMB.im = im;
+  if (im){ const b = document.createElement("canvas"); b.width = 640; b.height = 640; blurInto(b.getContext("2d"), im, 640, 640); AMB.blur = b; } else AMB.blur = null;
+}
+function ambDraw(){
+  const cv = $("#ambCv"), dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const t = cur(), acc = LOOKACC || "#f2b544", now = performance.now() / 1000; if (!t) return;
+  if (AMB.for !== t.id) ambCover(t);
+  let lv = 0; const f = AMB.f;
+  if (analyser && S.playing){ analyser.getByteFrequencyData(f); for (let i = 0; i < 12; i++) lv += f[i]; lv /= 12 * 255; } else f.fill(0);
+  AMB.lv += (lv - AMB.lv) * .25;
+  x.fillStyle = "#000"; x.fillRect(0, 0, W, H);
+  if (AMB.blur){ const k = Math.max(W, H) * (1.25 + .04 * Math.sin(now * .15)), ox = (W - k) / 2 + Math.sin(now * .07) * W * .03, oy = (H - k) / 2 + Math.cos(now * .05) * H * .03; x.globalAlpha = .85; x.drawImage(AMB.blur, ox, oy, k, k); x.globalAlpha = 1; }
+  const vg = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .2, W / 2, H / 2, Math.max(W, H) * .75); vg.addColorStop(0, "rgba(0,0,0,.25)"); vg.addColorStop(1, "rgba(0,0,0,.75)"); x.fillStyle = vg; x.fillRect(0, 0, W, H);
+  const port = H > W, sz = Math.min(W, H) * (port ? .62 : .42), cx = W / 2, cy = port ? H * .36 : H * .42, pulse = 1 + AMB.lv * .05;
+  // light around the cover, moving with the music
+  const n = 64, r0 = sz * .5 * pulse + 14; x.save(); x.translate(cx, cy); x.strokeStyle = acc; x.lineCap = "round"; x.lineWidth = Math.max(3, sz * .012);
+  for (let i = 0; i < n; i++){ const k = i < n / 2 ? i : n - 1 - i, v = f[Math.floor(k / (n / 2) * 40)] / 255, a = i / n * Math.PI * 2 + now * .1, len = 6 + v * sz * .28; x.globalAlpha = .25 + v * .75;
+    x.beginPath(); x.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); x.lineTo(Math.cos(a) * (r0 + len), Math.sin(a) * (r0 + len)); x.stroke(); }
+  x.restore(); x.globalAlpha = 1;
+  x.save(); x.translate(cx, cy); x.scale(pulse, pulse); x.shadowColor = acc; x.shadowBlur = 40 + AMB.lv * 60; x.beginPath(); x.roundRect(-sz / 2, -sz / 2, sz, sz, sz * .06); x.fillStyle = "#111"; x.fill(); x.shadowBlur = 0;
+  if (AMB.im){ x.clip(); const im = AMB.im, q = Math.min(im.width, im.height); x.drawImage(im, (im.width - q) / 2, (im.height - q) / 2, q, q, -sz / 2, -sz / 2, sz, sz); }
+  x.restore();
+  // song and lyrics
+  const base = cy + sz / 2 * pulse + (port ? 70 : 60), fs1 = Math.round(Math.min(W * .065, 46)), fs2 = Math.round(fs1 * .6);
+  x.textAlign = "center"; x.fillStyle = "#fff"; x.font = singFont(800, fs1, "d"); x.fillText(fitText(x, t.title, W * .9), cx, base);
+  x.fillStyle = "rgba(235,233,243,.72)"; x.font = singFont(600, fs2); x.fillText(fitText(x, t.artist, W * .9), cx, base + fs2 * 1.6);
+  const L = t.user && t.rec.lyrics && t.rec.lyrics.synced;
+  if (L && L.length){ const p = pos(); let i = -1; for (let k = 0; k < L.length; k++){ if (L[k].t <= p + .15) i = k; else break; }
+    const ly = base + fs2 * 1.6 + fs1 * 1.9, fl = Math.round(fs1 * 1.05); x.font = singFont(800, fl, "d"); x.fillStyle = "#fff";
+    wrapText(x, i >= 0 ? L[i].text || "♪" : "♪", W * .88, 2).forEach((ln, j) => x.fillText(ln, cx, ly + j * fl * 1.2));
+    if (L[i + 1]){ x.font = singFont(600, Math.round(fl * .6)); x.fillStyle = "rgba(235,233,243,.45)"; x.fillText(fitText(x, L[i + 1].text || "", W * .88), cx, ly + fl * 2.6); } }
+  const pp = $("#ambPP"), want = S.playing ? "pause" : "play"; if (pp && pp.dataset.s !== want){ pp.dataset.s = want; pp.innerHTML = ic(want); }
+}
+$("#ambient").addEventListener("pointermove", ambUi);
+$("#ambient").addEventListener("click", e => { if (!e.target.closest("button")) ambUi(); });
+document.addEventListener("keydown", e => { if (AMB.on && e.key === "Escape") closeAmbient(); });
+document.addEventListener("fullscreenchange", () => { if (AMB.on && !document.fullscreenElement && $("#ambient").dataset.fs === "1") closeAmbient(); $("#ambient").dataset.fs = document.fullscreenElement ? "1" : "0"; });
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]"); if (!a) return; const k = a.dataset.act;
+  if (k === "ambient") openAmbient();
+  if (k === "amb-close") closeAmbient();
+  if (k === "amb-pp"){ S.playing ? pause() : play(); ambUi(); }
+  if (k === "amb-next"){ next(false); ambUi(); }
+  if (k === "story") storyCard();
+});
+
 /* ---------- your look (this device only) ----------
    Color: a few to pick from, any color you like, "automatic" (each song's cover colors) or the colors of your photo.
    Background: plain dark, the glow of the song (as before), the song's cover blurred, or your own photo.
@@ -6842,7 +6966,31 @@ $("#installBtn").innerHTML = ic("install") + "<span>Instalar app</span>";
 if (isIOS && !isStandalone()) $("#installBtn").hidden = false;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#installBtn").hidden = false; if (!$("#welcome").hidden) $("#wInstall").hidden = false; });
 window.addEventListener("appinstalled", () => { installEvt = null; try { window.umami && umami.track("instalo-app"); } catch {} $("#installBtn").hidden = true; toast("Hum Player está instalada. Ábrela desde tu escritorio o tu pantalla de inicio."); });
-if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+/* ---------- always the newest Hum ----------
+   Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
+   while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
+const APP_V = "1.13.0";
+if ("serviceWorker" in navigator && location.protocol === "https:"){
+  let hadCtl = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    const check = () => reg.update().catch(() => {});
+    setInterval(check, 30 * 60000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (!hadCtl){ hadCtl = true; return; } showUpdate(); });
+}
+function showUpdate(){
+  if ($("#updBar")) return;
+  const b = document.createElement("div"); b.id = "updBar"; b.className = "upd-bar"; b.setAttribute("role", "status");
+  b.innerHTML = `<span>Hay una versión nueva de Hum.</span><button type="button" class="add-top" data-act="app-update">Actualizar</button><button type="button" class="ib" data-act="upd-later" aria-label="Más tarde">${ic("close")}</button>`;
+  document.body.appendChild(b);
+}
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]"); if (!a) return;
+  if (a.dataset.act === "app-update") location.reload();
+  if (a.dataset.act === "upd-later"){ const b = $("#updBar"); if (b) b.remove(); }
+});
+{ const v = $("#wVer"); if (v) v.textContent = `Versión ${APP_V}${desk ? " · Windows" : ""}`; }
 $("#homeIb").innerHTML = ic("home");
 $("#menuBtn").innerHTML = ic("menu"); $("#sideClose").innerHTML = ic("close");
 $("#navEq").innerHTML = ic("tune") + "Ecualizador" + '<i class="eq-dot" hidden></i>';
