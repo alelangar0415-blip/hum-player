@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-dGRJITKKMgmjH9SaMXIhK+oCSeSZI0PMU+Aep5fAPLc=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Bzw3VCWeKlu5NN4gWfY/0NqkEJ0Ztj2l5irPT5T7Wpo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1627,6 +1627,8 @@ function pause(){
 const toggle = () => S.playing ? pause() : play();
 function playIndex(i){ S.qi = i; loadAt(0); if (!S.playing) play(); else paint(); }
 function playContext(listId, startId){
+  if (startId && !pro()){ startId = null; S.shuffle = true; freeNote("pick"); }
+  else if (!pro()) S.shuffle = true;
   const list = getList(listId).tracks;
   if (!list.length){ if (IMPORTED[listId]) toast("Aún no tienes ningún archivo de esta playlist. Añádelos para escucharla aquí."); return; }
   S.ctxId = listId; S.ctxList = list.slice();
@@ -1638,6 +1640,7 @@ function playContext(listId, startId){
 }
 function next(auto){
   if (auto && S.sleep && sleepAtSongEnd()) return; // sleep mode: stop at the end of this song
+  if (!auto && !pro() && !freeSkip()) return;
   if (auto) S.autoNext = Date.now();
   if (!S.queue.length) return;
   if (auto && S.repeat === "one"){ loadAt(0); return; }
@@ -1647,6 +1650,7 @@ function next(auto){
   playIndex(0);
 }
 function prev(){
+  if (!pro()){ if (pos() <= 3) freeNote("prev"); loadAt(0); paint(); return; }
   if (pos() > 3 || S.qi === 0){ loadAt(0); paint(); return; }
   playIndex(S.qi - 1);
 }
@@ -5149,7 +5153,7 @@ function sleepCalm(){ // after this song, calm music only
   if (S.sleep.calmDone) return; S.sleep.calmDone = true;
   const md = MOODS.find(m => m.title === "Modo relajado"), t = cur(); if (!md || !t) return;
   const ids = moodIds(md).filter(id => id !== t.id); if (!ids.length) return;
-  S.queue = [...S.queue.slice(0, S.qi + 1), ...ids]; if (S.shuffle) S.shuffle = false; paint();
+  S.queue = [...S.queue.slice(0, S.qi + 1), ...ids]; if (S.shuffle && pro()) S.shuffle = false; paint();
 }
 function sleepTick(){
   const sl = S.sleep; if (!sl.end && !sl.stopAtEnd){ if (sleepK !== 1) clearSleep(); return; }
@@ -5665,8 +5669,22 @@ let LIC = (() => { const l = store.get("lic", null); return l && typeof l.key ==
 if (!store.get("trialStart", 0)) store.set("trialStart", Date.now());
 const trialLeft = () => Math.max(0, PRO.days - (Date.now() - (+store.get("trialStart", Date.now()) || Date.now())) / 864e5);
 function pro(){ return !!(LIC && LIC.ok) || trialLeft() > 0; }
+const FREE_SKIPS = 6;
+function freeSkip(){ // true if this skip is allowed; the free version has 6 per hour
+  const now = Date.now(), list = (store.get("skips", []) || []).filter(t => now - t < 36e5);
+  if (list.length >= FREE_SKIPS){ const wait = Math.max(1, Math.ceil((36e5 - (now - list[0])) / 6e4)); toast(`Llegaste a los ${FREE_SKIPS} saltos de esta hora. Podrás saltar otra vez en ${wait} min.`); openPro("skips"); return false; }
+  list.push(now); store.set("skips", list);
+  const left = FREE_SKIPS - list.length; if (left <= 2) toast(left ? `Te quedan ${left} ${left === 1 ? "salto" : "saltos"} esta hora.` : "Ese fue tu último salto de esta hora.");
+  return true;
+}
+const freeSaid = {};
+function freeNote(k){ // a short reminder, once per visit
+  if (freeSaid[k]) return; freeSaid[k] = true;
+  toast(k === "pick" ? "En la versión gratis tu música suena en aleatorio. Con Hum completo eliges cualquier canción."
+    : "En la versión gratis, «anterior» vuelve al inicio de la canción.");
+}
 function needPro(what){ if (pro()) return false; openPro(what); return true; }
-const PRO_WHAT = { hum: "Hum, tu asistente de voz, es parte de Hum completo.", fx: "Los efectos, el karaoke y los modos para jugar y correr son parte de Hum completo.", mix: "Las transiciones de DJ son parte de Hum completo.", ear: "La prueba de oído es parte de Hum completo.", hp: "La corrección de audífonos es parte de Hum completo.", voice: "«Subir voz» es parte de Hum completo.", auto: "La ecualización automática es parte de Hum completo.", tg: "Crear sesiones de «Escuchar juntos» es parte de Hum completo (unirte a la de un amigo es gratis)." };
+const PRO_WHAT = { free: "En la versión gratis tu música suena siempre en aleatorio.", skips: "En la versión gratis puedes saltar 6 canciones por hora.", pick: "Elegir qué canción suena es parte de Hum completo.", hum: "Hum, tu asistente de voz, es parte de Hum completo.", fx: "Los efectos, el karaoke y los modos para jugar y correr son parte de Hum completo.", mix: "Las transiciones de DJ son parte de Hum completo.", ear: "La prueba de oído es parte de Hum completo.", hp: "La corrección de audífonos es parte de Hum completo.", voice: "«Subir voz» es parte de Hum completo.", auto: "La ecualización automática es parte de Hum completo.", tg: "Crear sesiones de «Escuchar juntos» es parte de Hum completo (unirte a la de un amigo es gratis)." };
 function openPro(what){ PRO.what = what || ""; PRO.msg = ""; renderPro(); if (!$("#proDlg").open) $("#proDlg").showModal(); }
 function renderPro(){
   const b = $("#proBody"); if (!b) return;
@@ -5681,8 +5699,9 @@ function renderPro(){
   const head = PRO_WHAT[PRO.what] || "Desbloquea todo Hum.";
   b.innerHTML = `<h2 id="proH">Hum completo</h2>
     <p>${esc(head)}</p>
-    <p class="pro-trial">${left > 0 ? `Te ${left === 1 ? "queda 1 día" : `quedan ${left} días`} de prueba con todo incluido.` : "Tu prueba de 7 días terminó. Tu música, tus playlists y el reproductor siguen siendo gratis."}</p>
+    <p class="pro-trial">${left > 0 ? `Te ${left === 1 ? "queda 1 día" : `quedan ${left} días`} de prueba con todo incluido.` : "Tu prueba de 7 días terminó. Puedes seguir escuchando gratis, en aleatorio y con 6 saltos por hora."}</p>
     <ul class="pro-list">
+      <li>Elige cualquier canción, sin aleatorio obligatorio y con saltos ilimitados</li>
       <li>Karaoke perfecto con IA, efectos y modo videojuegos</li>
       <li>Hum, tu asistente: «Ey Hum, pon algo tranqui»</li>
       <li>Ajustado a tu oído y a tus audífonos</li>
@@ -5751,6 +5770,7 @@ function renderProNav(){
   S.fx = { ...S.fx, mode: "off", d8: false, kara: false };
   S.game = { ...S.game, on: false, duck: false };
   if (S.mix) S.mix.on = false;
+  S.shuffle = true; if (S.repeat === "one") S.repeat = "off";
   if (S.ear) S.ear = { ...S.ear, on: false };
   if (S.hp) S.hp = { ...S.hp, on: false };
   S.eq.voice = 0; S.eq.auto = false;
@@ -6007,7 +6027,7 @@ document.addEventListener("click", e => {
   if (row){ const id = row.dataset.row, ctxId = row.dataset.list;
     if (cur() && cur().id === id && S.ctxId === ctxId) toggle(); else playContext(ctxId, id); return; }
   const qi = e.target.closest("[data-qi]");
-  if (qi){ playIndex(+qi.dataset.qi); return; }
+  if (qi){ if (needPro("pick")) return; playIndex(+qi.dataset.qi); return; }
   const open = e.target.closest("[data-open]");
   if (open){ go({ type: "list", id: open.dataset.open }); return; }
   const act = e.target.closest("[data-act]");
@@ -6101,8 +6121,8 @@ document.addEventListener("keydown", e => {
 $("#pp").onclick = toggle;
 $("#next").onclick = () => next(false);
 $("#prev").onclick = prev;
-$("#shuf").onclick = () => setShuffle(!S.shuffle);
-$("#rep").onclick = () => { S.repeat = S.repeat === "off" ? "all" : S.repeat === "all" ? "one" : "off"; paint(); };
+$("#shuf").onclick = () => { if (S.shuffle && needPro("free")) return; setShuffle(!S.shuffle); };
+$("#rep").onclick = () => { let r = S.repeat === "off" ? "all" : S.repeat === "all" ? "one" : "off"; if (r === "one" && !pro()){ r = "off"; toast("Repetir una canción es parte de Hum completo."); } S.repeat = r; paint(); };
 $("#npBtn").onclick = () => { S.npOpen = !S.npOpen; paint(); };
 $("#muteBtn").onclick = () => { S.muted = !S.muted; if (!S.muted && S.vol === 0) S.vol = .5; applyVol(); };
 $("#vol").addEventListener("input", e => { S.vol = e.target.value / 100; S.muted = false; applyVol(); store.set("vol", S.vol); });
@@ -6138,7 +6158,7 @@ $("#sndBoost").addEventListener("click", () => { S.snd.boost = !S.snd.boost; app
 $("#fpPP").onclick = toggle;
 $("#fpPrev").onclick = prev;
 $("#fpNext").onclick = () => next(false);
-$("#fpShuf").onclick = () => setShuffle(!S.shuffle);
+$("#fpShuf").onclick = () => { if (S.shuffle && needPro("free")) return; setShuffle(!S.shuffle); };
 $("#fpRep").onclick = () => $("#rep").click();
 const fpSeek = $("#fpSeek");
 fpSeek.addEventListener("input", () => { S.fpDragging = true; const t = cur(); fpSeek.style.setProperty("--pct", fpSeek.value / 10 + "%"); $("#fpCur").textContent = fmt(fpSeek.value / 1000 * t.dur); });
