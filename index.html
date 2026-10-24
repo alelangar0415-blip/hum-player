@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-crnnJaDTr2RsNGdgJlzi1snaLQHSHPmzEaWjnXulhjs=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-dGRJITKKMgmjH9SaMXIhK+oCSeSZI0PMU+Aep5fAPLc=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -665,6 +665,15 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .eq-voice-hint{color:var(--muted);font-size:13px}
 .eq-dlg.eq-off .eq-voice{opacity:.5}
 
+/* ---------- Hum completo ---------- */
+.pro-dlg{width:min(520px,calc(100% - 32px))}
+.pro-trial{color:var(--accent);font-weight:600}
+.pro-list{margin:6px 0 12px;padding-left:20px;display:grid;gap:6px}
+.pro-price{margin:4px 0 14px}
+.pro-buy{margin:0 0 16px;display:inline-flex;text-decoration:none}
+.pro-key label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+#navPro{color:var(--accent)}
+
 /* ---------- perfect karaoke (AI) ---------- */
 .kara-ia{margin-top:8px;padding:12px 14px;border-radius:12px;background:var(--raise);display:grid;gap:10px}
 .kara-ia b{display:block}
@@ -795,6 +804,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <button class="nav-btn" id="navSnd" data-act="snd"></button>
       <button class="nav-btn" id="navAcct" data-act="acct"></button>
       <button class="nav-btn" id="navApp" data-act="welcome"></button>
+      <button class="nav-btn" id="navPro" data-act="pro"></button>
     </nav>
     <div class="lib-h" id="libH"></div>
     <div class="lib" id="lib"></div>
@@ -1130,6 +1140,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 </dialog>
 <dialog class="dlg" id="tgDlg" aria-labelledby="tgH"><div id="tgBody"></div></dialog>
 <div class="tg-chip" id="tgChip" hidden role="status"></div>
+<dialog class="dlg pro-dlg" id="proDlg" aria-labelledby="proH"><div id="proBody"></div></dialog>
 <section class="wrap" id="wrap" hidden aria-label="Hum Wrapped: tu mes en música"></section>
 <dialog class="dlg" id="libDlg" aria-labelledby="libH2">
   <h2 id="libH2">Gestionar biblioteca</h2>
@@ -2584,7 +2595,7 @@ function renderMixUI(){
   $("#mixDlg").classList.toggle("mix-off", !active);
 }
 function saveMix(){ store.set("mix", S.mix); renderMixUI(); }
-function openMix(){ if (S.drawer){ S.drawer = false; applySide(); } renderMixUI(); $("#mixDlg").showModal(); }
+function openMix(){ if (needPro("mix")) return; if (S.drawer){ S.drawer = false; applySide(); } renderMixUI(); $("#mixDlg").showModal(); }
 
 /* ---------- sound quality and speaker correction ---------- */
 const sndSaved = store.get("snd", null);
@@ -3164,6 +3175,7 @@ function localKeys(){
   [...S.hidden, ...Object.keys(S.hiddenU)].forEach(id => k.add("hide:" + id));
   Object.keys(COVER_V).forEach(id => k.add("cover:" + id));
   Object.keys(KARA).forEach(id => { if (BYID[id] && BYID[id].user) k.add("kara:" + id); });
+  if (LIC && LIC.key) k.add("lic:main");
   return [...k];
 }
 function localItem(key){
@@ -3173,6 +3185,7 @@ function localItem(key){
   if (kind === "pl"){ const p = IMPORTED[id]; return p ? { key, updated: p.u || p.updated || p.added || 1, data: plData(p) } : gone(); }
   if (kind === "like") return { key, updated: S.likedU[id] || 1, deleted: !S.liked.has(id), data: {} };
   if (kind === "hide") return { key, updated: S.hiddenU[id] || 1, deleted: !S.hidden.has(id), data: {} };
+  if (kind === "lic") return id === "main" && LIC && LIC.key ? { key, updated: LIC.at || 1, data: { k: LIC.key } } : null;
   if (kind === "kara"){
     const c = KARA[id]; if (!c || !BYID[id]) return null;
     if (c.del) return { key, updated: c.u || 1, deleted: true };
@@ -3310,6 +3323,11 @@ async function applyRemote(it){
     when[id] = it.updated; it.deleted ? set.delete(id) : set.add(id);
     if (kind === "like"){ store.set("liked", [...S.liked]); store.set("likedU", S.likedU); } else saveHidden();
     return true;
+  }
+  if (kind === "lic"){ // you activated Hum completo on another device: this one too
+    const k = str(it.data && it.data.k, 80);
+    if (id !== "main" || it.deleted || !/^[A-Za-z0-9-]{8,80}$/.test(k) || (LIC && LIC.key === k)) return false;
+    proActivate(k, true); return false;
   }
   if (kind === "kara"){
     const c = KARA[id];
@@ -4115,6 +4133,7 @@ function paintHum(){
   $("#humWakeNote").textContent = H.wakeOn ? "Activado: di «Ey Hum» y lo que quieras, mientras la app esté abierta." : "Mientras la app esté abierta, di «Ey Hum» y lo que quieras.";
 }
 function openHum(byWake){
+  if (!pro()){ if (!byWake) openPro("hum"); return; }
   if (S.drawer){ S.drawer = false; applySide(); }
   H.byWake = !!byWake; clearTimeout(H.closeT);
   const p = $("#hum"); p.hidden = false; humIdeas(); paintHum(); paintVoices();
@@ -4191,7 +4210,7 @@ function renderFxUI(){
   renderGameUI();
   renderKaraUI();
 }
-function openFx(){ if (S.drawer){ S.drawer = false; applySide(); } renderFxUI(); $("#fxDlg").showModal(); }
+function openFx(){ if (needPro("fx")) return; if (S.drawer){ S.drawer = false; applySide(); } renderFxUI(); $("#fxDlg").showModal(); }
 function setFx(patch, say){
   Object.assign(S.fx, patch); applyFx();
   if ("kara" in patch) karaChanged();
@@ -5018,7 +5037,7 @@ function earSummary(){
 // --- the hearing test
 const ET = { steps: [], i: 0, pass: 0, level: 0, lastLevel: 0, coarse: 0, timer: 0, res: null, resume: false, busy: false };
 const ET_MIN = -90, ET_MAX = -12; // dB below full scale; never louder than -12
-function openEar(){ if ($("#sndDlg").open) $("#sndDlg").close(); renderEarIntro(); $("#earDlg").showModal(); }
+function openEar(){ if (needPro("ear")) return; if ($("#sndDlg").open) $("#sndDlg").close(); renderEarIntro(); $("#earDlg").showModal(); }
 function renderEarIntro(){
   $("#earBody").innerHTML = `<h2 id="earH">Prueba de oído</h2>
     <p>Ponte tus audífonos de siempre, busca un lugar tranquilo y deja el volumen como lo usas normalmente.</p>
@@ -5091,6 +5110,7 @@ document.addEventListener("keydown", e => { if (ET.busy && $("#earDlg").open && 
 // --- headphone profiles
 let hpList = null;
 async function openHp(){
+  if (needPro("hp")) return;
   if ($("#sndDlg").open) $("#sndDlg").close();
   $("#hpDlg").showModal(); $("#hpSearch").value = ""; $("#hpList").innerHTML = `<p class="pl-empty">Cargando modelos…</p>`;
   if (!hpList){ try { const r = await fetch("eq/headphones.json"); hpList = (await r.json()).filter(h => h && typeof h.n === "string" && Array.isArray(h.f)); } catch { $("#hpList").innerHTML = `<p class="pl-empty">No se pudo cargar la lista. Revisa tu internet.</p>`; return; } }
@@ -5251,6 +5271,7 @@ function tgClock(r, sent, got){ // narrows down the difference between this devi
 }
 function tgSnap(){ const t = cur(); return t ? { title: t.title, artist: t.artist, album: t.album.title || "", dur: Math.round(t.dur || 0), pos: +pos().toFixed(2), rate: t.user && audio.playbackRate ? +audio.playbackRate.toFixed(3) : 1, playing: !!S.playing, id: t.id } : null; }
 async function tgHost(){
+  if (needPro("tg")) return;
   if (TG.role === "host"){ openTg(); return; }
   if (!S.acct){ toast("Inicia sesión con Google para escuchar con alguien."); openAcct(); return; }
   if (!tokenOk()){ try { await askToken(""); } catch { toast("Vuelve a conectar con Google."); return; } }
@@ -5633,6 +5654,119 @@ document.addEventListener("click", e => {
 });
 renderKaraUI();
 
+/* ---------- Hum completo: one payment, yours forever ----------
+   7 days with everything. After that the player stays free (your music, playlists, sync, lyrics, equalizer,
+   sleep mode, mini player, joining a friend's session) and the rest asks for the full version: Hum, effects
+   and karaoke, DJ transitions, hearing test, headphones, voice lift, auto equalizer and hosting "listen together".
+   The key is checked with Lemon Squeezy (no server of ours) and, with your Google account, reaches your other
+   devices by itself (up to 5). */
+const PRO = { checkout: "https://humusicof.lemonsqueezy.com/checkout/buy/984c909b-1f8e-47e7-be4c-63395e3050f2", api: "https://api.lemonsqueezy.com/v1/licenses", days: 7, busy: false, msg: "", what: "" };
+let LIC = (() => { const l = store.get("lic", null); return l && typeof l.key === "string" && /^[A-Za-z0-9-]{8,80}$/.test(l.key) ? l : null; })();
+if (!store.get("trialStart", 0)) store.set("trialStart", Date.now());
+const trialLeft = () => Math.max(0, PRO.days - (Date.now() - (+store.get("trialStart", Date.now()) || Date.now())) / 864e5);
+function pro(){ return !!(LIC && LIC.ok) || trialLeft() > 0; }
+function needPro(what){ if (pro()) return false; openPro(what); return true; }
+const PRO_WHAT = { hum: "Hum, tu asistente de voz, es parte de Hum completo.", fx: "Los efectos, el karaoke y los modos para jugar y correr son parte de Hum completo.", mix: "Las transiciones de DJ son parte de Hum completo.", ear: "La prueba de oído es parte de Hum completo.", hp: "La corrección de audífonos es parte de Hum completo.", voice: "«Subir voz» es parte de Hum completo.", auto: "La ecualización automática es parte de Hum completo.", tg: "Crear sesiones de «Escuchar juntos» es parte de Hum completo (unirte a la de un amigo es gratis)." };
+function openPro(what){ PRO.what = what || ""; PRO.msg = ""; renderPro(); if (!$("#proDlg").open) $("#proDlg").showModal(); }
+function renderPro(){
+  const b = $("#proBody"); if (!b) return;
+  const left = Math.ceil(trialLeft());
+  if (LIC && LIC.ok){
+    b.innerHTML = `<h2 id="proH">Tienes Hum completo</h2>
+      <p>Gracias por apoyar Hum. Todo está desbloqueado en este dispositivo.</p>
+      <p class="mix-note">Clave: ${esc(LIC.key.slice(0, 8))}••••••••</p>
+      <div class="dlg-act"><button type="button" class="pill" data-act="pro-deactivate">Liberar este dispositivo</button><button type="button" class="add-top" data-act="pro-close">Listo</button></div>`;
+    return;
+  }
+  const head = PRO_WHAT[PRO.what] || "Desbloquea todo Hum.";
+  b.innerHTML = `<h2 id="proH">Hum completo</h2>
+    <p>${esc(head)}</p>
+    <p class="pro-trial">${left > 0 ? `Te ${left === 1 ? "queda 1 día" : `quedan ${left} días`} de prueba con todo incluido.` : "Tu prueba de 7 días terminó. Tu música, tus playlists y el reproductor siguen siendo gratis."}</p>
+    <ul class="pro-list">
+      <li>Karaoke perfecto con IA, efectos y modo videojuegos</li>
+      <li>Hum, tu asistente: «Ey Hum, pon algo tranqui»</li>
+      <li>Ajustado a tu oído y a tus audífonos</li>
+      <li>Transiciones de DJ, subir voz y ecualización automática</li>
+      <li>Crea sesiones de «Escuchar juntos»</li>
+    </ul>
+    <p class="pro-price"><b>MX$100</b> · pago único · tuyo para siempre · hasta 5 dispositivos</p>
+    <a class="add-top pro-buy" href="${PRO.checkout}" target="_blank" rel="noopener">${ic("spark")}<span>Comprar Hum completo</span></a>
+    <div class="pro-key">
+      <label for="proKey">¿Ya la compraste? Pega aquí tu clave (te llegó por correo):</label>
+      <div class="share-link"><input id="proKey" type="text" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><button type="button" class="pill" data-act="pro-activate"${PRO.busy ? " disabled" : ""}>${PRO.busy ? "Activando…" : "Activar"}</button></div>
+      <p class="dlg-msg${/no |ya está|otro|Revisa|lleno/i.test(PRO.msg) ? " err" : ""}" id="proMsg" role="status">${esc(PRO.msg)}</p>
+    </div>
+    <div class="dlg-act"><button type="button" class="pill" data-act="pro-close">Ahora no</button></div>`;
+}
+async function proActivate(key, quiet){
+  key = String(key || "").trim();
+  if (!/^[A-Za-z0-9-]{8,80}$/.test(key)){ PRO.msg = "Esa clave no parece completa. Revisa que la copiaste entera."; renderPro(); return false; }
+  if (PRO.busy) return false;
+  PRO.busy = true; PRO.msg = ""; if (!quiet) renderPro();
+  try {
+    const name = `Hum · ${desk ? "Windows" : isMobile ? "Teléfono" : "Navegador"} · ${rid()}`;
+    const r = await fetch(`${PRO.api}/activate`, { method: "POST", headers: { accept: "application/json" }, body: new URLSearchParams({ license_key: key, instance_name: name }) });
+    const j = await r.json().catch(() => ({}));
+    if (!j.activated || !j.instance || !j.instance.id){
+      const e = String(j.error || "");
+      PRO.msg = /limit/i.test(e) ? "Esa clave ya está activa en 5 dispositivos. Libera uno (Hum completo → Liberar este dispositivo) y vuelve a intentarlo."
+        : /not found|invalid/i.test(e) ? "No encontramos esa clave. Revisa que esté completa." : /disabled|expired/i.test(e) ? "Esa clave ya no está activa." : "No se pudo activar. Revisa tu internet y vuelve a intentarlo.";
+      return false;
+    }
+    if (!/hum/i.test(String(j.meta && j.meta.product_name || ""))){ PRO.msg = "Esa clave es de otro producto."; return false; }
+    LIC = { key, inst: String(j.instance.id), ok: true, at: Date.now(), checked: Date.now(), store: j.meta.store_id, product: j.meta.product_id };
+    store.set("lic", LIC); if (S.acct) markDirty("lic:main");
+    toast("¡Listo! Hum completo activado. Gracias por tu compra.");
+    setTimeout(() => location.reload(), 1400); // brings back every setting you had during the trial
+    return true;
+  } catch { PRO.msg = "No se pudo conectar. Revisa tu internet y vuelve a intentarlo."; return false; }
+  finally { PRO.busy = false; if ($("#proDlg").open) renderPro(); renderProNav(); }
+}
+async function proDeactivate(){
+  if (!LIC) return;
+  try { await fetch(`${PRO.api}/deactivate`, { method: "POST", headers: { accept: "application/json" }, body: new URLSearchParams({ license_key: LIC.key, instance_id: LIC.inst }) }); } catch {}
+  LIC = null; store.set("lic", null); toast("Este dispositivo quedó libre. Tu clave puede usarse en otro.");
+  setTimeout(() => location.reload(), 1200);
+}
+async function proCheck(){ // now and then, make sure the key is still good (refunds, etc.); offline it keeps working
+  if (!LIC || !navigator.onLine || Date.now() - (LIC.checked || 0) < 3 * 864e5) return;
+  try {
+    const r = await fetch(`${PRO.api}/validate`, { method: "POST", headers: { accept: "application/json" }, body: new URLSearchParams({ license_key: LIC.key, instance_id: LIC.inst }) });
+    const j = await r.json().catch(() => ({}));
+    if (j.valid === true) LIC.ok = true;
+    else if (r.status === 404 || (j.license_key && /disabled|expired/.test(j.license_key.status || ""))) LIC.ok = false;
+    LIC.checked = Date.now(); store.set("lic", LIC); renderProNav();
+  } catch {}
+}
+setTimeout(proCheck, 8000);
+function renderProNav(){
+  const n = $("#navPro"); if (!n) return;
+  const left = Math.ceil(trialLeft());
+  n.innerHTML = ic("spark") + (LIC && LIC.ok ? "Hum completo" : left > 0 ? `Prueba · ${left} ${left === 1 ? "día" : "días"}` : "Comprar Hum completo");
+  n.classList.toggle("pro-off", !pro());
+}
+// without the full version the premium features rest; your settings stay saved for the day you activate it
+(function proLock(){
+  if (pro()) return;
+  S.fx = { ...S.fx, mode: "off", d8: false, kara: false };
+  S.game = { ...S.game, on: false, duck: false };
+  if (S.mix) S.mix.on = false;
+  if (S.ear) S.ear = { ...S.ear, on: false };
+  if (S.hp) S.hp = { ...S.hp, on: false };
+  S.eq.voice = 0; S.eq.auto = false;
+  H.wakeOn = false; try { stopWake(); } catch {}
+})();
+document.addEventListener("click", e => {
+  const act = e.target.closest("[data-act]"); if (!act) return;
+  const a = act.dataset.act;
+  if (a === "pro") openPro("");
+  if (a === "pro-close") $("#proDlg").close();
+  if (a === "pro-activate") proActivate($("#proKey").value);
+  if (a === "pro-deactivate") proDeactivate();
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target && e.target.id === "proKey"){ e.preventDefault(); proActivate(e.target.value); } });
+renderProNav();
+
 var modesReady = true;
 
 /* ---------- rendering ---------- */
@@ -5996,9 +6130,9 @@ $("#eqBands").addEventListener("dblclick", e => {
   el.value = 0; el.dispatchEvent(new Event("input", { bubbles: true }));
 });
 $("#eqSwitch").addEventListener("click", () => { S.eq.on = !S.eq.on; applyEq(); renderEqUI(); });
-$("#eqAutoSw").addEventListener("click", () => setAuto(!S.eq.auto));
-$("#eqVoiceR").addEventListener("input", e => { S.eq.voice = clamp(+e.target.value || 0, 0, 10); applyEq(); drawEq(); });
-$("#eqVoiceAuto").addEventListener("click", () => { S.eq.voiceAuto = !S.eq.voiceAuto; applyEq(); drawEq(); });
+$("#eqAutoSw").addEventListener("click", () => { if (!S.eq.auto && needPro("auto")) return; setAuto(!S.eq.auto); });
+$("#eqVoiceR").addEventListener("input", e => { if (!pro()){ e.target.value = 0; renderVoiceUI(); openPro("voice"); return; } S.eq.voice = clamp(+e.target.value || 0, 0, 10); applyEq(); drawEq(); });
+$("#eqVoiceAuto").addEventListener("click", () => { if (needPro("voice")) return; S.eq.voiceAuto = !S.eq.voiceAuto; applyEq(); drawEq(); });
 $("#mixSw").addEventListener("click", () => { S.mix.on = !S.mix.on; saveMix(); });
 $("#sndBoost").addEventListener("click", () => { S.snd.boost = !S.snd.boost; applyBoost(); saveSnd(); });
 $("#fpPP").onclick = toggle;
