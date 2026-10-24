@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JCg7pfb2dmoGN8AgbRvmDHHdRFF46nC9l011aKPjzRk=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-crnnJaDTr2RsNGdgJlzi1snaLQHSHPmzEaWjnXulhjs=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -665,6 +665,14 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .eq-voice-hint{color:var(--muted);font-size:13px}
 .eq-dlg.eq-off .eq-voice{opacity:.5}
 
+/* ---------- perfect karaoke (AI) ---------- */
+.kara-ia{margin-top:8px;padding:12px 14px;border-radius:12px;background:var(--raise);display:grid;gap:10px}
+.kara-ia b{display:block}
+.kara-ia small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.kara-ia .ear-prog{margin:0}
+.kara-ia-act{display:flex;gap:8px;flex-wrap:wrap}
+.kara-ia-act .armed{background:var(--accent);color:var(--bg)}
+
 /* ---------- game mode ---------- */
 .game-box{margin-top:6px}
 .game-box.mix-off #gmDuckRow,.game-box.mix-off #gmLevel{opacity:.5}
@@ -1061,6 +1069,15 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
     <div><b>Karaoke</b><small>Baja la voz de la canción para que cantes tú. Funciona mejor cuando la voz va al centro, como en la mayoría del pop y el reguetón.</small></div>
     <button type="button" class="switch" id="fxKara" role="switch" aria-checked="false" aria-label="Karaoke"></button>
   </div>
+  <div class="kara-ia" id="karaIa">
+    <div><b>Karaoke perfecto con IA</b><small id="karaIaNote"></small></div>
+    <div class="ear-prog" id="karaProgBox" hidden><i id="karaProg"></i></div>
+    <div class="kara-ia-act">
+      <button type="button" class="pill" data-act="kara-prep" id="karaPrepOne">Preparar esta canción</button>
+      <button type="button" class="pill" data-act="kara-prep-all" id="karaPrepAll" hidden>Preparar todas</button>
+      <button type="button" class="pill danger" data-act="kara-stop" id="karaStop" hidden>Detener</button>
+    </div>
+  </div>
   <div class="game-box" id="gameBox">
     <h3 class="snd-h">Modo videojuegos</h3>
     <div class="mix-opt">
@@ -1379,6 +1396,8 @@ const keep = new Audio(); keep.loop = true; keep.src = URL.createObjectURL(silen
 const bgEl = new Audio(); bgEl.preload = "auto";
 let bgOn = false, bgUnlocked = false;
 let sleepK = 1, runRate = 1; // sleep-mode fade, running-mode speed
+const STEM = {}; // song id -> its karaoke version (music without voice), once loaded
+const KARA = (() => { const k = store.get("kara", {}); return k && typeof k === "object" && !Array.isArray(k) ? k : {}; })(); // song id -> { u, here, f, size, del }
 function silentWav(sec){
   const rate = 8000, n = rate * sec, b = new ArrayBuffer(44 + n), v = new DataView(b);
   const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
@@ -1412,7 +1431,8 @@ function ensureCtx(){
   compNode.connect(boostNode); boostNode.connect(limiter); limiter.connect(analyser); analyser.connect(ctx.destination);
   applySpk(); applyBoost(); applyBits();
   try {
-    decks = [audio, deckB].map(el => { const g = ctx.createGain(); ctx.createMediaElementSource(el).connect(g); g.connect(master); return { el, g }; });
+    decks = [audio, deckB].map(el => { const g = ctx.createGain(), lvl = ctx.createGain(); ctx.createMediaElementSource(el).connect(lvl); lvl.connect(g); g.connect(master); return { el, g, lvl }; });
+    decks.forEach(d => stemLevel(d.el));
   } catch { decks = null; }
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -1503,6 +1523,7 @@ function typedBlob(rec, byName){
 }
 function playFail(e){
   if (e && e.name === "AbortError") return;
+  if (audio.dataset.k === "k"){ const kt = cur(); if (kt && STEM[kt.id]){ URL.revokeObjectURL(STEM[kt.id]); delete STEM[kt.id]; } karaSwap(); return; } // the karaoke version failed: your song plays instead
   const t = cur(); if (!t || !t.user) return;
   if (e && e.name === "NotAllowedError"){ // the browser wants a tap first (for example after the screen was locked)
     // with the screen off, stay "playing": the next song starts as soon as the phone allows it
@@ -1516,7 +1537,7 @@ function playFail(e){
   if (!t.retried && t.rec.blob){ // try once more, with the file type taken from its name
     t.retried = true; const at = audio.currentTime || 0;
     if (t.url){ URL.revokeObjectURL(t.url); t.url = null; }
-    audio.src = songUrl(t); audio.dataset.id = t.id; try { audio.currentTime = at; } catch {}
+    audio.src = songUrl(t); audio.dataset.id = t.id; audio.dataset.k = "o"; try { audio.currentTime = at; } catch {}
     if (S.playing) audio.play().catch(playFail);
     return;
   }
@@ -1534,12 +1555,13 @@ function loadAt(sec){
       needFile(t, sec); return;
     }
     if (bgOn){ // screen off with the plain player: the next songs keep going there
-      if (bgEl.dataset.id !== t.id){ bgEl.src = songUrl(t); bgEl.dataset.id = t.id; }
+      if (bgEl.dataset.id !== t.id || (bgEl.dataset.k || "o") !== srcKind(t)){ bgEl.src = srcFor(t); bgEl.dataset.id = t.id; bgEl.dataset.k = srcKind(t); }
       try { bgEl.currentTime = sec; } catch {}
       if (S.playing) bgEl.play().catch(() => { S.resumeOnShow = true; });
       return;
     }
-    if (audio.dataset.id !== t.id){ t.failSrc = null; audio.src = songUrl(t); audio.dataset.id = t.id; }
+    const kd = srcKind(t);
+    if (audio.dataset.id !== t.id || (audio.dataset.k || "o") !== kd){ t.failSrc = null; audio.src = srcFor(t); audio.dataset.id = t.id; audio.dataset.k = kd; if (S.fx.kara) applyFx(true); }
     try { audio.currentTime = sec; } catch {}
     if (S.playing) audio.play().catch(playFail);
     return;
@@ -1835,6 +1857,7 @@ async function removeSong(id, opts = {}){
   try { await idbReq("readwrite", s => s.delete(id)); } catch {}
   if (wasCur){ loadAt(0); if (wasPlaying) play(); }
   const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y; renderLib(); paint();
+  karaForget(id, !!opts.remote);
   if (!opts.remote){ trashFile(t.rec.cloud); tomb("song:" + id); if (!opts.quiet) toast(`Quitada de Mis canciones: ${t.title}`); }
 }
 const dropzone = () => `<div class="dropzone"><b>Añade tu música</b>
@@ -2412,7 +2435,7 @@ const once = (el, ok, bad) => new Promise((res, rej) => {
 async function startMix(t, nt, ni, fade){
   const from = audio, inc = decks[0].el === from ? decks[1].el : decks[0].el;
   inc.pause(); deckGain(inc, 0);
-  inc.src = songUrl(nt); inc.dataset.id = nt.id;
+  inc.src = srcFor(nt); inc.dataset.id = nt.id; inc.dataset.k = srcKind(nt);
   inc.preservesPitch = inc.mozPreservesPitch = inc.webkitPreservesPitch = S.fx.mode === "off"; // speed changes keep the key (unless slowed / sped up is on)
   await once(inc, "loadedmetadata", "error");
   if (!S.playing || audio !== from || cur() !== t) return; // something changed while loading
@@ -2499,7 +2522,7 @@ function startBg(){
   if (bgOn || !bgCan() || !S.playing || !document.hidden || !t || !t.user || !t.rec.blob) return false;
   const at = audio.dataset.id === t.id ? audio.currentTime || 0 : 0;
   cancelMix(); bgOn = true;
-  bgEl.muted = false; bgEl.src = songUrl(t); bgEl.dataset.id = t.id;
+  bgEl.muted = false; bgEl.src = srcFor(t); bgEl.dataset.id = t.id; bgEl.dataset.k = srcKind(t);
   try { bgEl.currentTime = at; } catch {}
   const r = fxRate(); bgEl.preservesPitch = bgEl.mozPreservesPitch = bgEl.webkitPreservesPitch = S.fx.mode === "off"; bgEl.defaultPlaybackRate = bgEl.playbackRate = r;
   bgVol(); audio.pause();
@@ -2511,7 +2534,7 @@ function backFromBg(){ // back in the app: the full sound (equalizer, effects) t
   const t = cur();
   if (!t || !t.user || !S.playing){ bgOn = false; bgEl.pause(); return; }
   if (ctx && ctx.state !== "running") ctx.resume().catch(() => {});
-  if (audio.dataset.id !== t.id){ t.failSrc = null; audio.src = songUrl(t); audio.dataset.id = t.id; }
+  if (audio.dataset.id !== t.id || (audio.dataset.k || "o") !== srcKind(t)){ t.failSrc = null; audio.src = srcFor(t); audio.dataset.id = t.id; audio.dataset.k = srcKind(t); }
   try { audio.currentTime = bgEl.currentTime || 0; } catch {}
   audio.play().then(() => {
     if (!bgOn) return;
@@ -3140,6 +3163,7 @@ function localKeys(){
   [...S.liked, ...Object.keys(S.likedU)].forEach(id => k.add("like:" + id));
   [...S.hidden, ...Object.keys(S.hiddenU)].forEach(id => k.add("hide:" + id));
   Object.keys(COVER_V).forEach(id => k.add("cover:" + id));
+  Object.keys(KARA).forEach(id => { if (BYID[id] && BYID[id].user) k.add("kara:" + id); });
   return [...k];
 }
 function localItem(key){
@@ -3149,6 +3173,11 @@ function localItem(key){
   if (kind === "pl"){ const p = IMPORTED[id]; return p ? { key, updated: p.u || p.updated || p.added || 1, data: plData(p) } : gone(); }
   if (kind === "like") return { key, updated: S.likedU[id] || 1, deleted: !S.liked.has(id), data: {} };
   if (kind === "hide") return { key, updated: S.hiddenU[id] || 1, deleted: !S.hidden.has(id), data: {} };
+  if (kind === "kara"){
+    const c = KARA[id]; if (!c || !BYID[id]) return null;
+    if (c.del) return { key, updated: c.u || 1, deleted: true };
+    return c.f ? { key, updated: c.u || 1, data: { size: c.size || 0, g: c.g || 1 }, f: c.f } : null; // shared once it is in your Drive
+  }
   if (kind === "cover"){
     const c = COVER_V[id]; if (!c) return null;
     if (c.del) return { key, updated: c.u, deleted: true };
@@ -3219,6 +3248,7 @@ async function doSync(){
     if (changed){ matchIdx = null; renderLib(); if (S.view.type !== "search") rerender(); paint(); }
     paintAcct();
     if (S.acct) runTransfers();
+    if (S.acct) karaUploads();
     if (sync.again){ sync.again = false; scheduleSync(300); }
   }
 }
@@ -3280,6 +3310,15 @@ async function applyRemote(it){
     when[id] = it.updated; it.deleted ? set.delete(id) : set.add(id);
     if (kind === "like"){ store.set("liked", [...S.liked]); store.set("likedU", S.likedU); } else saveHidden();
     return true;
+  }
+  if (kind === "kara"){
+    const c = KARA[id];
+    if (c && (c.u || 0) >= it.updated) return false;
+    if (it.deleted){ karaDrop(id); KARA[id] = { u: it.updated, del: true }; saveKara(); return false; }
+    if (typeof it.parts !== "string" || !/^[\w-]{10,200}$/.test(it.parts)) return false;
+    KARA[id] = { u: it.updated, f: it.parts, size: clamp(+(it.data && it.data.size) || 0, 0, 2e9), g: clamp(+(it.data && it.data.g) || 1, .05, 1), here: !!(c && c.here && !c.del) }; saveKara();
+    const ct = cur(); if (S.fx.kara && ct && ct.id === id) karaOnTrack(ct);
+    return false;
   }
   if (kind === "cover"){
     const c = COVER_V[id];
@@ -4132,7 +4171,7 @@ function applyFx(silent){
   [audio, deckB].forEach(el => { el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = !shift; el.defaultPlaybackRate = r; });
   if (!mix && !glide) audio.playbackRate = r;
   if (fxN && ctx){
-    const t = ctx.currentTime, k = S.fx.kara;
+    const t = ctx.currentTime, k = S.fx.kara && (audio.dataset.k || "o") !== "k";
     fxN.dry.gain.setTargetAtTime(k ? 0 : 1, t, .05); fxN.karaWet.gain.setTargetAtTime(k ? 1 : 0, t, .05); fxN.bassG.gain.setTargetAtTime(k ? 1 : 0, t, .05);
     fxN.wet.gain.setTargetAtTime(S.fx.mode === "slowed" ? .4 : S.fx.d8 ? .14 : 0, t, .1);
     if (!S.fx.d8) fxN.pan.pan.setTargetAtTime(0, t, .2);
@@ -4150,10 +4189,12 @@ function renderFxUI(){
   $("#fx8d").setAttribute("aria-checked", S.fx.d8);
   $("#fxKara").setAttribute("aria-checked", S.fx.kara);
   renderGameUI();
+  renderKaraUI();
 }
 function openFx(){ if (S.drawer){ S.drawer = false; applySide(); } renderFxUI(); $("#fxDlg").showModal(); }
 function setFx(patch, say){
   Object.assign(S.fx, patch); applyFx();
+  if ("kara" in patch) karaChanged();
   if (say) toast(say);
 }
 
@@ -5329,6 +5370,7 @@ window.addEventListener("hashchange", () => {
 /* ---------- what happens on a new song, for the modes above ---------- */
 function modesOnTrack(prev, t, auto){
   if (auto && prev && prev.id !== t.id && S.sleep.stopAtEnd){ sleepStop(); return; } // a DJ mix moved on by itself
+  karaOnTrack(t);
   if (S.sleep.end && S.sleep.calm) sleepCalm();
   if (RUN.on && S.ctxId === "hum" && S.humList.title === "Modo correr" && RUN.cad){ // keep the next songs close to your pace
     const cad = RUN.cad, near = id => { const x = BYID[id]; return x && x.user && x.rec.bpm > 0 ? Math.min(...[1, 2, .5].map(k => Math.abs(x.rec.bpm * k - cad))) / cad : 9; };
@@ -5388,10 +5430,209 @@ function humModes(c){
     if (!canRun()){ reply("El modo correr funciona en tu teléfono, con su sensor de movimiento."); return true; }
     setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
   }
+  if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
   if (/(prueba de oido|ajusta(lo)? a mi oido|mi oido)/.test(c)){ openEar(); reply("Vamos con la prueba de oído."); return true; }
   if (/(escuchar|escuchemos|oir) (juntos|con alguien|con un amigo|con mi)/.test(c)){ openTg(); reply("Comparte el enlace y escuchen lo mismo al mismo tiempo."); return true; }
   return false;
 }
+/* ---------- perfect karaoke with AI ----------
+   A device that can (a PC, or any with a capable graphics chip) prepares a song once: the AI finds the voice and
+   the app keeps "your song minus the voice". This device keeps it lossless; your Google Drive gets a high-quality
+   copy (AAC 256 kbps), so your phone and your other devices have perfect karaoke without preparing anything.
+   Your original files are never changed. Songs not prepared keep the usual karaoke. */
+let iaDb = null;
+function iaIdb(){
+  return iaDb || (iaDb = new Promise((res, rej) => {
+    try { const r = indexedDB.open("hum-ia", 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains("stems")) r.result.createObjectStore("stems", { keyPath: "id" }); };
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("blocked"));
+    } catch (e){ rej(e); }
+  }));
+}
+const iaReq = (mode, fn) => iaIdb().then(d => new Promise((res, rej) => { const tx = d.transaction("stems", mode), r = fn(tx.objectStore("stems")); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); }));
+const saveKara = () => store.set("kara", KARA);
+const karaReady = id => !!(KARA[id] && !KARA[id].del && (KARA[id].here || KARA[id].f));
+function srcKind(t){ return S.fx.kara && t && t.user && STEM[t.id] ? "k" : "o"; }
+function srcFor(t){ return srcKind(t) === "k" ? STEM[t.id] : songUrl(t); }
+// the music without voice for this song, from this device or from your Drive
+const stemLoading = new Map();
+function ensureStem(t){
+  if (!t || !t.user || STEM[t.id] || !karaReady(t.id)) return Promise.resolve(!!(t && STEM[t.id]));
+  if (stemLoading.has(t.id)) return stemLoading.get(t.id);
+  const p = (async () => {
+    const k = KARA[t.id];
+    let row = await iaReq("readonly", s => s.get(t.id)).catch(() => null);
+    if ((!row || !row.blob) && k.f && S.acct && tokenOk()){
+      try {
+        const r = await gfetch(`${DRIVE}/files/${k.f}?alt=media`);
+        row = { id: t.id, blob: new Blob([await r.arrayBuffer()], { type: "audio/aac" }), at: Date.now() };
+        await iaReq("readwrite", s => s.put(row)).catch(() => {});
+      } catch { return false; }
+    }
+    if (!row || !row.blob || !BYID[t.id]) return false;
+    STEM[t.id] = URL.createObjectURL(row.blob); k.here = true; saveKara();
+    return true;
+  })().finally(() => stemLoading.delete(t.id));
+  stemLoading.set(t.id, p);
+  return p;
+}
+// switches between your song and its karaoke version at the same second, without stopping
+function karaSwap(){
+  const t = cur(); if (!t || !t.user){ applyFx(true); return; }
+  const el = bgOn ? bgEl : audio; if (el.dataset.id !== t.id){ applyFx(true); return; }
+  const want = srcKind(t); if ((el.dataset.k || "o") === want){ applyFx(true); return; }
+  const at = el.currentTime || 0;
+  el.src = want === "k" ? STEM[t.id] : songUrl(t); el.dataset.k = want;
+  try { el.currentTime = at; } catch {}
+  if (S.playing) el.play().catch(() => {});
+  applyFx(true);
+}
+function stemLevel(el){ // a karaoke version stored a little lower plays at the same loudness as your song
+  const d = decks && decks.find(x => x.el === el); if (!d || !ctx) return;
+  const k = el.dataset.k === "k" && KARA[el.dataset.id], g = k && k.g > 0 ? 1 / k.g : 1;
+  d.lvl.gain.setValueAtTime(g, ctx.currentTime);
+}
+[audio, deckB].forEach(el => el.addEventListener("loadstart", () => stemLevel(el)));
+function karaChanged(){ // karaoke turned on or off
+  const t = cur();
+  if (S.fx.kara && t && t.user){ ensureStem(t).then(() => karaSwap()); const n = BYID[S.queue[S.qi + 1]]; if (n) ensureStem(n); }
+  else karaSwap();
+  renderKaraUI();
+}
+function karaOnTrack(t){ if (!S.fx.kara) return; ensureStem(t).then(ok => { if (ok && cur() === t) karaSwap(); }); const n = BYID[S.queue[S.qi + 1]]; if (n) ensureStem(n); }
+function karaDrop(id){ // forget it on this device
+  if (STEM[id]){ URL.revokeObjectURL(STEM[id]); delete STEM[id]; }
+  iaReq("readwrite", s => s.delete(id)).catch(() => {});
+}
+function karaForget(id, remote){ // the song was removed
+  const k = KARA[id]; if (!k) return;
+  karaDrop(id);
+  if (remote){ delete KARA[id]; saveKara(); return; }
+  if (k.f) trashFile(k.f);
+  KARA[id] = { u: Date.now(), del: true }; saveKara(); markDirty("kara:" + id);
+}
+// --- preparing: one song at a time, in the background
+const PREP = { q: [], cur: null, p: 0, phase: "", worker: null, t0: 0, sepT0: 0, eta: 0, arm: false };
+const canPrep = () => typeof Worker !== "undefined" && typeof OfflineAudioContext !== "undefined";
+function prepWorker(){
+  if (!PREP.worker){
+    PREP.worker = new Worker("ia/separar.js", { type: "module" });
+    PREP.worker.onmessage = e => onPrep(e.data);
+    PREP.worker.onerror = () => prepFail("No se pudo cargar la IA. Revisa tu internet.");
+  }
+  return PREP.worker;
+}
+function prepQueue(ids, quiet){
+  if (!canPrep()){ toast("Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta."); return 0; }
+  const add = ids.filter(id => { const t = BYID[id]; return t && t.user && t.rec.blob && !karaReady(id) && PREP.cur !== id && !PREP.q.includes(id); });
+  PREP.q.push(...add);
+  if (add.length && !quiet) toast(add.length === 1 ? `Preparando el karaoke de “${BYID[add[0]].title}”…` : `Preparando ${add.length} canciones para karaoke…`);
+  prepNext(); renderKaraUI();
+  return add.length;
+}
+async function prepNext(){
+  if (PREP.cur || !PREP.q.length) return;
+  const id = PREP.q.shift(), t = BYID[id];
+  if (!t || !t.rec.blob) return prepNext();
+  PREP.cur = id; PREP.p = 0; PREP.phase = "decode"; PREP.t0 = performance.now(); PREP.eta = 0; renderKaraUI();
+  try {
+    const ab = await new OfflineAudioContext(2, 1, 44100).decodeAudioData(await t.rec.blob.arrayBuffer());
+    if (ab.duration > 15 * 60) throw new Error("Es demasiado larga (más de 15 minutos).");
+    const L = ab.getChannelData(0).slice(), R = (ab.numberOfChannels > 1 ? ab.getChannelData(1) : ab.getChannelData(0)).slice();
+    PREP.dur = ab.duration;
+    prepWorker().postMessage({ type: "sep", id, left: L, right: R, noGpu: !!store.get("iaNoGpu", false) }, [L.buffer, R.buffer]);
+  } catch (e){ prepFail(e && e.message && !/decode/i.test(e.message) ? e.message : "No se pudo leer el archivo."); }
+}
+let prepPaint = 0;
+function onPrep(m){
+  if (!m || m.id && m.id !== PREP.cur && m.type !== "progress") return;
+  if (m.type === "gpu-bad"){ store.set("iaNoGpu", true); return; } // this graphics chip gets it wrong: the processor from now on
+  if (m.type === "progress"){
+    if (m.phase === "sep" && PREP.phase !== "sep"){ PREP.sepT0 = performance.now(); }
+    PREP.phase = m.phase; PREP.p = m.p || 0;
+    if (m.phase === "sep" && PREP.p > .02){ const el = (performance.now() - PREP.sepT0) / 1000; PREP.eta = el / PREP.p * (1 - PREP.p); }
+    if (performance.now() - prepPaint > 500){ prepPaint = performance.now(); renderKaraUI(); }
+    return;
+  }
+  if (m.type === "error") return prepFail(/model|fetch|network/i.test(m.msg) ? "No se pudo descargar la IA. Revisa tu internet." : "La IA no pudo con esta canción.");
+  if (m.type === "done") prepDone(m);
+}
+async function prepDone(m){
+  const id = m.id, t = BYID[id];
+  if (PREP.dur && m.secs > 0) store.set("iaSpeed", clamp(PREP.dur / m.secs, .02, 20)); // how fast this device is, for the time estimates
+  try {
+    await iaReq("readwrite", s => s.put({ id, blob: m.wav, aac: m.aac || null, at: Date.now() }));
+    KARA[id] = { u: Date.now(), here: true, f: null, size: (m.aac || m.wav).size, g: clamp(+m.gain || 1, .05, 1) }; saveKara();
+    if (t){ toast(`Karaoke perfecto listo: “${t.title}”.`); if (cur() === t && S.fx.kara) ensureStem(t).then(() => karaSwap()); }
+    karaUploads();
+  } catch { toast("No hay espacio en este dispositivo para guardar el karaoke."); }
+  PREP.cur = null; PREP.phase = ""; renderKaraUI(); prepNext();
+}
+function prepFail(msg){
+  const t = BYID[PREP.cur];
+  if (PREP.cur) toast(`${t ? `“${t.title}”: ` : ""}${msg}`);
+  if (PREP.worker && /IA/.test(msg)){ PREP.worker.terminate(); PREP.worker = null; }
+  PREP.cur = null; PREP.phase = ""; renderKaraUI(); setTimeout(prepNext, 500);
+}
+function prepStop(){
+  PREP.q = []; if (PREP.worker){ PREP.worker.terminate(); PREP.worker = null; }
+  PREP.cur = null; PREP.phase = ""; renderKaraUI(); toast("Preparación detenida.");
+}
+// --- your other devices: the karaoke versions go to your Drive (one at a time, after the songs)
+let karaUp = false;
+async function karaUploads(){
+  if (karaUp || !S.acct || !tokenOk() || !navigator.onLine) return;
+  karaUp = true;
+  try {
+    for (const [id, k] of Object.entries(KARA)){
+      if (!k || k.del || k.f || !k.here || !BYID[id] || BYID[id].rec.owner && BYID[id].rec.owner !== S.acct.email) continue;
+      const row = await iaReq("readonly", s => s.get(id)).catch(() => null); if (!row) continue;
+      const blob = row.aac || row.blob, type = row.aac ? "audio/aac" : "audio/wav";
+      await ensureLib();
+      const r = await gfetch(`${DRIVE_UP}/files?uploadType=resumable&fields=id`, { method: "POST",
+        headers: { "content-type": "application/json; charset=UTF-8", "x-upload-content-type": type, "x-upload-content-length": String(blob.size) },
+        body: JSON.stringify({ name: `karaoke-${id}.${row.aac ? "aac" : "wav"}`, parents: [sync.folder], appProperties: { hum: "kara", humId: id } }) });
+      const loc = r.headers.get("location"); if (!loc) break;
+      const j = await xhrPut(loc, new Blob([blob], { type }), () => {}); if (!j.id) break;
+      k.f = j.id; k.size = blob.size; k.u = Date.now(); saveKara(); markDirty("kara:" + id);
+      if (row.aac){ row.aac = null; await iaReq("readwrite", s => s.put(row)).catch(() => {}); } // this device keeps only the lossless one
+    }
+  } catch {} finally { karaUp = false; }
+}
+// --- the Effects window
+function renderKaraUI(){
+  const box = $("#karaIa"); if (!box) return;
+  const t = cur(), speed = store.get("iaSpeed", .6), mins = s => s < 90 ? `${Math.max(1, Math.round(s / 60))} min` : `${Math.round(s / 60)} min`;
+  const pending = USER.filter(id => { const x = BYID[id]; return x && x.rec.blob && !karaReady(id) && PREP.cur !== id && !PREP.q.includes(id); });
+  let note;
+  if (PREP.cur){
+    const pt = BYID[PREP.cur], ph = PREP.phase;
+    note = ph === "model" ? `Descargando la IA (una sola vez, 172 MB)… ${Math.round(PREP.p * 100)} %`
+      : ph === "sep" ? `Preparando “${pt ? pt.title : ""}”… ${Math.round(PREP.p * 100)} %${PREP.eta > 5 ? ` · faltan unos ${mins(PREP.eta)}` : ""}`
+      : ph === "save" ? `Guardando “${pt ? pt.title : ""}”…` : `Preparando “${pt ? pt.title : ""}”…`;
+    if (PREP.q.length) note += ` · ${PREP.q.length} en cola`;
+  } else if (!canPrep()) note = "Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta y aquí sonarán perfectas.";
+  else if (t && t.user && karaReady(t.id)) note = `“${t.title}” ya tiene karaoke perfecto${KARA[t.id].f ? ", también en tus otros dispositivos" : ""}.`;
+  else note = `La IA separa la voz de verdad. Cada canción se prepara una vez${isMobile ? " (en el teléfono es lento: mejor en tu PC con tu misma cuenta)" : ` (en este equipo, unos ${mins((t && t.dur || 210) / speed)} por canción)`} y después funciona en todos tus dispositivos con tu cuenta.`;
+  $("#karaIaNote").textContent = note;
+  const pb = $("#karaProgBox"); pb.hidden = !PREP.cur; $("#karaProg").style.width = (PREP.phase === "sep" || PREP.phase === "model" ? PREP.p * 100 : PREP.phase === "save" ? 100 : 2) + "%";
+  const one = $("#karaPrepOne"); one.hidden = !canPrep() || !t || !t.user || !t.rec.blob || karaReady(t.id) || PREP.cur === t.id || PREP.q.includes(t.id);
+  const all = $("#karaPrepAll"); all.hidden = !canPrep() || pending.length < 2;
+  if (!all.hidden){ const secs = pending.reduce((s, id) => s + (BYID[id].dur || 210), 0) / speed; all.textContent = PREP.arm ? `Pulsa otra vez: ${pending.length} canciones, unas ${secs >= 5400 ? Math.round(secs / 3600) + " h" : mins(secs)}` : `Preparar todas (${pending.length})`; all.classList.toggle("armed", PREP.arm); }
+  $("#karaStop").hidden = !PREP.cur && !PREP.q.length;
+}
+document.addEventListener("click", e => {
+  const act = e.target.closest("[data-act]"); if (!act) return;
+  const a = act.dataset.act;
+  if (a === "kara-prep"){ const t = cur(); if (t) prepQueue([t.id]); }
+  if (a === "kara-prep-all"){
+    if (!PREP.arm){ PREP.arm = true; renderKaraUI(); setTimeout(() => { PREP.arm = false; renderKaraUI(); }, 5000); return; }
+    PREP.arm = false; prepQueue(USER.slice());
+  }
+  if (a === "kara-stop") prepStop();
+});
+renderKaraUI();
+
 var modesReady = true;
 
 /* ---------- rendering ---------- */
