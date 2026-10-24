@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+UssJ9YWploLyyGFB7qNAkfXjXW16/nBOQWz+f6SjbU=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Auzf480Bt2FeJz4P8keC6Y3vcX+ZwXeTkhOLpWoB2O0=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1224,6 +1224,9 @@ window.humStatsFilter = (type, p) => {
   const where = /Electron/i.test(navigator.userAgent) ? "windows" : (matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) ? "instalada" : "web";
   return { ...p, title: "Hum", tag: where };
 };
+// which features people use (only the feature name and simple choices, never songs or personal data); at most once every 30 s each
+const statAt = {};
+function stat(name, data){ try { const now = Date.now(); if (now - (statAt[name] || 0) < 30000) return; statAt[name] = now; if (window.umami && umami.track) umami.track(name, data); } catch {} }
 // Security: Hum never runs inside another site's frame (that is how click-tricks work)
 if (window.top !== window.self){ try { window.top.location.replace(location.href); } catch {} document.documentElement.innerHTML = ""; return; }
 /* ---------- icons ---------- */
@@ -5181,7 +5184,7 @@ function earSummary(){
 // --- the hearing test
 const ET = { steps: [], i: 0, pass: 0, level: 0, lastLevel: 0, coarse: 0, timer: 0, res: null, resume: false, busy: false };
 const ET_MIN = -90, ET_MAX = -12; // dB below full scale; never louder than -12
-function openEar(){ if (needPro("ear")) return; if ($("#sndDlg").open) $("#sndDlg").close(); renderEarIntro(); $("#earDlg").showModal(); }
+function openEar(){ if (needPro("ear")) return; stat("prueba-oido"); if ($("#sndDlg").open) $("#sndDlg").close(); renderEarIntro(); $("#earDlg").showModal(); }
 function renderEarIntro(){
   $("#earBody").innerHTML = `<h2 id="earH">Prueba de oído</h2>
     <p>Ponte tus audífonos de siempre, busca un lugar tranquilo y deja el volumen como lo usas normalmente.</p>
@@ -5416,6 +5419,7 @@ function tgClock(r, sent, got){ // narrows down the difference between this devi
 function tgSnap(){ const t = cur(); return t ? { title: t.title, artist: t.artist, album: t.album.title || "", dur: Math.round(t.dur || 0), pos: +pos().toFixed(2), rate: t.user && audio.playbackRate ? +audio.playbackRate.toFixed(3) : 1, playing: !!S.playing, id: t.id } : null; }
 async function tgHost(){
   if (needPro("tg")) return;
+  stat("escuchar-juntos");
   if (TG.role === "host"){ openTg(); return; }
   if (!S.acct){ toast("Inicia sesión con Google para escuchar con alguien."); openAcct(); return; }
   if (!tokenOk()){ try { await askToken(""); } catch { toast("Vuelve a conectar con Google."); return; } }
@@ -5703,7 +5707,7 @@ function prepWorker(){
 function prepQueue(ids, quiet){
   if (!canPrep()){ toast(isMobile ? "En este teléfono sería muy lento. Prepara tus canciones en tu PC con tu misma cuenta y aquí sonarán perfectas." : "Este navegador no puede preparar canciones. Prepáralas en tu PC con tu misma cuenta."); return 0; }
   const add = ids.filter(id => { const t = BYID[id]; return t && t.user && t.rec.blob && !karaReady(id) && PREP.cur !== id && !PREP.q.includes(id); });
-  PREP.q.push(...add);
+  PREP.q.push(...add); if (add.length) stat("karaoke-ia-preparar", { canciones: add.length > 1 ? "varias" : "una" });
   if (add.length && !quiet) toast(add.length === 1 ? `Preparando el karaoke de “${BYID[add[0]].title}”…` : `Preparando ${add.length} canciones para karaoke…`);
   prepNext(); renderKaraUI();
   return add.length;
@@ -5843,7 +5847,7 @@ function freeNote(k){ // a short reminder, once per visit
 }
 function needPro(what){ if (pro()) return false; openPro(what); return true; }
 const PRO_WHAT = { free: "En la versión gratis tu música suena siempre en aleatorio.", skips: "En la versión gratis puedes saltar 6 canciones por hora.", pick: "Elegir qué canción suena es parte de Hum completo.", hum: "Hum, tu asistente de voz, es parte de Hum completo.", fx: "Los efectos, el karaoke y los modos para jugar y correr son parte de Hum completo.", mix: "Las transiciones de DJ son parte de Hum completo.", ear: "La prueba de oído es parte de Hum completo.", hp: "La corrección de audífonos es parte de Hum completo.", voice: "«Subir voz» es parte de Hum completo.", sing: "Cantar con puntuación y grabar tu video es parte de Hum completo.", auto: "La ecualización automática es parte de Hum completo.", tg: "Crear sesiones de «Escuchar juntos» es parte de Hum completo (unirte a la de un amigo es gratis)." };
-function openPro(what){ PRO.what = what || ""; PRO.msg = ""; renderPro(); if (!$("#proDlg").open) $("#proDlg").showModal(); }
+function openPro(what){ stat("abrir-compra", { motivo: what || "menu" }); PRO.what = what || ""; PRO.msg = ""; renderPro(); if (!$("#proDlg").open) $("#proDlg").showModal(); }
 function renderPro(){
   const b = $("#proBody"); if (!b) return;
   const left = Math.ceil(trialLeft());
@@ -5902,6 +5906,7 @@ async function proActivate(key, quiet){
     }
     LIC = { key, inst: String(j.instance.id), ok: true, at: Date.now(), checked: Date.now(), store: j.meta.store_id, product: j.meta.product_id };
     store.set("lic", LIC); if (S.acct) markDirty("lic:main");
+    stat("clave-activada");
     toast("¡Listo! Hum completo activado. Gracias por tu compra.");
     setTimeout(() => location.reload(), 1400); // brings back every setting you had during the trial
     return true;
@@ -6333,6 +6338,7 @@ async function singStart(){
   const tr = SING.stream.getAudioTracks()[0], inLat = (tr && tr.getSettings && tr.getSettings().latency) || .02;
   SING.lat = clamp((ctx.outputLatency || 0) + (ctx.baseLatency || 0) + inLat, .02, .6);
   SING.hits = SING.n = SING.score = 0; SING.trail = []; SING.chunks = []; SING.rec = null; SING.blob = null; SING.url = "";
+  stat("cantar");
   window.__singing = true; try { stopWake(); } catch {} // "Ey Hum" rests while you sing, so the lyrics are never taken as orders
   try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { SING.lock = l; }).catch(() => {}); } catch {} // the screen stays on
   SING.st = "count"; renderSingBar();
@@ -6381,6 +6387,7 @@ function singFinish(){
   clearInterval(SING.iv);
   const t = SING.t; if (S.playing && cur() === t) pause();
   SING.final = SING.n >= 50 ? SING.score : 0;
+  if (SING.final) stat("cantar-puntos", { rango: SING.final >= 90 ? "90-100" : SING.final >= 75 ? "75-89" : SING.final >= 55 ? "55-74" : "0-54" });
   const best = store.get("singBest", {}) || {}, prev = best[t.id] || 0; SING.best = Math.max(prev, SING.final);
   if (SING.final > (best[t.id] || 0)){ best[t.id] = SING.final; store.set("singBest", best); }
   SING.msg = SING.n < 50 ? "Cantaste muy poquito para calificarte. Inténtalo con la canción completa." : SING.final > prev ? "¡Nuevo récord en esta canción!" : SING.final === prev && prev > 0 ? "Igualaste tu récord en esta canción." : "";
@@ -6396,12 +6403,12 @@ function singFinish(){
   } else { SING.st = "done"; singCleanup(); renderSingBar(); }
 }
 function singName(){ return `Hum karaoke - ${SING.t ? SING.t.title : "canción"}.${/mp4/.test(SING.mime) ? "mp4" : "webm"}`.replace(/[\\/:*?"<>|]/g, ""); }
-function singSave(){ if (!SING.url) return; const a = document.createElement("a"); a.href = SING.url; a.download = singName(); document.body.appendChild(a); a.click(); a.remove(); toast("Guardando tu video…"); }
+function singSave(){ if (!SING.url) return; stat("video-karaoke-guardado"); const a = document.createElement("a"); a.href = SING.url; a.download = singName(); document.body.appendChild(a); a.click(); a.remove(); toast("Guardando tu video…"); }
 async function singShare(){
   if (!SING.blob) return;
   const file = new File([SING.blob], singName(), { type: SING.blob.type });
   if (navigator.canShare && navigator.canShare({ files: [file] })){
-    try { await navigator.share({ files: [file], title: "Mi karaoke en Hum", text: `Saqué ${SING.final} puntos cantando “${SING.t.title}” en Hum Player` }); return; }
+    try { stat("video-karaoke-compartido"); await navigator.share({ files: [file], title: "Mi karaoke en Hum", text: `Saqué ${SING.final} puntos cantando “${SING.t.title}” en Hum Player` }); return; }
     catch (e){ if (e && e.name === "AbortError") return; }
   }
   singSave();
@@ -6530,7 +6537,7 @@ document.addEventListener("input", e => {
   if (e.target.id === "lookPick"){ LOOK.custom = e.target.value; LOOK.color = "custom"; applyLook(); clearTimeout(saveLook.t); saveLook.t = setTimeout(saveLook, 300); }
   if (e.target.id === "lookDim"){ LOOK.dim = +e.target.value / 100; applyLook(); const o = $("#lookDimOut"); if (o) o.textContent = e.target.value + " %"; clearTimeout(saveLook.t); saveLook.t = setTimeout(() => store.set("look", LOOK), 300); }
 });
-function saveLook(){ store.set("look", LOOK); artCache.clear(); msFor = null; applyLook(); try { paintMediaSession(); } catch {} if ($("#lookDlg").open) renderLook(); }
+function saveLook(){ stat("apariencia", { color: LOOK.color === "custom" || LOOK.color === "photo" ? LOOK.color : "lista", fondo: LOOK.bg }); store.set("look", LOOK); artCache.clear(); msFor = null; applyLook(); try { paintMediaSession(); } catch {} if ($("#lookDlg").open) renderLook(); }
 function resetLook(){ LOOK = { ...LOOK_DEF }; lookPhoto = ""; try { localStorage.removeItem("hum:lookPhoto"); } catch {} saveLook(); toast("Volviste al estilo original de Hum."); }
 function renderLook(){
   const opt = (attr, cur2, list) => list.map(([k, n, d]) => `<button type="button" class="spk${cur2 === k ? " on" : ""}" data-${attr}="${k}" aria-pressed="${cur2 === k}"><b>${n}</b>${d ? `<small>${d}</small>` : ""}</button>`).join("");
