@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Auzf480Bt2FeJz4P8keC6Y3vcX+ZwXeTkhOLpWoB2O0=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-AkD6bftoZDAUR6R05jJbI4xa8DFBwg+0p2OUQFdEoXE=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5609,7 +5609,7 @@ function humModes(c){
     if (!canRun()){ reply("El modo correr funciona en tu teléfono, con su sensor de movimiento."); return true; }
     setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
   }
-  if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
+  if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c) && !/cantar|puntos/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
   if (/(quiero cantar|vamos a cantar|cantar y (sacar|ganar) puntos|califica(me)? (como canto|mi voz)|karaoke con puntos)/.test(c)){ openSing(); reply("¡A cantar! Usa audífonos para mejor resultado."); return true; }
   if (/(prueba de oido|ajusta(lo)? a mi oido|mi oido)/.test(c)){ openEar(); reply("Vamos con la prueba de oído."); return true; }
   if (/(escuchar|escuchemos|oir) (juntos|con alguien|con un amigo|con mi)/.test(c)){ openTg(); reply("Comparte el enlace y escuchen lo mismo al mismo tiempo."); return true; }
@@ -5805,7 +5805,7 @@ function renderKaraUI(){
   const all = $("#karaPrepAll"); all.hidden = !canPrep() || pending.length < 2;
   if (!all.hidden){ const secs = pending.reduce((s, id) => s + (BYID[id].dur || 210), 0) / speed; all.textContent = PREP.arm ? `Pulsa otra vez: ${pending.length} canciones, unas ${secs >= 5400 ? Math.round(secs / 3600) + " h" : mins(secs)}` : `Preparar todas (${pending.length})`; all.classList.toggle("armed", PREP.arm); }
   $("#karaStop").hidden = !PREP.cur && !PREP.q.length;
-  $("#karaSing").hidden = !(t && t.user && karaReady(t.id));
+  $("#karaSing").hidden = !(t && t.user && t.rec.blob);
 }
 document.addEventListener("click", e => {
   const act = e.target.closest("[data-act]"); if (!act) return;
@@ -6145,13 +6145,14 @@ const MEL_WORKER = `onmessage = e => {
 };`;
 const singSay = (msg, p) => { SING.msg = msg; if (p != null) SING.p = p; renderSingBar(); };
 async function singMelody(t){
-  const key = "mel:" + t.id;
+  let stem = null;
+  if (karaReady(t.id)){ stem = (await iaReq("readonly", s => s.get(t.id)).catch(() => null) || {}).blob; if (!stem && STEM[t.id]) stem = await (await fetch(STEM[t.id])).blob().catch(() => null); }
+  const basic = !stem, key = (basic ? "melb:" : "mel:") + t.id;
   const have = await iaReq("readonly", s => s.get(key)).catch(() => null);
   if (have && have.notes && have.notes.length) return have;
-  let stem = (await iaReq("readonly", s => s.get(t.id)).catch(() => null) || {}).blob;
-  if (!stem && STEM[t.id]) stem = await (await fetch(STEM[t.id])).blob();
-  if (!stem || !t.rec.blob) throw new Error("nostem");
+  if (!t.rec.blob) throw new Error("nofile");
   const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (basic) return singMelodyBasic(t, key, OAC);
   const mono = async b => { const ab = await new OAC(1, 1, MEL_SR).decodeAudioData(await b.arrayBuffer()), n = ab.length, m = new Float32Array(n), k = ab.numberOfChannels;
     for (let c = 0; c < k; c++){ const d = ab.getChannelData(c); for (let i = 0; i < n; i++) m[i] += d[i] / k; } return m; };
   singSay("Escuchando la voz de la canción…", .05);
@@ -6169,6 +6170,31 @@ async function singMelody(t){
     w.postMessage({ v, sr: MEL_SR, hop: MEL_HOP }, [v.buffer]);
   });
   const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, at: Date.now() };
+  iaReq("readwrite", s => s.put(mel)).catch(() => {});
+  return mel;
+}
+// basic mode (no AI karaoke for this song, for example on a phone that cannot prepare it): the melody is taken from
+// the song itself, from what sits in the middle of the stereo image (where the voice usually is) and in the voice range.
+// It is less exact than with the AI, so the score is shown as approximate.
+async function singMelodyBasic(t, key, OAC){
+  singSay("Escuchando la canción…", .05);
+  const ab = await new OAC(2, 1, MEL_SR).decodeAudioData(await t.rec.blob.arrayBuffer()), n = ab.length;
+  const L = ab.getChannelData(0), Rr = ab.numberOfChannels > 1 ? ab.getChannelData(1) : L, mid = new Float32Array(n);
+  for (let i = 0; i < n; i++) mid[i] = (L[i] + Rr[i]) / 2;
+  singSay("Buscando la voz…", .15);
+  const oc = new OAC(1, n, MEL_SR), buf = oc.createBuffer(1, n, MEL_SR); buf.copyToChannel(mid, 0);
+  const src = oc.createBufferSource(), hp = oc.createBiquadFilter(), hp2 = oc.createBiquadFilter(), lp = oc.createBiquadFilter();
+  hp.type = hp2.type = "highpass"; hp.frequency.value = hp2.frequency.value = 170; lp.type = "lowpass"; lp.frequency.value = 1100;
+  src.buffer = buf; src.connect(hp); hp.connect(hp2); hp2.connect(lp); lp.connect(oc.destination); src.start();
+  const v = (await oc.startRendering()).getChannelData(0).slice();
+  singSay("Aprendiendo la melodía…", .25);
+  const notes = await new Promise((res, rej) => {
+    const u = URL.createObjectURL(new Blob([MEL_WORKER], { type: "text/javascript" })), w = new Worker(u);
+    w.onmessage = e => { if (e.data.notes){ res(e.data.notes); w.terminate(); URL.revokeObjectURL(u); } else singSay("Aprendiendo la melodía…", .25 + e.data.p * .75); };
+    w.onerror = e => { rej(e); w.terminate(); URL.revokeObjectURL(u); };
+    w.postMessage({ v, sr: MEL_SR, hop: MEL_HOP }, [v.buffer]);
+  });
+  const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, basic: true, at: Date.now() };
   iaReq("readwrite", s => s.put(mel)).catch(() => {});
   return mel;
 }
@@ -6273,6 +6299,7 @@ function singDraw(){
     x.fillStyle = g; x.font = singFont(800, 300, "d"); x.fillText(String(sc), SW_ / 2, 1000);
     x.fillStyle = "#fff"; x.font = singFont(800, 64, "d"); x.fillText(label, SW_ / 2, 1110);
     x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(600, 36); x.fillText(fitText(x, `“${t.title}” · ${t.artist}`, 960), SW_ / 2, 1180);
+    if (SING.basic){ x.font = singFont(600, 26); x.fillStyle = "rgba(235,233,243,.5)"; x.fillText("Calificación aproximada (modo básico)", SW_ / 2, 1290); }
     if (SING.best > sc) { x.font = singFont(600, 30); x.fillText(`Tu récord en esta canción: ${SING.best}`, SW_ / 2, 1240); }
     x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(600, 28); x.fillText("Hecho con Hum Player", SW_ / 2, 1830);
   }
@@ -6301,7 +6328,6 @@ async function openSing(){
   const t = cur();
   if (!t || !t.user){ toast("Puedes cantar con tus propias canciones. Pon una y vuelve aquí."); return; }
   if (needPro("sing")) return;
-  if (!karaReady(t.id)){ toast("Primero prepara el karaoke con IA de esta canción (en Efectos). Después puedes cantar y sacar puntos."); openFx(); return; }
   if (!t.rec.blob){ toast("Esta canción aún no está en este equipo. Ponla una vez para que se descargue."); return; }
   if ($("#fxDlg").open) $("#fxDlg").close();
   if (S.drawer){ S.drawer = false; applySide(); }
@@ -6315,7 +6341,8 @@ async function openSing(){
     singRange();
     if (!SING.mel.notes.some(Boolean)){ SING.st = "error"; singSay("No encontré una voz clara en esta canción para calificarla."); return; }
     SING.best = (store.get("singBest", {}) || {})[t.id] || 0;
-    SING.st = "ready"; SING.msg = SING.best ? `Tu récord en esta canción: ${SING.best} puntos. Usa audífonos para mejor resultado.` : ""; renderSingBar();
+    SING.basic = !!SING.mel.basic;
+    SING.st = "ready"; SING.msg = (SING.basic ? "Modo básico: esta canción no tiene karaoke con IA, así que Hum baja la voz y te califica de forma aproximada. Para la calificación más exacta, prepárala con IA en Efectos. " : "") + (SING.best ? `Tu récord: ${SING.best} puntos. ` : "") + "Usa audífonos para mejor resultado."; renderSingBar();
   } catch (e){
     SING.st = "error"; singSay(e && e.message === "nostem" ? "El karaoke con IA de esta canción no está en este equipo todavía. Ponla con karaoke una vez y vuelve a intentarlo." : "No se pudo preparar esta canción para cantar. Prueba con otra.");
   }
@@ -6328,7 +6355,7 @@ async function singStart(){
   ensureCtx();
   SING.karaWas = S.fx.kara; SING.mixWas = S.mix ? S.mix.on : null; if (S.mix) S.mix.on = false;
   if (!S.fx.kara) setFx({ kara: true });
-  await ensureStem(t);
+  if (!SING.basic) await ensureStem(t);
   if (S.playing) pause();
   S.qi = S.queue.indexOf(t.id) >= 0 ? S.queue.indexOf(t.id) : S.qi; loadAt(0); karaSwap();
   SING.rate = ctx.sampleRate; SING.k = Math.max(1, Math.round(SING.rate / 12000));
