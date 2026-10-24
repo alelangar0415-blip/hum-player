@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0d0e13">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-OC2H9cTLeu+lmVKqC7lKmrmhMvJWVM7fyrua0kWAfGw=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1BODxCpHLBKE+YDTdRZ5POKAMolQjAebnrcu+jG1VzE=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -943,7 +943,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
       <a class="w-ghost" id="wWin" href="https://github.com/alelangar0415-blip/hum-player/releases/latest/download/HumPlayer-Setup.exe" hidden>Descargar para Windows</a>
     </div>
     <p class="w-small" id="wHelp">En el móvil: en Android, menú ⋮ › Instalar app. En iPhone, Compartir › Añadir a pantalla de inicio.</p>
-    <p class="w-small w-legal"><a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">Términos y reembolsos</a> · <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
+    <p class="w-small w-legal"><a href="https://alelangar0415-blip.github.io/hum-player/precios.html" target="_blank" rel="noopener">Precios</a> · <a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">Términos y reembolsos</a> · <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
   </div>
 </section>
 <section class="fp" id="fp" hidden aria-label="Canción en grande">
@@ -1016,20 +1016,19 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 <dialog class="dlg" id="impDlg" aria-labelledby="impH">
   <form id="impForm" novalidate>
     <h2 id="impH">Importar playlist</h2>
-    <p>Carga el archivo CSV que sacaste de Spotify, o pega la lista con una canción por línea: <b>Artista - Canción</b>. La lista se guarda en la app para siempre, y cada canción suena en cuanto añades su archivo de audio.</p>
+    <p>Carga el archivo CSV de una playlist que exportaste de tu app de música, o pega la lista con una canción por línea: <b>Artista - Canción</b>. La lista se guarda en la app para siempre, y cada canción suena en cuanto añades su archivo de audio.</p>
     <label for="impLink">¿Te pasaron un enlace de Hum? Pégalo aquí</label>
     <div class="share-link"><input id="impLink" type="text" autocomplete="off" placeholder="https://…/hum-player/#lista=…"><button type="button" class="pill" data-act="imp-link">Abrir</button></div>
     <label for="impFile" class="mt">Archivo CSV o de texto</label>
     <input id="impFile" type="file" accept=".csv,.tsv,.txt,text/csv,text/plain">
     <label for="impText" class="mt">O pega la lista</label>
-    <textarea id="impText" rows="5" placeholder="Rosalía - Despechá&#10;Bad Bunny - Tití Me Preguntó&#10;Karol G - Provenza"></textarea>
+    <textarea id="impText" rows="5" placeholder="Valeria Sol - Luz de Neón&#10;Los Cometas - Verano Eterno&#10;Nico Ríos - Medianoche"></textarea>
     <label for="impName" class="mt">Nombre de la playlist</label>
     <input id="impName" type="text" autocomplete="off" placeholder="Si lo dejas vacío, se usa el del archivo">
     <details class="help">
-      <summary>¿Cómo saco el archivo de Spotify?</summary>
+      <summary>¿Cómo saco el archivo de mi playlist?</summary>
       <ol>
-        <li><b>Con Exportify:</b> entra en <a href="https://exportify.net" target="_blank" rel="noopener">exportify.net</a>, inicia sesión con Spotify y pulsa <b>Export</b> junto a tu playlist. Se descarga un archivo .csv.</li>
-        <li><b>Con TuneMyMusic:</b> en <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> elige Spotify como origen, selecciona tu playlist y como destino elige <b>Exportar a archivo</b> (CSV).</li>
+        <li>Usa una herramienta gratuita que exporte playlists a un archivo CSV, como <a href="https://exportify.net" target="_blank" rel="noopener">exportify.net</a> o <a href="https://www.tunemymusic.com" target="_blank" rel="noopener">tunemymusic.com</a> (en esta, como destino elige <b>Exportar a archivo</b>).</li>
         <li>Vuelve aquí, pulsa <b>Archivo CSV o de texto</b> y elige ese archivo.</li>
       </ol>
     </details>
@@ -1072,7 +1071,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 </section>
 <dialog class="dlg snd-dlg" id="fxDlg" aria-labelledby="fxH">
   <h2 id="fxH">Efectos</h2>
-  <p>Cambia cómo suenan tus canciones, como en los videos de TikTok. Se aplica a todo lo que suena.</p>
+  <p>Cambia cómo suenan tus canciones, como en los videos de moda. Se aplica a todo lo que suena.</p>
   <div class="spk-grid" id="fxModes" role="group" aria-label="Velocidad"></div>
   <div class="mix-opt" style="margin-top:12px">
     <div><b>Audio 8D</b><small>El sonido da vueltas alrededor de tu cabeza. Se nota con audífonos.</small></div>
@@ -1094,7 +1093,7 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
   <div class="game-box" id="gameBox">
     <h3 class="snd-h">Modo videojuegos</h3>
     <div class="mix-opt">
-      <div><b>Modo videojuegos</b><small>Deja hueco en la música para pasos, disparos y voces del juego (o de Discord), y mantiene el volumen parejo para que nada tape al juego.</small></div>
+      <div><b>Modo videojuegos</b><small>Deja hueco en la música para pasos, disparos y voces del juego (o de tu chat de voz), y mantiene el volumen parejo para que nada tape al juego.</small></div>
       <button type="button" class="switch" id="gmOn" role="switch" aria-checked="false" aria-label="Modo videojuegos"></button>
     </div>
     <div class="mix-opt" id="gmDuckRow" style="margin-top:8px">
@@ -1390,7 +1389,7 @@ function baseList(id){
     const mine = p.source === "user", tracks = p.items.map(matchOf).filter(Boolean);
     return { id, kind: "Playlist", imported: !mine, mine, title: p.title, desc: p.desc, hue: p.hue,
       cover: p.cover || (mine && tracks.length ? cover(BYID[tracks[0]]) : p.genCover), fb: p.genCover,
-      tracks, items: p.items, by: mine ? "Tú" : (p.owner || "Spotify") };
+      tracks, items: p.items, by: mine ? "Tú" : (p.owner || "Importada") };
   }
   const al = ALBUM[id];
   return { id, kind: "Album", title: al.title, desc: "", hue: al.hue, cover: al.cover, tracks: al.trackIds, by: al.artist, year: al.year };
@@ -1883,7 +1882,7 @@ const dropzone = () => `<div class="dropzone"><b>Añade tu música</b>
   <button class="add-top" data-act="add">${ic("add")}<span>Elegir archivos</span></button>
   <small>Se guardan solo en este dispositivo. No se suben a ningún sitio.</small></div>`;
 
-/* ---------- Spotify playlists: the list is kept in the app, songs play from your own files ---------- */
+/* ---------- imported playlists: the list is kept in the app, songs play from your own files ---------- */
 const IMPORTED = {}, IMP_ORDER = [];
 const FB = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 let matchIdx = null; S.impFilter = "all"; S.delArm = null; S.pickFor = null;
@@ -1919,7 +1918,7 @@ function addImported(rec){
   IMPORTED[rec.id] = rec;
 }
 function rerender(){ const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y; }
-const banner = () => `<div class="banner"><div><b>Pasa tu playlist de Spotify</b><p>Exporta la playlist a un archivo CSV y cárgalo aquí: la lista se guarda en la app para siempre. Añade tus archivos de audio y podrás escucharla aunque canceles Spotify.</p></div>
+const banner = () => `<div class="banner"><div><b>Trae tus playlists</b><p>Exporta una playlist a un archivo CSV o pega la lista de canciones: se guarda en la app para siempre. Añade tus archivos de audio y podrás escucharla cuando quieras.</p></div>
   <button class="add-top" data-act="import">${ic("plAdd")}<span>Importar playlist</span></button></div>`;
 function renderImported(id){
   const p = IMPORTED[id], l = getList(id);
@@ -1929,7 +1928,7 @@ function renderImported(id){
   const armed = S.delArm === id;
   return `<header class="hero" style="--h:${l.hue}">
       ${coverEd(l, p.genCover)}
-      <div class="hero-txt"><div class="eyebrow">${p.sharedFrom ? `Compartida contigo${p.owner ? " por " + esc(p.owner) : ""}` : p.spotifyId ? "Playlist de Spotify" : "Playlist importada"}</div><h1>${esc(p.title)}</h1>${p.desc ? `<p>${esc(p.desc)}</p>` : ""}
+      <div class="hero-txt"><div class="eyebrow">${p.sharedFrom ? `Compartida contigo${p.owner ? " por " + esc(p.owner) : ""}` : "Playlist importada"}</div><h1>${esc(p.title)}</h1>${p.desc ? `<p>${esc(p.desc)}</p>` : ""}
         <div class="meta"><b>${esc(p.owner || "Tú")}</b> · ${nc(n)}</div></div>
     </header>
     <div class="actions" style="--h:${l.hue}">
@@ -1942,7 +1941,7 @@ function renderImported(id){
     <div class="have">
       <div class="have-top"><b>Tienes ${have} de ${n} canciones con archivo</b><span>${pct}%</span></div>
       <div class="meter"><i style="width:${pct}%"></i></div>
-      <p>${n && have === n ? "Puedes escuchar toda la playlist sin Spotify." : "Las que faltan no suenan aquí. Añade su archivo de audio (por ejemplo, un MP3 que hayas comprado) y se enlaza solo si el título coincide, o pulsa el + de esa canción para elegirlo tú."}</p>
+      <p>${n && have === n ? "Ya tienes el archivo de todas las canciones de esta playlist." : "Las que faltan no suenan aquí. Añade su archivo de audio (por ejemplo, un MP3 que hayas comprado) y se enlaza solo si el título coincide, o pulsa el + de esa canción para elegirlo tú."}</p>
     </div>
     <div class="chips" role="group" aria-label="Filtrar canciones">
       ${[["all", "Todas"], ["have", "Con archivo"], ["miss", "Faltan"]].map(([k, t]) => `<button class="chip${f === k ? " on" : ""}" data-filter="${k}" aria-pressed="${f === k}">${t}</button>`).join("")}
@@ -1952,7 +1951,7 @@ function renderImported(id){
       ${shown.map(({ it, i, m }) => {
         const art = esc(it.artists.join(", ") || "Artista desconocido");
         const img = `<img src="${esc(it.cover || FB)}" data-fb="${FB}" alt="" width="40" height="40" loading="lazy">`;
-        const sp = it.url ? `<a class="ext" href="${esc(it.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(it.title)} en Spotify">${ic("open")}</a>` : "<span></span>";
+        const sp = it.url ? `<a class="ext" href="${esc(it.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(it.title)} en su servicio original">${ic("open")}</a>` : "<span></span>";
         if (m) return `<div class="row" role="listitem" tabindex="0" data-row="${m}" data-list="${id}">
           <span class="c-n"><span class="n">${i + 1}</span><span class="eq"><i></i><i></i><i></i></span><span class="pi">${ic("play")}</span></span>
           <span class="c-title">${img}<span><b>${esc(it.title)}</b><small>${art}</small></span></span>
@@ -1966,7 +1965,7 @@ function renderImported(id){
           <span class="c-dur">${fmt(it.dur)}</span>${sp}</div>`;
       }).join("")}
     </div>
-    ${!shown.length ? `<div class="empty">${f === "miss" ? "<b>No te falta ninguna</b>Todas las canciones tienen su archivo." : f === "have" ? "<b>Ninguna canción con archivo todavía</b>Añade tus archivos de audio y se enlazarán solos." : "<b>Esta playlist está vacía</b>Añade canciones en Spotify y pulsa Actualizar."}</div>` : ""}`;
+    ${!shown.length ? `<div class="empty">${f === "miss" ? "<b>No te falta ninguna</b>Todas las canciones tienen su archivo." : f === "have" ? "<b>Ninguna canción con archivo todavía</b>Añade tus archivos de audio y se enlazarán solos." : "<b>Esta playlist está vacía</b>Añade canciones en tu app de música y vuelve a importarla."}</div>` : ""}`;
 }
 /* Reading a playlist from a CSV export (Exportify, TuneMyMusic, Soundiiz…) or from pasted text. */
 const COLS = {
@@ -2050,7 +2049,7 @@ async function submitImport(e){
     const res = parsePlaylist(raw);
     const total = [...res.groups.values()].reduce((s, g) => s + g.length, 0);
     if (!total) return fail(res.links
-      ? "Esa lista solo tiene enlaces de Spotify, y la app necesita los nombres de las canciones. Saca un archivo CSV con Exportify o TuneMyMusic."
+      ? "Esa lista solo tiene enlaces, y la app necesita los nombres de las canciones. Exporta la playlist a un archivo CSV (por ejemplo con exportify.net o tunemymusic.com)."
       : "No encontré canciones. Usa el archivo CSV que descargaste, o escribe una canción por línea: Artista - Canción.");
     const base = file ? file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() : "";
     const recs = [];
@@ -5733,7 +5732,7 @@ function renderPro(){
       <div class="share-link"><input id="proKey" type="text" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><button type="button" class="pill" data-act="pro-activate"${PRO.busy ? " disabled" : ""}>${PRO.busy ? "Activando…" : "Activar"}</button></div>
       <p class="dlg-msg${/no |ya está|otro|Revisa|lleno/i.test(PRO.msg) ? " err" : ""}" id="proMsg" role="status">${esc(PRO.msg)}</p>
     </div>
-    <p class="mix-note pro-legal">Al comprar aceptas los <a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">términos</a>. Reembolso completo dentro de los 14 días. <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a>.</p>
+    <p class="mix-note pro-legal">Al comprar aceptas los <a href="https://alelangar0415-blip.github.io/hum-player/terminos.html" target="_blank" rel="noopener">términos</a>. Reembolso completo dentro de los 14 días. <a href="https://alelangar0415-blip.github.io/hum-player/precios.html" target="_blank" rel="noopener">Precios</a> · <a href="https://alelangar0415-blip.github.io/hum-player/privacidad.html" target="_blank" rel="noopener">Privacidad</a>.</p>
     <div class="dlg-act"><button type="button" class="pill" data-act="pro-close">Ahora no</button></div>`;
 }
 async function proActivate(key, quiet){
