@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-GBIdPH8FDPr7p3CiEzZrWRMnC3o9spEvXldaZ22BmZo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-j73bUwG5iA+gjleTYwYbAh+FhWp/JRfplfKEDQyBtkw=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5700,7 +5700,7 @@ function karaOnTrack(t){ if (!S.fx.kara) return; ensureStem(t).then(ok => { if (
 function karaDrop(id){ // forget it on this device
   if (STEM[id]){ URL.revokeObjectURL(STEM[id]); delete STEM[id]; }
   iaReq("readwrite", s => s.delete(id)).catch(() => {});
-  iaReq("readwrite", s => s.delete("mel:" + id)).catch(() => {});
+  iaReq("readwrite", s => s.delete("mel:" + id)).catch(() => {}); iaReq("readwrite", s => s.delete("mel2:" + id)).catch(() => {});
 }
 function karaForget(id, remote){ // the song was removed
   const k = KARA[id]; if (!k) return;
@@ -6146,33 +6146,52 @@ const SING = { st: "idle", t: null, mel: null, stream: null, src: null, an: null
   wantRec: true, mixWas: null, karaWas: null, bg: null, cv: null, x: null, lo: 48, hi: 72, msg: "", p: 0, cd: 0, doneAt: 0 };
 const MEL_SR = 11025, MEL_HOP = 220; // one note every 20 ms
 const MEL_WORKER = `onmessage = e => {
-  const { v, sr, hop } = e.data, w = Math.round(sr * .036), minL = Math.floor(sr / 1000), maxL = Math.ceil(sr / 70);
+  const { v, sr, hop, gate } = e.data, thr = e.data.thr || .15, energy = e.data.energy || .12, minLen = e.data.minLen || 6;
+  const w = Math.round(sr * .036), minL = Math.floor(sr / 1000), maxL = Math.ceil(sr / 70);
   const n = Math.max(0, Math.floor((v.length - w - maxL - 1) / hop)), out = new Uint8Array(n), c = new Float32Array(maxL + 1), rms = new Float32Array(n);
   for (let f = 0; f < n; f++){ let s = 0; const o = f * hop; for (let i = 0; i < w; i++) s += v[o + i] * v[o + i]; rms[f] = Math.sqrt(s / w); }
   const srt = Array.from(rms).sort((a, b) => a - b), loud = srt[Math.floor(n * .95)] || 0;
   for (let f = 0; f < n; f++){
     if (f % 500 === 0) postMessage({ p: f / n });
-    if (rms[f] < loud * .08) continue;
+    if (rms[f] < loud * energy || (gate && !gate[f])) continue;
     const o = f * hop; let run = 0;
     for (let L = 1; L <= maxL; L++){ let s = 0; for (let i = 0; i < w; i++){ const q = v[o + i] - v[o + i + L]; s += q * q; } run += s; c[L] = run ? s * L / run : 1; }
-    for (let L = minL; L <= maxL; L++) if (c[L] < .18){
+    for (let L = minL; L <= maxL; L++) if (c[L] < thr){
       while (L + 1 <= maxL && c[L + 1] < c[L]) L++;
       const a = c[L - 1], b = c[L], d = L + 1 <= maxL ? c[L + 1] : b, den = a + d - 2 * b, sh = den ? (a - d) / (2 * den) : 0;
-      const m = 69 + 12 * Math.log2(sr / (L + sh) / 440); if (m >= 36 && m <= 96) out[f] = Math.round(m * 2); break;
+      const m = 69 + 12 * Math.log2(sr / (L + sh) / 440); if (m >= 40 && m <= 88) out[f] = Math.round(m * 2); break;
     }
   }
-  // smooth: a note must last at least 60 ms, and single odd frames take their neighbours' note
+  // smooth: single odd frames take their neighbours' note; tiny gaps inside a phrase are filled; a sung passage must last 120 ms
   for (let f = 1; f < n - 1; f++) if (out[f] && out[f - 1] && out[f + 1] && Math.abs(out[f] - out[f - 1]) > 3 && Math.abs(out[f - 1] - out[f + 1]) <= 2) out[f] = out[f - 1];
-  for (let f = 0; f < n;){ if (!out[f]){ f++; continue; } let g = f; while (g < n && out[g]) g++; if (g - f < 3) out.fill(0, f, g); f = g; }
+  for (let f = 1; f < n - 2; f++) if (!out[f] && out[f - 1] && (out[f + 1] || out[f + 2]) && Math.abs(out[f - 1] - (out[f + 1] || out[f + 2])) <= 2) out[f] = out[f - 1];
+  for (let f = 0; f < n;){ if (!out[f]){ f++; continue; } let g = f; while (g < n && out[g]) g++; if (g - f < minLen) out.fill(0, f, g); f = g; }
   postMessage({ notes: out }, [out.buffer]);
 };`;
 const singSay = (msg, p) => { SING.msg = msg; if (p != null) SING.p = p; renderSingBar(); };
+const lyrCount = t => (t.rec.lyrics && t.rec.lyrics.synced && t.rec.lyrics.synced.length) || 0;
+function lyricGate(t, len, hopS){ // 1 where the lyrics say a line is being sung, 0 elsewhere (only with synced lyrics)
+  const L = t.rec.lyrics && t.rec.lyrics.synced; if (!L || L.length < 5) return null;
+  const g = new Uint8Array(len);
+  L.forEach((l, i) => { if (!l.text || !/[\p{L}\p{N}]/u.test(l.text)) return;
+    const a = Math.max(0, l.t - .4), b = Math.min(L[i + 1] ? L[i + 1].t - .05 : l.t + 9, l.t + 9);
+    for (let fr = Math.floor(a / hopS), e = Math.min(len, Math.ceil(b / hopS)); fr < e; fr++) g[fr] = 1; });
+  return g;
+}
+function melRun(v, opts){
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(new Blob([MEL_WORKER], { type: "text/javascript" })), w = new Worker(u);
+    w.onmessage = e => { if (e.data.notes){ res(e.data.notes); w.terminate(); URL.revokeObjectURL(u); } else singSay("Aprendiendo la melodía…", .25 + e.data.p * .75); };
+    w.onerror = e => { rej(e); w.terminate(); URL.revokeObjectURL(u); };
+    w.postMessage({ v, sr: MEL_SR, hop: MEL_HOP, ...opts }, [v.buffer]);
+  });
+}
 async function singMelody(t){
   let stem = null;
   if (karaReady(t.id)){ stem = (await iaReq("readonly", s => s.get(t.id)).catch(() => null) || {}).blob; if (!stem && STEM[t.id]) stem = await (await fetch(STEM[t.id])).blob().catch(() => null); }
-  const basic = !stem, key = (basic ? "melb:" : "mel:") + t.id;
+  const basic = !stem, key = (basic ? "melb3:" : "mel2:") + t.id;
   const have = await iaReq("readonly", s => s.get(key)).catch(() => null);
-  if (have && have.notes && have.notes.length) return have;
+  if (have && have.notes && have.notes.length && (have.lyr || 0) === lyrCount(t)) return have;
   if (!t.rec.blob) throw new Error("nofile");
   const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   if (basic) return singMelodyBasic(t, key, OAC);
@@ -6186,13 +6205,8 @@ async function singMelody(t){
   const mid = Math.floor(a.length / 2), W = Math.max(0, Math.min(MEL_SR * 4, a.length - mid - 1500)), R = 1200; let lag = 0, best = -Infinity;
   for (let L = -R; L <= R; L++){ let s = 0; for (let i = 0; i < W; i += 2){ const j = mid + i + L; if (j >= 0 && j < b.length) s += a[mid + i] * b[j]; } if (s > best){ best = s; lag = L; } }
   const v = new Float32Array(a.length); for (let i = 0; i < a.length; i++){ const j = i + lag; v[i] = a[i] - (j >= 0 && j < b.length ? b[j] / g : 0); }
-  const notes = await new Promise((res, rej) => {
-    const u = URL.createObjectURL(new Blob([MEL_WORKER], { type: "text/javascript" })), w = new Worker(u);
-    w.onmessage = e => { if (e.data.notes){ res(e.data.notes); w.terminate(); URL.revokeObjectURL(u); } else singSay("Aprendiendo la melodía…", .25 + e.data.p * .75); };
-    w.onerror = e => { rej(e); w.terminate(); URL.revokeObjectURL(u); };
-    w.postMessage({ v, sr: MEL_SR, hop: MEL_HOP }, [v.buffer]);
-  });
-  const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, at: Date.now() };
+  const notes = await melRun(v, { thr: .15, energy: .12, minLen: 6, gate: lyricGate(t, Math.ceil(v.length / MEL_HOP) + 1, MEL_HOP / MEL_SR) });
+  const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, lyr: lyrCount(t), at: Date.now() };
   iaReq("readwrite", s => s.put(mel)).catch(() => {});
   return mel;
 }
@@ -6205,34 +6219,40 @@ async function singMelodyBasic(t, key, OAC){
   const L = ab.getChannelData(0), Rr = ab.numberOfChannels > 1 ? ab.getChannelData(1) : L, mid = new Float32Array(n);
   for (let i = 0; i < n; i++) mid[i] = (L[i] + Rr[i]) / 2;
   singSay("Buscando la voz…", .15);
-  const oc = new OAC(1, n, MEL_SR), buf = oc.createBuffer(1, n, MEL_SR); buf.copyToChannel(mid, 0);
+  const side = new Float32Array(n); for (let i = 0; i < n; i++) side[i] = (L[i] - Rr[i]) / 2;
+  const oc = new OAC(2, n, MEL_SR), buf = oc.createBuffer(2, n, MEL_SR); buf.copyToChannel(mid, 0); buf.copyToChannel(side, 1);
   const src = oc.createBufferSource(), hp = oc.createBiquadFilter(), hp2 = oc.createBiquadFilter(), lp = oc.createBiquadFilter();
   hp.type = hp2.type = "highpass"; hp.frequency.value = hp2.frequency.value = 170; lp.type = "lowpass"; lp.frequency.value = 1100;
   src.buffer = buf; src.connect(hp); hp.connect(hp2); hp2.connect(lp); lp.connect(oc.destination); src.start();
-  const v = (await oc.startRendering()).getChannelData(0).slice();
+  const rd = await oc.startRendering(), v = rd.getChannelData(0).slice(), sd = rd.getChannelData(1);
   singSay("Aprendiendo la melodía…", .25);
-  const notes = await new Promise((res, rej) => {
-    const u = URL.createObjectURL(new Blob([MEL_WORKER], { type: "text/javascript" })), w = new Worker(u);
-    w.onmessage = e => { if (e.data.notes){ res(e.data.notes); w.terminate(); URL.revokeObjectURL(u); } else singSay("Aprendiendo la melodía…", .25 + e.data.p * .75); };
-    w.onerror = e => { rej(e); w.terminate(); URL.revokeObjectURL(u); };
-    w.postMessage({ v, sr: MEL_SR, hop: MEL_HOP }, [v.buffer]);
-  });
-  const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, basic: true, at: Date.now() };
+  const frames = Math.ceil(n / MEL_HOP) + 1, win = Math.round(MEL_SR * .036), gate = new Uint8Array(frames);
+  for (let fr = 0; fr < frames; fr++){ let em = 0, es = 0; const o = fr * MEL_HOP; for (let i = o; i < Math.min(n, o + win); i++){ em += v[i] * v[i]; es += sd[i] * sd[i]; } gate[fr] = em > 2.2 * es ? 1 : 0; }
+  const lg = lyricGate(t, frames, MEL_HOP / MEL_SR); if (lg) for (let fr = 0; fr < frames; fr++) gate[fr] &= lg[fr];
+  const notes = await melRun(v, { thr: .18, energy: .15, minLen: 7, gate });
+  const mel = { id: key, notes, hop: MEL_HOP / MEL_SR, basic: true, lyr: lyrCount(t), at: Date.now() };
   iaReq("readwrite", s => s.put(mel)).catch(() => {});
   return mel;
 }
 // your note right now, from the microphone (YIN pitch method)
 function yinLive(x, n, sr){
   const minL = Math.floor(sr / 1000), maxL = Math.ceil(sr / 70), w = Math.min(n - maxL - 1, Math.round(sr * .036)); if (w < 64) return 0;
-  let e = 0; for (let i = 0; i < w; i++) e += x[i] * x[i]; if (Math.sqrt(e / w) < .006) return 0;
+  let e = 0; for (let i = 0; i < w; i++) e += x[i] * x[i]; if (Math.sqrt(e / w) < .0025) return 0;
   const c = SING.cbuf || (SING.cbuf = new Float32Array(400)); let run = 0;
   for (let L = 1; L <= maxL; L++){ let s = 0; for (let i = 0; i < w; i++){ const q = x[i] - x[i + L]; s += q * q; } run += s; c[L] = run ? s * L / run : 1; }
-  for (let L = minL; L <= maxL; L++) if (c[L] < .2){
+  for (let L = minL; L <= maxL; L++) if (c[L] < .3){
     while (L + 1 <= maxL && c[L + 1] < c[L]) L++;
     const a = c[L - 1], b = c[L], d = L + 1 <= maxL ? c[L + 1] : b, den = a + d - 2 * b, sh = den ? (a - d) / (2 * den) : 0; return sr / (L + sh);
   }
   return 0;
 }
+const SING_LV = { // how strict the points are
+  easy:   { name: "Fácil",    full: 2.5,  half: 3.5,  win: 16, breath: 16, curve: .5 },
+  normal: { name: "Normal",   full: 1.5,  half: 2.5,  win: 12, breath: 9,  curve: .6 },
+  hard:   { name: "Exigente", full: .5,   half: 1,    win: 3,  breath: 5,  curve: 1 }
+};
+const singLv = () => SING_LV[store.get("singLevel", "normal")] ? store.get("singLevel", "normal") : "normal";
+const bestKey = (id) => id + ":" + singLv();
 const melAt = i => SING.mel && i >= 0 && i < SING.mel.notes.length ? SING.mel.notes[i] / 2 : 0;
 const pcDist = (a, b) => { const d = Math.abs(a - b) % 12; return Math.min(d, 12 - d); };
 function singTick(){
@@ -6240,15 +6260,28 @@ function singTick(){
   const t = SING.t, p = pos();
   if (cur() !== t || !S.playing || (t.dur && p >= t.dur - .3)) return singFinish();
   SING.an.getFloatTimeDomainData(SING.buf);
-  const k = SING.k, n = Math.floor(SING.buf.length / k); for (let i = 0; i < n; i++){ let s = 0; for (let j = 0; j < k; j++) s += SING.buf[i * k + j]; SING.dec[i] = s / k; }
+  const k = SING.k, n = Math.floor(SING.buf.length / k); let ms = 0; for (let i = 0; i < n; i++){ let s = 0; for (let j = 0; j < k; j++) s += SING.buf[i * k + j]; SING.dec[i] = s / k; ms += SING.dec[i] * SING.dec[i]; }
+  SING.lvl += (Math.min(1, Math.sqrt(ms / n) * 12) - SING.lvl) * .35;
   const f = yinLive(SING.dec, n, SING.rate / k), um = f > 65 && f < 1100 ? 69 + 12 * Math.log2(f / 440) : 0;
   const tm = p - SING.lat, fr = Math.round(tm / SING.mel.hop);
   SING.trail.push({ t: tm, m: um }); while (SING.trail.length && SING.trail[0].t < tm - 3) SING.trail.shift();
+  const lv = SING_LV[singLv()];
+  if (um){ SING.heardAt = Date.now(); SING.heard++; }
   if (melAt(fr)){
-    let d = 99; if (um) for (let i = fr - 12; i <= fr + 12; i++){ const r = melAt(i); if (r) d = Math.min(d, pcDist(um, r)); }
-    SING.last = d <= 1 ? 1 : d <= 2 ? .5 : 0; SING.hits += SING.last; SING.n++;
+    SING.refN++;
+    if (um){
+      let d = 99; for (let i = fr - lv.win; i <= fr + lv.win; i++){ const r = melAt(i); if (r) d = Math.min(d, pcDist(um, r)); }
+      SING.last = d <= lv.full ? 1 : d <= lv.half ? .5 : 0; SING.hits += SING.last; SING.n++; SING.sung++;
+    } else if (!SING.basic && !SING.trail.slice(-lv.breath, -1).some(dd => dd.m)){ SING.last = 0; SING.n++; } // with AI: silent for a while during a sung part is a miss (a short breath is not)
   }
-  SING.score = SING.n ? Math.round(100 * Math.pow(SING.hits / SING.n, .7)) : 0;
+  // basic mode: only the moments you sing are judged (the melody found there can include an instrument), and how much of
+  // the song you sang counts too, so two good notes are not a 100
+  let sc = SING.n ? Math.pow(SING.hits / SING.n, lv.curve) : 0;
+  if (SING.basic) sc *= .7 + .3 * Math.min(1, SING.sung / Math.max(1, SING.refN) / .6);
+  SING.score = Math.round(100 * sc);
+  // nothing heard for a while although the song is being sung: say what to check
+  const deaf = SING.refN > 120 && Date.now() - (SING.heardAt || SING.t0) > 7000;
+  if (deaf !== !!SING.deaf){ SING.deaf = deaf; renderSingBar(); }
 }
 // the picture: the same on your screen and in the video
 const SW_ = 1080, SH_ = 1920;
@@ -6284,7 +6317,12 @@ function singDraw(){
   if (SING.bg) x.drawImage(SING.bg, 0, 0); else { x.fillStyle = "#08080c"; x.fillRect(0, 0, SW_, SH_); }
   // score
   x.textAlign = "right"; x.fillStyle = "#fff"; x.font = singFont(800, 64, "d"); x.fillText(String(SING.score), 984, 152);
-  x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(700, 24); x.fillText("PUNTOS", 984, 186);
+  x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(700, 24); x.fillText("PUNTOS · " + SING_LV[singLv()].name.toUpperCase(), 984, 186);
+  if (SING.st === "sing" || SING.st === "count"){ // microphone level: shows Hum hears you
+    x.textAlign = "left"; x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(700, 22); x.fillText("MICRÓFONO", 96, 196);
+    x.fillStyle = "rgba(255,255,255,.15)"; x.beginPath(); x.roundRect(96, 210, 220, 10, 5); x.fill();
+    x.fillStyle = SING.deaf ? "#ff8a80" : acc; x.beginPath(); x.roundRect(96, 210, Math.max(6, 220 * (SING.lvl || 0)), 10, 5); x.fill();
+  }
   // the melody lane: the singer's notes go by, your voice is the bright trail
   const L0 = 1000, LH = 380, X0 = 60, XW = 960, past = 2.5, fut = 3.5, now = X0 + XW * past / (past + fut), pps = XW / (past + fut);
   x.fillStyle = "rgba(255,255,255,.05)"; x.beginPath(); x.roundRect(X0 - 20, L0 - 20, XW + 40, LH + 40, 28); x.fill();
@@ -6322,7 +6360,7 @@ function singDraw(){
     x.fillStyle = g; x.font = singFont(800, 300, "d"); x.fillText(String(sc), SW_ / 2, 1000);
     x.fillStyle = "#fff"; x.font = singFont(800, 64, "d"); x.fillText(label, SW_ / 2, 1110);
     x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(600, 36); x.fillText(fitText(x, `“${t.title}” · ${t.artist}`, 960), SW_ / 2, 1180);
-    if (SING.basic){ x.font = singFont(600, 26); x.fillStyle = "rgba(235,233,243,.5)"; x.fillText("Calificación aproximada (modo básico)", SW_ / 2, 1290); }
+    x.font = singFont(600, 26); x.fillStyle = "rgba(235,233,243,.5)"; x.fillText(`Dificultad: ${SING_LV[singLv()].name}${SING.basic ? " · calificación aproximada (modo básico)" : ""}`, SW_ / 2, 1290);
     if (SING.best > sc) { x.font = singFont(600, 30); x.fillText(`Tu récord en esta canción: ${SING.best}`, SW_ / 2, 1240); }
     x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(600, 28); x.fillText("Hecho con Hum Player", SW_ / 2, 1830);
   }
@@ -6338,9 +6376,10 @@ function renderSingBar(){
   const msg = m => `<p class="sing-msg" role="status">${esc(m)}</p>`;
   if (st === "prep") b.innerHTML = msg(`${SING.msg || "Preparando…"} ${Math.round(SING.p * 100)} %`) + `<button type="button" class="pill" data-act="sing-close">Cancelar</button>`;
   else if (st === "ready") b.innerHTML = msg(SING.msg || "Usa audífonos: así Hum te escucha solo a ti y el video suena mejor.")
+    + `<div class="chips" role="group" aria-label="Dificultad">${Object.entries(SING_LV).map(([k, l]) => `<button type="button" class="chip${singLv() === k ? " on" : ""}" data-act="sing-lv" data-lv="${k}" aria-pressed="${singLv() === k}">${l.name}</button>`).join("")}</div>`
     + (window.MediaRecorder && SING.cv.captureStream ? `<button type="button" class="pill${SING.wantRec ? " on" : ""}" data-act="sing-rec" aria-pressed="${SING.wantRec}">${ic("video")}${SING.wantRec ? "Grabar video: sí" : "Grabar video: no"}</button>` : "")
     + `<button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-go">${ic("mic")}<span>Empezar</span></button>`;
-  else if (st === "count" || st === "sing") b.innerHTML = msg(SING.rec ? "Grabando… canta con ganas" : "Canta con ganas") + `<button type="button" class="pill danger" data-act="sing-stop">Terminar</button>`;
+  else if (st === "count" || st === "sing") b.innerHTML = msg(SING.deaf ? "No te escucho bien: acerca el micrófono o canta más fuerte. Si usas audífonos Bluetooth, prueba con el micrófono del teléfono." : SING.rec ? "Grabando… canta con ganas" : "Canta con ganas") + `<button type="button" class="pill danger" data-act="sing-stop">Terminar</button>`;
   else if (st === "saving") b.innerHTML = msg("Terminando el video…");
   else if (st === "done") b.innerHTML = msg(SING.msg || "")
     + (SING.url ? `<button type="button" class="pill" data-act="sing-watch">${ic($("#singVid").hidden ? "video" : "mic")}${$("#singVid").hidden ? "Ver video" : "Ver puntos"}</button><button type="button" class="pill" data-act="sing-save">${ic("install")}Guardar video</button>` + (navigator.share ? `<button type="button" class="pill" data-act="sing-share">${ic("share")}Compartir</button>` : "") : "")
@@ -6363,7 +6402,7 @@ async function openSing(){
     SING.mel = await singMelody(t); if (SING.t !== t || !$("#singDlg").open) return;
     singRange();
     if (!SING.mel.notes.some(Boolean)){ SING.st = "error"; singSay("No encontré una voz clara en esta canción para calificarla."); return; }
-    SING.best = (store.get("singBest", {}) || {})[t.id] || 0;
+    SING.best = (store.get("singBest", {}) || {})[bestKey(t.id)] || 0;
     SING.basic = !!SING.mel.basic;
     SING.st = "ready"; SING.msg = (SING.basic ? "Modo básico: esta canción no tiene karaoke con IA, así que Hum baja la voz y te califica de forma aproximada. Para la calificación más exacta, prepárala con IA en Efectos. " : "") + (SING.best ? `Tu récord: ${SING.best} puntos. ` : "") + "Usa audífonos para mejor resultado."; renderSingBar();
   } catch (e){
@@ -6373,7 +6412,7 @@ async function openSing(){
 async function singStart(){
   const t = SING.t; if (!t) return;
   try {
-    SING.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+    SING.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
   } catch { SING.st = "error"; singSay("Hum necesita tu micrófono para escucharte cantar. Permite el micrófono para este sitio y vuelve a intentarlo."); return; }
   ensureCtx();
   SING.karaWas = S.fx.kara; SING.mixWas = S.mix ? S.mix.on : null; if (S.mix) S.mix.on = false;
@@ -6384,10 +6423,10 @@ async function singStart(){
   SING.rate = ctx.sampleRate; SING.k = Math.max(1, Math.round(SING.rate / 12000));
   SING.src = ctx.createMediaStreamSource(SING.stream);
   SING.an = ctx.createAnalyser(); SING.an.fftSize = 4096; SING.buf = new Float32Array(SING.an.fftSize); SING.dec = new Float32Array(Math.ceil(SING.an.fftSize / SING.k));
-  SING.src.connect(SING.an); // only listened to: your voice never goes to the speakers
+  SING.boost = ctx.createGain(); SING.boost.gain.value = 4; SING.src.connect(SING.boost); SING.boost.connect(SING.an); // only listened to (louder, to hear you well): your voice never goes to the speakers
   const tr = SING.stream.getAudioTracks()[0], inLat = (tr && tr.getSettings && tr.getSettings().latency) || .02;
   SING.lat = clamp((ctx.outputLatency || 0) + (ctx.baseLatency || 0) + inLat, .02, .6);
-  SING.hits = SING.n = SING.score = 0; SING.trail = []; SING.chunks = []; SING.rec = null; SING.blob = null; SING.url = "";
+  SING.hits = SING.n = SING.score = 0; SING.refN = SING.sung = 0; SING.heard = 0; SING.heardAt = 0; SING.t0 = Date.now(); SING.deaf = false; SING.lvl = 0; SING.trail = []; SING.chunks = []; SING.rec = null; SING.blob = null; SING.url = "";
   stat("cantar");
   window.__singing = true; try { stopWake(); } catch {} // "Ey Hum" rests while you sing, so the lyrics are never taken as orders
   try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { SING.lock = l; }).catch(() => {}); } catch {} // the screen stays on
@@ -6423,6 +6462,7 @@ function singRecStart(){
 }
 function singCleanup(){
   clearInterval(SING.iv);
+  try { SING.boost && SING.boost.disconnect(); } catch {} SING.boost = null;
   try { SING.src && SING.src.disconnect(); } catch {}
   try { analyser && SING.nodes[0] && analyser.disconnect(SING.nodes[0]); } catch {}
   SING.nodes.forEach(nd => { try { nd.disconnect(); } catch {} }); SING.nodes = [];
@@ -6436,11 +6476,13 @@ function singFinish(){
   if (SING.st !== "sing" && SING.st !== "count") return;
   clearInterval(SING.iv);
   const t = SING.t; if (S.playing && cur() === t) pause();
-  SING.final = SING.n >= 50 ? SING.score : 0;
+  const enough = SING.basic ? SING.refN >= 50 && SING.n >= 20 : SING.n >= 50;
+  SING.final = enough ? SING.score : 0;
   if (SING.final) stat("cantar-puntos", { rango: SING.final >= 90 ? "90-100" : SING.final >= 75 ? "75-89" : SING.final >= 55 ? "55-74" : "0-54" });
-  const best = store.get("singBest", {}) || {}, prev = best[t.id] || 0; SING.best = Math.max(prev, SING.final);
-  if (SING.final > (best[t.id] || 0)){ best[t.id] = SING.final; store.set("singBest", best); }
-  SING.msg = SING.n < 50 ? "Cantaste muy poquito para calificarte. Inténtalo con la canción completa." : SING.final > prev ? "¡Nuevo récord en esta canción!" : SING.final === prev && prev > 0 ? "Igualaste tu récord en esta canción." : "";
+  const bk = bestKey(t.id), best = store.get("singBest", {}) || {}, prev = best[bk] || 0; SING.best = Math.max(prev, SING.final);
+  if (SING.final > prev){ best[bk] = SING.final; store.set("singBest", best); }
+  const judged = SING.basic ? SING.refN : SING.n, lowHear = judged >= 50 && SING.heard < judged * .08;
+  SING.msg = lowHear || (!enough && SING.refN >= 50 && SING.heard < SING.refN * .08) ? "Hum casi no escuchó tu voz. Revisa que el micrófono esté permitido, acércalo o canta más fuerte, y vuelve a intentarlo." : !enough ? "Cantaste muy poquito para calificarte. Inténtalo con la canción completa." : SING.final > prev ? "¡Nuevo récord en esta canción!" : SING.final === prev && prev > 0 ? "Igualaste tu récord en esta canción." : "";
   if (SING.rec && SING.rec.state === "recording"){
     SING.st = "saving"; renderSingBar();
     setTimeout(() => { // the result stays on screen a moment in the video
@@ -6478,6 +6520,7 @@ document.addEventListener("click", e => {
   if (a === "sing-go") singStart();
   if (a === "sing-stop") singFinish();
   if (a === "sing-rec"){ SING.wantRec = !SING.wantRec; renderSingBar(); }
+  if (a === "sing-lv"){ store.set("singLevel", act.dataset.lv); SING.best = (store.get("singBest", {}) || {})[bestKey(SING.t.id)] || 0; SING.msg = SING.best ? `Tu récord en ${SING_LV[singLv()].name}: ${SING.best} puntos.` : SING_LV[singLv()].name === "Exigente" ? "Exigente: tienes que dar la nota casi exacta y a tiempo." : SING_LV[singLv()].name === "Fácil" ? "Fácil: Hum acepta notas cercanas. Ideal para empezar." : ""; renderSingBar(); }
   if (a === "sing-save") singSave();
   if (a === "sing-share") singShare();
   if (a === "sing-again"){ const v = $("#singVid"); v.hidden = true; SING.cv.hidden = false; if (SING.url){ URL.revokeObjectURL(SING.url); SING.url = ""; SING.blob = null; } SING.st = "ready"; SING.score = 0; SING.trail = []; SING.msg = ""; renderSingBar(); singLoop(); }
@@ -6969,7 +7012,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.13.0";
+const APP_V = "1.13.1";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
