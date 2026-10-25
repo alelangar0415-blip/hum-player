@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RQdpx3WcRdeioMsIb7AWVOu7JHCJfEfmzMrac8xLY8w=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aATb/Y5GPRA3N+2ziaViD4gmGg9l5c7kiZLFILVHpjo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -879,6 +879,97 @@ html.look-dark body{background:var(--bg)}
 .wk-splits td{padding:6px 4px;border-bottom:1px solid var(--line)}
 .wk-splits td:last-child{text-align:right}
 .wk-prev{max-width:360px;margin:0 auto}
+/* ---------- Hum look 2: rounder, softer, the color of each song, made to be shown ---------- */
+:root{--sig:linear-gradient(135deg,var(--accent) 0%,hsl(340 88% 66%) 55%,hsl(262 85% 70%) 100%);--tint:hsl(var(--amb,42) 42% 20%)}
+html,*{-webkit-tap-highlight-color:transparent}
+button,[role=button],[role=link],.row,.tile,.card,.lib-item,.hx,.nav-btn,.chip,.pill,.tab,img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:2px solid hsl(var(--amb,42) 85% 72%);outline-offset:3px;border-radius:10px}
+@media (hover:none) and (pointer:coarse){ :focus-visible{outline:none} .dlg input:focus,.dlg textarea:focus,.hum-form input:focus{outline:none;border-color:hsl(var(--amb,42) 70% 60%)} }
+button,.tile,.card,.hx,.row,.lib-item{transition:transform .14s ease,background .15s,border-color .15s,opacity .15s}
+button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:scale(.97)}
+.pane{border-radius:16px}
+.brand-mark{background:var(--sig);color:#fff;box-shadow:0 4px 14px hsl(340 80% 60% / .35)}
+.nav-btn{border-radius:10px}
+.nav-btn.on{background:hsl(var(--amb,42) 30% 22% / .9)}
+.main{background:linear-gradient(180deg,hsl(var(--amb,42) 38% 19%) 0,var(--panel) 380px) local}
+.topbar{background:hsl(var(--amb,42) 22% 11% / .78)}
+.search{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.06)}
+.greet{font-size:clamp(28px,3.4vw,40px);letter-spacing:-.035em;background:linear-gradient(90deg,var(--fg) 40%,hsl(var(--amb,42) 80% 78%));-webkit-background-clip:text;background-clip:text;color:transparent}
+.banner{border-radius:20px;position:relative;overflow:hidden;
+  background:radial-gradient(120% 120% at 100% 0%,hsl(calc(var(--amb,42) + 70) 70% 55% / .45),transparent 55%),linear-gradient(135deg,hsl(var(--amb,42) 60% 34%),hsl(calc(var(--amb,42) + 40) 50% 22%))}
+.banner::after{content:"";position:absolute;right:-30px;bottom:-40px;width:160px;height:160px;border-radius:50%;background:var(--sig);opacity:.35;filter:blur(30px);pointer-events:none}
+.banner>*{position:relative;z-index:1}
+.hx{border-radius:18px;background:linear-gradient(120deg,hsl(var(--amb,42) 40% 22% / .9),rgba(255,255,255,.04) 75%);border:1px solid rgba(255,255,255,.07)}
+.hx-ic{background:var(--sig);color:#fff;box-shadow:0 6px 16px hsl(340 80% 55% / .3)}
+.tile{border-radius:12px;background:rgba(255,255,255,.07)}
+.tile:hover{background:rgba(255,255,255,.12)}
+.tile img{border-radius:10px 0 0 10px}
+.card{border-radius:14px}
+.card-art img{border-radius:12px}
+.card b{font-family:var(--f-display);letter-spacing:-.01em}
+.shelf-h{font-size:24px;letter-spacing:-.025em}
+.fab{box-shadow:0 8px 22px hsl(var(--amb,42) 80% 45% / .45)}
+.chip{background:rgba(255,255,255,.08)}
+.pill{border-color:rgba(255,255,255,.22)}
+.row{border-radius:10px}
+.c-title img,.upnext img,.lib-item img{border-radius:8px}
+.hero{border-radius:0 0 22px 22px}
+.hero img{border-radius:14px}
+.dlg{border-radius:22px;background:linear-gradient(180deg,hsl(var(--amb,42) 28% 15%),var(--panel) 240px);border:1px solid rgba(255,255,255,.06)}
+.dlg::backdrop{background:rgba(4,4,8,.62);backdrop-filter:blur(4px)}
+.toast{border-radius:999px;padding:11px 18px}
+.np-art{border-radius:16px}
+.facts div{border-radius:12px}
+.b-now img{border-radius:8px}
+.pp{box-shadow:0 4px 14px rgba(0,0,0,.35)}
+/* full player: sits on its own cover, blurred */
+.fp{background:var(--bg)}
+.fp-bg{position:fixed;inset:-12%;z-index:-1;background:center/cover no-repeat var(--tint);filter:blur(56px) saturate(1.6) brightness(.62);transform:scale(1.15);pointer-events:none}
+.fp-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,hsl(var(--amb,42) 30% 8% / .55) 55%,var(--bg) 92%)}
+.fp-art{border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+.fp-meta h2{font-size:clamp(24px,6vw,34px);letter-spacing:-.03em}
+.fp-meta p{color:rgba(255,255,255,.72)}
+.fp-extra .pill{border:0;background:rgba(255,255,255,.12);backdrop-filter:none}
+.fp-extra .pill:hover{background:rgba(255,255,255,.2)}
+.fp-lyr{border-radius:22px;background:hsl(var(--amb,42) 40% 28% / .6)}
+.fp-times{color:rgba(255,255,255,.65)}
+.fp-pp{box-shadow:0 10px 30px rgba(0,0,0,.4)}
+/* bottom tabs (phones) */
+.tabs{display:none}
+.wk{background:linear-gradient(180deg,hsl(var(--amb,42) 40% 18%),var(--bg) 340px)}
+@media (max-width:760px){
+  .app,.app:not(.np-open){grid-template-areas:"main" "bar" "tabs";grid-template-rows:minmax(0,1fr) auto auto;padding:0;gap:0}
+  .main{border-radius:0}
+  .topbar{padding:10px 16px}
+  #menuBtn,#humTop{display:none}
+  .bar{margin:0 8px 2px;padding:8px 10px 10px;border-radius:14px;position:relative;overflow:hidden;
+    background:linear-gradient(90deg,hsl(var(--amb,42) 45% 26%),hsl(var(--amb,42) 38% 18%));box-shadow:0 10px 30px rgba(0,0,0,.45);
+    grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"now ctrl right";gap:4px 6px}
+  .b-ctrl #prev{display:none}
+  .b-right #lyrBtn,.b-right #npBtn{display:none}
+  .bar .pp{width:40px;height:40px;background:transparent;color:#fff;box-shadow:none}
+  .bar .pp svg{width:30px;height:30px}
+  .b-ctrl .ib{color:#fff}
+  .b-seek{position:absolute;left:10px;right:10px;bottom:0;height:10px}
+  .b-seek .t{display:none}
+  .b-seek input[type=range]{height:10px}
+  .b-seek input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#fff var(--pct),rgba(255,255,255,.22) var(--pct))}
+  .b-seek input[type=range]::-webkit-slider-thumb{opacity:0;width:10px;height:10px;margin-top:-3.5px}
+  .b-seek input[type=range]::-moz-range-track,.b-seek input[type=range]::-moz-range-progress{height:3px}
+  .b-txt b{font-size:14px}
+  .b-txt small{color:rgba(255,255,255,.7);font-size:12px}
+  .tabs{grid-area:tabs;display:flex;justify-content:space-around;padding:6px 4px 4px;background:linear-gradient(0deg,var(--bg) 55%,transparent)}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;color:var(--muted);font-size:11px;font-weight:600;min-width:0}
+  .tab svg{width:24px;height:24px}
+  .tab.on{color:var(--fg)}
+  .tab.on svg{filter:drop-shadow(0 0 8px hsl(var(--amb,42) 80% 60% / .55))}
+  .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+  .hum{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+  .tg-chip{bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion:reduce){ button:active,.tile:active,.card:active,.hx:active{transform:none} }
+
 </style>
 </head>
 <body>
@@ -964,6 +1055,13 @@ html.look-dark body{background:var(--bg)}
       <input type="range" id="vol" min="0" max="100" value="70" aria-label="Volumen">
     </div>
   </footer>
+  <nav class="tabs" id="tabs" aria-label="Secciones">
+    <button type="button" class="tab" data-act="home" data-tab="home"></button>
+    <button type="button" class="tab" data-act="search" data-tab="search"></button>
+    <button type="button" class="tab" data-act="menu" data-tab="lib"></button>
+    <button type="button" class="tab" data-act="workout" data-tab="wk"></button>
+    <button type="button" class="tab" data-act="hum" data-tab="hum"></button>
+  </nav>
   <div class="scrim" data-act="menu" aria-hidden="true"></div>
 </div>
 <dialog class="dlg eq-dlg" id="eqDlg" aria-labelledby="eqH">
@@ -1044,6 +1142,7 @@ html.look-dark body{background:var(--bg)}
   </div>
 </section>
 <section class="fp" id="fp" hidden aria-label="Canción en grande">
+  <div class="fp-bg" id="fpBg" aria-hidden="true"></div>
   <div class="fp-in">
     <div class="fp-top">
       <button type="button" class="ib" data-act="fp-close" aria-label="Cerrar la vista en grande" id="fpClose"></button>
@@ -1558,7 +1657,8 @@ function degMidi(t, deg, oct){ const sc = SCALES[t.mode]; const o = Math.floor(d
 function ensureCtx(){
   if (ctx) return false;
   const AC = window.AudioContext || window.webkitAudioContext;
-  const opts = { latencyHint: "playback" }; if (S.snd.rate !== "auto") opts.sampleRate = +S.snd.rate;
+  // phones get a larger sound buffer: small pauses of the phone (other apps, the screen, the network) are never heard
+  const opts = { latencyHint: /android|iphone|ipad|ipod/i.test(navigator.userAgent) ? .2 : "playback" }; if (S.snd.rate !== "auto") opts.sampleRate = +S.snd.rate;
   try { ctx = new AC(opts); } catch { ctx = new AC(); }
   master = ctx.createGain(); master.gain.value = S.muted ? 0 : S.vol * S.vol;
   // chain: songs → master → your EQ → speaker correction → compressor → boost → limiter → (resolution) → analyser → output
@@ -3052,7 +3152,8 @@ function renderFpLyrics(){
 }
 function renderFp(){
   const t = cur(); if (!t || $("#fp").hidden) return;
-  $("#fpArt").src = cover(t); $("#fpTitle").textContent = t.title; $("#fpArtist").textContent = t.artist;
+  $("#fpArt").src = cover(t); { const u = 'url("' + String(cover(t)).replace(/"/g, "%22") + '")'; const bg = $("#fpBg"); if (bg.dataset.u !== u){ bg.dataset.u = u; bg.style.backgroundImage = u; } }
+  $("#fpTitle").textContent = t.title; $("#fpArtist").textContent = t.artist;
   $("#fpCtx").textContent = S.ctxId && S.ctxId !== "search" ? getList(S.ctxId).title : "Reproduciendo";
   $("#fpLike").dataset.like = t.id; likeBtn($("#fpLike"));
   $("#fpPP").innerHTML = ic(S.playing ? "pause" : "play"); $("#fpPP").setAttribute("aria-label", S.playing ? "Pausar" : "Reproducir");
@@ -6157,6 +6258,7 @@ function renderView(){
   paintMarks();
   $("#navHome").classList.toggle("on", view.type === "home");
   $("#navSearch").classList.toggle("on", view.type === "search");
+  document.querySelectorAll("#tabs .tab").forEach(b => { const on = b.dataset.tab === view.type; b.classList.toggle("on", on); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
 }
 function renderLib(){
   const items = ["mine", "liked", ...IMP_ORDER, ...(demoOff() ? [] : [...PLAYLISTS.filter(p => !p.art && !S.hidden.has(p.id)).map(p => p.id), ...ALBUMS.map(a => a.id)])];
@@ -6184,9 +6286,32 @@ function paintMarks(){
   const ls = $("#listShuf"); if (ls){ ls.classList.toggle("on", S.shuffle); ls.setAttribute("aria-pressed", S.shuffle); }
   renderLibActive();
 }
+const TONE = new Map();
+function songTone(t){
+  if (!t.user || !t.rec || !t.rec.pic) return null;
+  if (TONE.has(t.id)) return TONE.get(t.id);
+  TONE.set(t.id, null);
+  const im = new Image();
+  im.onload = () => {
+    try {
+      const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); x.drawImage(im, 0, 0, 32, 32);
+      const p = x.getImageData(0, 0, 32, 32).data, bins = new Float64Array(36), sums = new Float64Array(36);
+      for (let i = 0; i < p.length; i += 4){
+        const r = p[i] / 255, g = p[i + 1] / 255, b = p[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+        if (mx < .18 || d < .1) continue;
+        let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360;
+        const k = Math.floor(h / 10) % 36; bins[k] += d; sums[k] += h * d;
+      }
+      let best = -1, bw = 0; bins.forEach((v, k) => { if (v > bw){ bw = v; best = k; } });
+      if (best >= 0 && bw > 4){ TONE.set(t.id, Math.round(sums[best] / bins[best])); const c2 = cur(); if (c2 && c2.id === t.id) document.documentElement.style.setProperty("--amb", TONE.get(t.id)); }
+    } catch {}
+  };
+  im.src = cover(t);
+  return null;
+}
 function paint(){
   const t = cur(); if (!t) return;
-  document.documentElement.style.setProperty("--amb", t.album && t.album.hue != null ? t.album.hue : hash(t.id) % 360);
+  { const tone = songTone(t); document.documentElement.style.setProperty("--amb", tone != null ? tone : t.album && t.album.hue != null ? t.album.hue : hash(t.id) % 360); }
   if (lookFor !== t.id){ lookFor = t.id; if (LOOK.color === "auto" || LOOK.bg === "cover") applyLook(); }
   paintLyrBtn(); renderFp(); maybeAutoAi(t);
   $("#npLyr").innerHTML = ic("mic") + (t.user && t.rec.lyrics ? "Ver letra" : "Letra");
@@ -7740,6 +7865,8 @@ document.addEventListener("drop", e => { if (!hasFiles(e)) return; e.preventDefa
 $("#brandMark").innerHTML = ic("wave");
 $("#navHome").innerHTML = ic("home") + "Inicio";
 $("#navSearch").innerHTML = ic("search") + "Buscar";
+{ const T = { home: ["home", "Inicio"], search: ["search", "Buscar"], lib: ["library", "Biblioteca"], wk: ["run", "Entrenar"], hum: ["mic", "Hum"] };
+  document.querySelectorAll("#tabs .tab").forEach(b => { const [i, n] = T[b.dataset.tab]; b.innerHTML = ic(i) + "<span>" + n + "</span>"; }); }
 $("#libH").innerHTML = ic("library") + "<span>Tu biblioteca</span>" + `<button class="ib" data-act="lib-dlg" aria-label="Gestionar biblioteca" title="Gestionar biblioteca">${ic("tune")}</button>` + `<button class="ib" data-act="pl-new" aria-label="Crear playlist" title="Crear playlist">${ic("plAdd")}</button><button class="ib" data-act="add" aria-label="Añadir canciones" title="Añadir canciones">${ic("add")}</button>`;
 $("#addTop").innerHTML = ic("add") + "<span>Añadir música</span>";
 $("#importBtn").innerHTML = ic("plAdd") + "<span>Importar playlist</span>";
@@ -7750,7 +7877,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.15.0";
+const APP_V = "1.16.0";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
