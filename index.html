@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ymYIb1S1ULxgDOszTsuUndi3wr+h9B97JHZNhyDac0Y=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RQdpx3WcRdeioMsIb7AWVOu7JHCJfEfmzMrac8xLY8w=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -857,6 +857,28 @@ html.look-dark body{background:var(--bg)}
 .alarm-row{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
 .alarm-row input,.alarm-row select{height:38px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--raise);color:var(--fg);font:inherit;color-scheme:dark}
 .alarm-row .switch{margin-left:auto}
+/* ---------- workouts ---------- */
+.wk{position:fixed;inset:0;z-index:75;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.wk-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.wk-top b{font:800 22px var(--f-display)}
+.wk-body{flex:1;overflow:auto;padding:0 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:720px;width:100%;margin:0 auto;box-sizing:border-box}
+.wk-big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:8px 0}
+.wk-big div{background:var(--raise);border-radius:14px;padding:12px 6px}
+.wk-big b{display:block;font:800 clamp(24px,7vw,40px)/1.05 var(--f-display);font-variant-numeric:tabular-nums}
+.wk-big small{color:var(--muted);font-size:12px}
+.wk-big .main{grid-column:1/-1}
+.wk-big .main b{font-size:clamp(56px,18vw,96px)}
+.wk canvas{width:100%;height:auto;display:block;border-radius:16px;background:#0b0b10}
+.wk-acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:14px 0}
+.wk-song{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;margin:6px 0}
+.wk-song img{width:36px;height:36px;border-radius:6px;object-fit:cover}
+.wk-list{display:grid;gap:8px;margin-top:8px}
+.wk-list button{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:var(--raise);text-align:left;color:var(--fg)}
+.wk-list small{color:var(--muted)}
+.wk-splits{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-top:6px}
+.wk-splits td{padding:6px 4px;border-bottom:1px solid var(--line)}
+.wk-splits td:last-child{text-align:right}
+.wk-prev{max-width:360px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -873,6 +895,7 @@ html.look-dark body{background:var(--bg)}
       <button class="nav-btn" id="navSnd" data-act="snd"></button>
       <button class="nav-btn" id="navLook" data-act="look"></button>
       <button class="nav-btn" id="navLog" data-act="logros"></button>
+      <button class="nav-btn" id="navWk" data-act="workout"></button>
       <button class="nav-btn" id="navAcct" data-act="acct"></button>
       <button class="nav-btn" id="navApp" data-act="welcome"></button>
       <button class="nav-btn" id="navPro" data-act="pro"></button>
@@ -1207,6 +1230,7 @@ html.look-dark body{background:var(--bg)}
   <div class="dlg-act"><button type="button" class="add-top" data-act="hp-close">Listo</button></div>
 </dialog>
 <dialog class="dlg look-dlg" id="lookDlg" aria-labelledby="lookH"><div id="lookBody"></div><input type="file" id="lookFile" accept="image/*" hidden></dialog>
+<div class="wk" id="wk" hidden role="dialog" aria-label="Entrenar"><div class="wk-top"><b>Entrenar</b><button type="button" class="ib" data-act="wk-close" aria-label="Cerrar"></button></div><div class="wk-body" id="wkBody"></div></div>
 <div class="ambient" id="ambient" hidden aria-label="Modo ambiente"><canvas id="ambCv"></canvas>
   <div class="amb-ui"><button type="button" class="ib" data-act="amb-pp" id="ambPP" aria-label="Pausar o reproducir"></button><button type="button" class="ib" data-act="amb-next" aria-label="Siguiente"></button><button type="button" class="ib" data-act="amb-close" aria-label="Salir del modo ambiente"></button></div></div>
 <dialog class="sing-dlg" id="singDlg" aria-label="Cantar con puntuación">
@@ -1314,6 +1338,7 @@ const P = {
   mix:"M22 8l-4-4v3H3v2h15v3l4-4zM2 16l4 4v-3h15v-2H6v-3l-4 4z",
   chevDown:"M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z",
   mic:"M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
+  run:"M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z",
   video:"M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",
   palette:"M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
   spkr:"M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 1.99 2 1.99L17 22c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 2c1.1 0 2 .9 2 2s-.9 2-2 2c-1.11 0-2-.9-2-2s.89-2 2-2zm0 16c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z",
@@ -5680,6 +5705,7 @@ function humModes(c){
     setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
   }
   if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c) && !/cantar|puntos/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
+  if (/(entrenar|entrenamiento|registra(r)? (mi )?(carrera|caminata|ruta)|modo strava|empez(ar|o) a (correr|caminar|rodar)|mide mis (km|kilometros))/.test(c)){ openWorkout(); reply("Listo para entrenar. Elige correr, caminar o bici y dale a empezar."); return true; }
   if (/(calentar|calienta|calentamiento)( la| mi)? voz|ejercicios? (de|para) (la )?voz/.test(c)){ openWarm(); reply("Vamos a calentar la voz. Ponte cómodo y respira."); return true; }
   if (/(modo ambiente|pantalla completa|modo fiesta visual)/.test(c)){ openAmbient(); reply("Modo ambiente. Toca la pantalla para ver los controles."); return true; }
   if (/(comparte|compartir|publica) (lo que (estoy escuchando|escucho)|esta cancion|la cancion)/.test(c)){ storyCard(); reply("Te preparo la imagen para tus historias."); return true; }
@@ -6901,6 +6927,198 @@ setInterval(() => {
   if (now >= due && now - due < 20 * 60000) alarmFire(); // up to 20 minutes late (a sleeping phone), never hours later
 }, 15000);
 
+/* ---------- workouts with GPS: your route, km, pace and the music that pushed you ----------
+   Everything stays on this device. Phones only give a web app the GPS while it is open, so the screen stays on while
+   you train (the music keeps going); if the screen does go off, that stretch is counted in a straight line when you
+   come back. The shared picture leaves out the start and the end of the route, so nobody sees where you live. */
+const WK = { st: "idle", type: "run", pts: [], dist: 0, t0: 0, pausedAt: 0, paused: 0, splits: [], lastSplitT: 0, songs: {}, kmSongs: [{}], watch: null, iv: 0, lock: null, cur: null, err: "", arm: false, view: null };
+const WK_T = { run: { n: "Correr", v: "Carrera", max: 9, step: 1 }, walk: { n: "Caminar", v: "Caminata", max: 4.5, step: 1 }, bike: { n: "Bici", v: "Rodada", max: 25, step: 5 } };
+const wkHist = () => { const h = store.get("workouts", []); return Array.isArray(h) ? h : []; };
+function hav(a, b){ const R2 = 6371000, r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r, x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dn / 2) ** 2; return 2 * R2 * Math.asin(Math.sqrt(x)); }
+const wkSecs = () => WK.t0 ? Math.max(0, ((WK.st === "paused" ? WK.pausedAt : Date.now()) - WK.t0 - WK.paused) / 1000) : 0;
+const hms = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${String(m).padStart(2, "0")}:${String(x).padStart(2, "0")}` : `${m}:${String(x).padStart(2, "0")}`; };
+const paceTxt = (secs, km) => km > .02 ? (() => { const p = secs / km; return `${Math.floor(p / 60)}:${String(Math.round(p % 60)).padStart(2, "0")}`; })() : "–:––";
+const speedTxt = (secs, km) => secs > 5 ? (km / (secs / 3600)).toFixed(1) : "0.0";
+function openWorkout(){
+  if (S.drawer){ S.drawer = false; applySide(); }
+  $("#wk").hidden = false; $("#wk .wk-top .ib").innerHTML = ic("close");
+  if (WK.st === "idle" || WK.st === "done") { WK.st = "ready"; WK.view = null; }
+  renderWk(); stat("entrenar-abrir");
+}
+function closeWorkout(){
+  if (WK.st === "on" || WK.st === "paused"){ toast("Tu entrenamiento sigue: ábrelo en «Entrenar» para verlo o terminarlo."); $("#wk").hidden = true; return; }
+  $("#wk").hidden = true; WK.st = "idle";
+}
+function renderWk(){
+  const b = $("#wkBody"), st = WK.st, T = WK_T[WK.type];
+  if (st === "ready"){
+    const h = wkHist().slice().reverse().slice(0, 12);
+    b.innerHTML = `<div class="chips" role="group" aria-label="Actividad" style="justify-content:center;margin:6px 0 12px">${Object.entries(WK_T).map(([k, t]) => `<button type="button" class="chip${WK.type === k ? " on" : ""}" data-act="wk-type" data-v="${k}" aria-pressed="${WK.type === k}">${t.n}</button>`).join("")}</div>
+      ${WK.type === "run" && canRun() ? `<div class="mix-opt"><div><b>Música a tu paso</b><small>Hum elige canciones con un ritmo parecido a tu zancada.</small></div><button type="button" class="switch" id="wkPace" data-act="wk-pace" role="switch" aria-checked="${!!store.get("wkPace", false)}" aria-label="Música a tu paso"></button></div>` : ""}
+      <p class="mix-note">Hum mide tu ruta con el GPS del teléfono. Mantén Hum abierto mientras entrenas: la pantalla se queda encendida y la música sigue. Tu ruta se guarda solo en este dispositivo.</p>
+      ${WK.err ? `<p class="dlg-msg err">${esc(WK.err)}</p>` : ""}
+      <div class="wk-acts"><button type="button" class="add-top" data-act="wk-start">${ic("run")}<span>Empezar</span></button></div>
+      ${h.length ? `<h3 class="snd-h">Tus entrenamientos</h3><div class="wk-list">${h.map(w => `<button type="button" data-act="wk-see" data-id="${esc(w.id)}"><span><b>${(w.dist / 1000).toFixed(2)} km · ${esc(WK_T[w.type] ? WK_T[w.type].v : "Entreno")}</b><br><small>${new Date(w.start).toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short" })} · ${hms(w.secs)}</small></span><small>${w.type === "bike" ? speedTxt(w.secs, w.dist / 1000) + " km/h" : paceTxt(w.secs, w.dist / 1000) + " /km"}</small></button>`).join("")}</div>` : ""}`;
+    return;
+  }
+  if (st === "on" || st === "paused" || st === "wait"){
+    const t = cur();
+    b.innerHTML = `<div class="wk-big"><div class="main"><b id="wkKm">0.00</b><small>kilómetros</small></div>
+        <div><b id="wkTime">0:00</b><small>tiempo</small></div><div><b id="wkPaceN">–:––</b><small>${WK.type === "bike" ? "km/h" : "ritmo /km"}</small></div><div><b id="wkGps">${st === "wait" ? "…" : "GPS"}</b><small>señal</small></div></div>
+      <canvas id="wkCv" width="900" height="560" aria-label="Tu ruta"></canvas>
+      <div class="wk-song" id="wkSong">${t ? `<img src="${esc(cover(t))}" alt=""><span>${esc(t.title)} · ${esc(t.artist)}</span>` : ""}</div>
+      <div class="wk-acts">${st === "paused" ? `<button type="button" class="add-top" data-act="wk-resume">${ic("play")}<span>Seguir</span></button>` : `<button type="button" class="pill" data-act="wk-pause">${ic("pause")}Pausa</button>`}
+        <button type="button" class="pill danger" data-act="wk-stop">${WK.arm ? "Toca otra vez para terminar" : "Terminar"}</button></div>
+      <p class="mix-note" id="wkNote">${st === "wait" ? "Buscando señal de GPS… sal al aire libre si puedes." : st === "paused" ? "En pausa: no se cuenta distancia." : "Deja Hum abierto mientras entrenas."}</p>`;
+    wkPaint(); return;
+  }
+  if (st === "done" && WK.view){
+    const w = WK.view, km = w.dist / 1000;
+    b.innerHTML = `<div class="wk-prev"><canvas id="wkShare" width="1080" height="1920" aria-label="Tu imagen para historias"></canvas></div>
+      <div class="wk-acts"><button type="button" class="add-top" data-act="wk-share">${ic("share")}<span>Compartir en historias</span></button><button type="button" class="pill" data-act="wk-back">Listo</button></div>
+      <div class="wk-big"><div><b>${km.toFixed(2)}</b><small>km</small></div><div><b>${hms(w.secs)}</b><small>tiempo</small></div><div><b>${w.type === "bike" ? speedTxt(w.secs, km) : paceTxt(w.secs, km)}</b><small>${w.type === "bike" ? "km/h" : "ritmo /km"}</small></div></div>
+      ${w.splits.length ? `<h3 class="snd-h">Por kilómetro</h3><table class="wk-splits">${w.splits.map((sp, i) => `<tr><td>Km ${(i + 1) * (WK_T[w.type] || WK_T.run).step}</td><td>${hms(sp)}${sp === Math.min(...w.splits) && w.splits.length > 1 ? " ⚡" : ""}</td></tr>`).join("")}</table>` : ""}
+      ${w.power ? `<h3 class="snd-h">Tu canción power ⚡</h3><p class="mix-note">La que sonaba en tu ${w.splits.length > 1 ? "kilómetro más rápido" : "entrenamiento"}: <b>${esc(w.power.title)}</b> · ${esc(w.power.artist)}</p>` : ""}
+      ${w.songs.length ? `<h3 class="snd-h">Tu soundtrack</h3>${w.songs.slice(0, 6).map(sg => `<div class="wk-song"><span>${esc(sg.title)} · ${esc(sg.artist)}</span></div>`).join("")}` : ""}
+      <div class="wk-acts"><button type="button" class="pill danger" data-act="wk-del" data-id="${esc(w.id)}">Borrar este entrenamiento</button></div>`;
+    wkCard(w);
+  }
+}
+async function wkStart(){
+  if (!("geolocation" in navigator)){ WK.err = "Este dispositivo no tiene GPS disponible."; renderWk(); return; }
+  Object.assign(WK, { pts: [], dist: 0, t0: 0, paused: 0, pausedAt: 0, splits: [], lastSplitT: 0, songs: {}, kmSongs: [{}], err: "", arm: false, st: "wait", startAt: Date.now() });
+  renderWk();
+  try { if (navigator.wakeLock) WK.lock = await navigator.wakeLock.request("screen"); } catch {}
+  try { unlockBg(); } catch {}
+  WK.watch = navigator.geolocation.watchPosition(wkPos, e => {
+    if (e.code === 1){ WK.err = "Hum necesita permiso de ubicación para medir tu ruta. Actívalo para este sitio y vuelve a intentarlo."; wkEnd(true); }
+    else { const n = $("#wkNote"); if (n) n.textContent = "Señal de GPS débil… sigue, Hum la recupera sola."; }
+  }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  if (WK.type === "run" && canRun() && store.get("wkPace", false)) try { await setRun(true); } catch {}
+  clearInterval(WK.iv); WK.iv = setInterval(wkTick, 1000);
+  stat("entrenar", { tipo: WK.type });
+}
+function wkPos(p){
+  const c = p.coords, pt = { lat: c.latitude, lon: c.longitude, acc: c.accuracy || 99, t: p.timestamp || Date.now() };
+  const g = $("#wkGps"); if (g) g.textContent = pt.acc <= 15 ? "Buena" : pt.acc <= 35 ? "Media" : "Débil";
+  if (WK.st === "wait"){ if (pt.acc > 50) return; WK.st = "on"; WK.t0 = Date.now(); WK.lastSplitT = 0; WK.pts = [pt]; renderWk(); humSay("Empezamos. ¡A darle!"); return; }
+  if (WK.st !== "on"){ WK.cur = pt; return; }
+  if (pt.acc > 35) return;
+  const last = WK.pts[WK.pts.length - 1]; if (!last){ WK.pts.push(pt); return; }
+  const d = hav(last, pt), dt = Math.max(.5, (pt.t - last.t) / 1000), max = WK_T[WK.type].max;
+  if (d < Math.max(4, pt.acc * .5)) return; // standing still or GPS wobble
+  if (d / dt > max * 1.6 && dt < 60) return; // a jump the body cannot do: a GPS glitch
+  WK.pts.push(pt); WK.dist += d;
+  const step = WK_T[WK.type].step * 1000;
+  while (WK.dist >= (WK.splits.length + 1) * step){
+    const now = wkSecs(); WK.splits.push(Math.round(now - WK.lastSplitT)); WK.lastSplitT = now; WK.kmSongs.push({});
+    const k = WK.splits.length * WK_T[WK.type].step, sp = WK.splits[WK.splits.length - 1];
+    humSay(`Llevas ${k} ${k === 1 ? "kilómetro" : "kilómetros"}. ${WK.type === "bike" ? `${(WK_T.bike.step / (sp / 3600)).toFixed(0)} kilómetros por hora` : `Ritmo ${Math.floor(sp / 60)} ${Math.round(sp % 60)}`}.`);
+  }
+}
+function humSay(t){ try { humSpeak(t, () => {}); } catch {} }
+function wkTick(){
+  if (WK.st !== "on") { wkPaint(); return; }
+  const t = cur();
+  if (t && S.playing){ const k = WK.kmSongs[WK.kmSongs.length - 1]; k[t.id] = (k[t.id] || 0) + 1; WK.songs[t.id] = (WK.songs[t.id] || 0) + 1; }
+  wkPaint();
+}
+function wkPaint(){
+  const km = WK.dist / 1000, secs = wkSecs();
+  const set = (id, v) => { const el = $(id); if (el && el.textContent !== v) el.textContent = v; };
+  set("#wkKm", km.toFixed(2)); set("#wkTime", hms(secs)); set("#wkPaceN", WK.type === "bike" ? speedTxt(secs, km) : paceTxt(secs, km));
+  const t = cur(), sg = $("#wkSong"); if (sg && t && sg.dataset.id !== t.id){ sg.dataset.id = t.id; sg.innerHTML = `<img src="${esc(cover(t))}" alt=""><span>${esc(t.title)} · ${esc(t.artist)}</span>`; }
+  const cv = $("#wkCv"); if (cv) wkRoute(cv.getContext("2d"), WK.pts, 0, 0, cv.width, cv.height, { live: true });
+}
+// the route as a glowing line in a box; trim = metres left out at each end (privacy)
+function wkXY(pts){ if (!pts.length) return []; const o = pts[0], k = Math.cos(o.lat * Math.PI / 180) * 111320; return pts.map(p => [(p.lon - o.lon) * k, -(p.lat - o.lat) * 110540]); }
+function wkTrim(xy, m){
+  if (xy.length < 3 || !m) return xy; let a = 0, s0 = 0; while (a < xy.length - 2 && s0 < m){ s0 += Math.hypot(xy[a + 1][0] - xy[a][0], xy[a + 1][1] - xy[a][1]); a++; }
+  let z = xy.length - 1, s1 = 0; while (z > a + 1 && s1 < m){ s1 += Math.hypot(xy[z][0] - xy[z - 1][0], xy[z][1] - xy[z - 1][1]); z--; }
+  return xy.slice(a, z + 1);
+}
+function wkRoute(x, pts, X, Y, W, H, o = {}){
+  const acc = LOOKACC || "#f2b544", xy = o.xy || wkXY(pts);
+  if (!o.noBg){ x.fillStyle = "#0b0b10"; x.fillRect(X, Y, W, H); x.strokeStyle = "rgba(255,255,255,.05)"; x.lineWidth = 1; for (let i = 1; i < 8; i++){ x.beginPath(); x.moveTo(X + W * i / 8, Y); x.lineTo(X + W * i / 8, Y + H); x.stroke(); x.beginPath(); x.moveTo(X, Y + H * i / 8); x.lineTo(X + W, Y + H * i / 8); x.stroke(); } }
+  if (xy.length < 2){ x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(600, Math.round(W / 26)); x.textAlign = "center"; x.fillText(o.live ? "Tu ruta aparecerá aquí" : "", X + W / 2, Y + H / 2); x.textAlign = "left"; return; }
+  let mnx = Infinity, mny = Infinity, mxx = -Infinity, mxy = -Infinity; xy.forEach(([a, b]) => { mnx = Math.min(mnx, a); mxx = Math.max(mxx, a); mny = Math.min(mny, b); mxy = Math.max(mxy, b); });
+  const pad = Math.min(W, H) * .1, sc = Math.min((W - 2 * pad) / Math.max(30, mxx - mnx), (H - 2 * pad) / Math.max(30, mxy - mny));
+  const ox = X + (W - (mxx - mnx) * sc) / 2 - mnx * sc, oy = Y + (H - (mxy - mny) * sc) / 2 - mny * sc, P = ([a, b]) => [ox + a * sc, oy + b * sc];
+  x.lineJoin = x.lineCap = "round";
+  x.beginPath(); xy.forEach((q, i) => { const [a, b] = P(q); i ? x.lineTo(a, b) : x.moveTo(a, b); });
+  x.save(); x.strokeStyle = acc; x.shadowColor = acc; x.shadowBlur = Math.max(10, W / 40); x.lineWidth = Math.max(4, W / 90); x.stroke(); x.restore();
+  x.strokeStyle = "rgba(255,255,255,.85)"; x.lineWidth = Math.max(1.5, W / 360); x.stroke();
+  const st = P(xy[0]), en = P(xy[xy.length - 1]);
+  if (o.live){ x.fillStyle = "#fff"; x.beginPath(); x.arc(en[0], en[1], Math.max(6, W / 90), 0, 7); x.fill(); x.fillStyle = acc; x.beginPath(); x.arc(st[0], st[1], Math.max(5, W / 110), 0, 7); x.fill(); }
+}
+function wkEnd(cancel){
+  clearInterval(WK.iv); if (WK.watch != null) try { navigator.geolocation.clearWatch(WK.watch); } catch {} WK.watch = null;
+  if (WK.lock){ try { WK.lock.release(); } catch {} WK.lock = null; }
+  if (RUN.on && store.get("wkPace", false)) try { setRun(false); } catch {}
+  if (cancel || WK.dist < 50){ if (!cancel) toast("Recorriste muy poquito para guardarlo."); WK.st = "ready"; renderWk(); return; }
+  const secs = Math.round(wkSecs()), step = WK_T[WK.type].step;
+  // the song of your fastest km (or the most played if there were no full km)
+  const fast = WK.splits.length ? WK.splits.indexOf(Math.min(...WK.splits)) : -1, ks = fast >= 0 ? WK.kmSongs[fast] : WK.songs;
+  const topOf = m => Object.entries(m || {}).sort((a, b) => b[1] - a[1]).map(([id, n]) => { const t = BYID[id]; return t ? { id, title: t.title, artist: t.artist, secs: n } : null; }).filter(Boolean);
+  const songs = topOf(WK.songs), power = topOf(ks)[0] || songs[0] || null;
+  // the route kept small: one point every few metres is plenty to draw it
+  const xy = wkXY(WK.pts), keep = []; let lastK = null; xy.forEach(p => { if (!lastK || Math.hypot(p[0] - lastK[0], p[1] - lastK[1]) > 8){ keep.push([Math.round(p[0]), Math.round(p[1])]); lastK = p; } });
+  const w = { id: "w" + Date.now().toString(36), type: WK.type, start: WK.startAt, secs, dist: Math.round(WK.dist), splits: WK.splits.slice(), route: keep.slice(-1500), songs: songs.slice(0, 10), power };
+  const h = wkHist(); h.push(w); store.set("workouts", h.slice(-60));
+  try { logEvent("workout", { km: WK.dist / 1000, type: WK.type }); } catch {}
+  stat("entrenar-fin", { tipo: WK.type, km: WK.dist >= 10000 ? "10+" : WK.dist >= 5000 ? "5-10" : "0-5" });
+  humSay(`¡Bien hecho! ${(WK.dist / 1000).toFixed(1).replace(".", " punto ")} kilómetros en ${hms(secs)}.`);
+  WK.st = "done"; WK.view = w; renderWk();
+}
+async function wkCard(w){ // the picture for stories
+  const cv = $("#wkShare"); if (!cv) return; const x = cv.getContext("2d"), acc = LOOKACC || "#f2b544", km = w.dist / 1000;
+  const pt = w.power && BYID[w.power.id], im = pt ? await loadImg(cover(pt)) : null;
+  x.fillStyle = "#08080c"; x.fillRect(0, 0, 1080, 1920);
+  if (im){ x.globalAlpha = .75; blurInto(x, im, 1080, 1920); x.globalAlpha = 1; }
+  const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, "rgba(6,6,10,.55)"); g.addColorStop(.55, "rgba(6,6,10,.7)"); g.addColorStop(1, "rgba(6,6,10,.92)"); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+  x.fillStyle = acc; [[-18, 26], [0, 44], [18, 26]].forEach(([dx, h]) => { x.beginPath(); x.roundRect(96 + dx - 5, 130 - h / 2, 10, h, 5); x.fill(); });
+  x.textAlign = "left"; x.fillStyle = "#fff"; x.font = singFont(800, 46, "d"); x.fillText("hum", 132, 146);
+  x.textAlign = "right"; x.fillStyle = "rgba(235,233,243,.75)"; x.font = singFont(700, 30);
+  x.fillText(`${(WK_T[w.type] || WK_T.run).v.toUpperCase()} · ${new Date(w.start).toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" })}`, 984, 144);
+  const xy = wkTrim(w.route, w.dist > 1200 ? 200 : w.dist * .15); // the ends are left out: nobody sees where you start or finish
+  wkRoute(x, null, 90, 250, 900, 860, { xy, noBg: true });
+  x.textAlign = "center"; x.fillStyle = "#fff"; x.font = singFont(800, 190, "d"); x.fillText(km.toFixed(2), 540, 1300);
+  x.fillStyle = acc; x.font = singFont(800, 44); x.fillText("KILÓMETROS", 540, 1370);
+  const pace = w.type === "bike" ? [speedTxt(w.secs, km), "KM/H"] : [paceTxt(w.secs, km), "RITMO /KM"];
+  [[hms(w.secs), "TIEMPO", 330], [pace[0], pace[1], 750]].forEach(([v, l, cx]) => { x.fillStyle = "#fff"; x.font = singFont(800, 76, "d"); x.fillText(v, cx, 1500); x.fillStyle = "rgba(235,233,243,.6)"; x.font = singFont(700, 26); x.fillText(l, cx, 1545); });
+  if (w.power){
+    x.fillStyle = "rgba(255,255,255,.08)"; x.beginPath(); x.roundRect(140, 1610, 800, 150, 24); x.fill();
+    if (im){ x.save(); x.beginPath(); x.roundRect(160, 1630, 110, 110, 14); x.clip(); const q = Math.min(im.width, im.height); x.drawImage(im, (im.width - q) / 2, (im.height - q) / 2, q, q, 160, 1630, 110, 110); x.restore(); }
+    x.textAlign = "left"; x.fillStyle = acc; x.font = singFont(800, 24); x.fillText("CANCIÓN POWER ⚡", 300, 1665);
+    x.fillStyle = "#fff"; x.font = singFont(800, 40, "d"); x.fillText(fitText(x, w.power.title, 610), 300, 1712);
+    x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(600, 28); x.fillText(fitText(x, w.power.artist, 610), 300, 1750);
+  }
+  x.textAlign = "center"; x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(600, 26); x.fillText("Entrené con Hum Player · alelangar0415-blip.github.io/hum-player", 540, 1860);
+}
+async function wkShare(){
+  const cv = $("#wkShare"); if (!cv) return; const b = await new Promise(r => cv.toBlob(r, "image/png")); if (!b) return;
+  stat("entrenar-compartir");
+  const file = new File([b], "Mi entrenamiento Hum.png", { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })){ try { await navigator.share({ files: [file], title: "Mi entrenamiento en Hum" }); return; } catch (e){ if (e && e.name === "AbortError") return; } }
+  const u = URL.createObjectURL(b), a = document.createElement("a"); a.href = u; a.download = "Mi entrenamiento Hum.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); toast("Guardé la imagen de tu entrenamiento.");
+}
+document.addEventListener("visibilitychange", async () => { if (!document.hidden && (WK.st === "on" || WK.st === "wait") && !WK.lock && navigator.wakeLock) try { WK.lock = await navigator.wakeLock.request("screen"); WK.lock.addEventListener("release", () => { WK.lock = null; }); } catch {} });
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]"); if (!a) return; const k = a.dataset.act;
+  if (k === "workout") openWorkout();
+  if (k === "wk-close") closeWorkout();
+  if (k === "wk-type"){ WK.type = a.dataset.v; renderWk(); }
+  if (k === "wk-start") wkStart();
+  if (k === "wk-pause"){ WK.st = "paused"; WK.pausedAt = Date.now(); renderWk(); }
+  if (k === "wk-resume"){ WK.paused += Date.now() - WK.pausedAt; WK.st = "on"; if (WK.cur) WK.pts.push(WK.cur); renderWk(); }
+  if (k === "wk-stop"){ if (!WK.arm){ WK.arm = true; renderWk(); setTimeout(() => { WK.arm = false; if (WK.st === "on" || WK.st === "paused") renderWk(); }, 4000); return; } WK.arm = false; if (WK.st === "paused") WK.paused += Date.now() - WK.pausedAt; wkEnd(false); }
+  if (k === "wk-share") wkShare();
+  if (k === "wk-back"){ WK.st = "ready"; WK.view = null; renderWk(); }
+  if (k === "wk-see"){ const w = wkHist().find(x => x.id === a.dataset.id); if (w){ WK.st = "done"; WK.view = w; renderWk(); } }
+  if (k === "wk-del"){ store.set("workouts", wkHist().filter(x => x.id !== a.dataset.id)); WK.st = "ready"; WK.view = null; renderWk(); toast("Entrenamiento borrado."); }
+  if (k === "wk-pace"){ store.set("wkPace", !store.get("wkPace", false)); a.setAttribute("aria-checked", !!store.get("wkPace", false)); }
+});
+
 /* ---------- vocal warm-up: three short exercises with guide tones; nothing is recorded ----------
    1 · hold a comfortable note (steadiness), 2 · follow a scale built on your note (tuning), 3 · a siren from low to high. */
 const WARM = { st: "idle", stream: null, src: null, an: null, buf: null, dec: null, k: 1, iv: 0, raf: 0, t0: 0, step: 0, base: 0, pts: [], res: {}, osc: null, og: null };
@@ -7039,7 +7257,8 @@ const WEEK_POOL = [
   { id: "amb", t: "Usa el modo ambiente", goal: 1 },
   { id: "songs", t: "Escucha 10 canciones distintas", goal: 10 },
   { id: "share", t: "Comparte lo que escuchas", goal: 1 },
-  { id: "days", t: "Escucha música 5 días", goal: 5 }
+  { id: "days", t: "Escucha música 5 días", goal: 5 },
+  { id: "km", t: "Recorre 10 km entrenando", goal: 10, unit: "km" }
 ];
 const MEDALS = [
   { id: "first", e: "🎧", t: "Primer paso", d: "Escucha tu primera canción" },
@@ -7054,11 +7273,19 @@ const MEDALS = [
   { id: "hard80", e: "🏔️", t: "Exigente", d: "80 o más en Exigente" },
   { id: "battle", e: "⚔️", t: "A la batalla", d: "Haz una batalla de canto" },
   { id: "reto", e: "📨", t: "Retador", d: "Reta a un amigo" },
-  { id: "week", e: "🏆", t: "Semana completa", d: "Cumple los 3 retos de una semana" }
+  { id: "week", e: "🏆", t: "Semana completa", d: "Cumple los 3 retos de una semana" },
+  { id: "wk1", e: "🏃", t: "En movimiento", d: "Tu primer entrenamiento" },
+  { id: "k5", e: "🥉", t: "5K", d: "5 km en un entrenamiento" },
+  { id: "k10", e: "🥈", t: "10K", d: "10 km en un entrenamiento" },
+  { id: "k21", e: "🥇", t: "Medio maratón", d: "21 km en un entrenamiento" }
 ];
-function weekPick(wk = weekKey()){ // 3 challenges for this week, the same for everyone
+function weekPick(wk = weekKey()){ // 3 challenges for this week, the same for everyone (kept once chosen)
+  const ws = LG.w && LG.w.k === wk ? LG.w : null;
+  if (ws && Array.isArray(ws.ids) && ws.ids.length === 3){ const l = ws.ids.map(id => WEEK_POOL.find(c => c.id === id)).filter(Boolean); if (l.length === 3) return l; }
+  const pool = ws && ws.p && Object.keys(ws.p).length && !ws.ids ? WEEK_POOL.slice(0, 10) : WEEK_POOL; // a week already under way keeps its challenges
   let h = 0; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const out = []; for (let k = 0; out.length < 3 && k < 30; k++){ const c = WEEK_POOL[(h + k * 7) % WEEK_POOL.length]; if (!out.includes(c)) out.push(c); }
+  const out = []; for (let k = 0; out.length < 3 && k < 30; k++){ const c = pool[(h + k * 7) % pool.length]; if (!out.includes(c)) out.push(c); }
+  if (ws){ ws.ids = out.map(c => c.id); }
   return out;
 }
 function weekState(){ const wk = weekKey(); if (LG.w.k !== wk) LG.w = { k: wk, p: {}, songs: [], done: {} }; return LG.w; }
@@ -7108,6 +7335,7 @@ function logEvent(name, data){
   else if (name === "reto-enviado"){ add("reto"); medal("reto"); }
   else if (name === "modo-ambiente") add("amb");
   else if (name === "compartir-cancion") add("share");
+  else if (name === "workout" && data){ w.p.km = (w.p.km || 0) + (data.km || 0); medal("wk1"); if (data.km >= 5) medal("k5"); if (data.km >= 10) medal("k10"); if (data.km >= 21.0975) medal("k21"); }
   else return;
   saveLG(); logCheck();
 }
@@ -7119,7 +7347,7 @@ function openLogros(){
       <small>${today >= 180 ? "Hoy ya cuenta. ¡Vuelve mañana!" : `Escucha ${Math.ceil((180 - today) / 60)} min más hoy para ${st ? "seguir tu racha" : "empezarla"}.`}</small></div></div>
     <h3 class="snd-h">Retos de esta semana</h3>
     <div class="log-ch">${weekPick().map(c => { const p = Math.min(c.goal, weekProgress(c)), pct = Math.round(p / c.goal * 100);
-      return `<div class="${p >= c.goal ? "ok" : ""}"><b><span>${p >= c.goal ? "✅ " : ""}${esc(c.t)}</span><small>${c.unit === "h" ? `${(p / 3600).toFixed(1)} de 2 h` : `${p} de ${c.goal}`}</small></b><i><em style="width:${pct}%"></em></i></div>`; }).join("")}</div>
+      return `<div class="${p >= c.goal ? "ok" : ""}"><b><span>${p >= c.goal ? "✅ " : ""}${esc(c.t)}</span><small>${c.unit === "h" ? `${(p / 3600).toFixed(1)} de 2 h` : c.unit === "km" ? `${p.toFixed(1)} de ${c.goal} km` : `${p} de ${c.goal}`}</small></b><i><em style="width:${pct}%"></em></i></div>`; }).join("")}</div>
     <p class="mix-note">Los retos cambian cada lunes.</p>
     <h3 class="snd-h">Medallas · ${Object.keys(LG.medals).length} de ${MEDALS.length}</h3>
     <div class="log-md">${MEDALS.map(m => `<div class="${LG.medals[m.id] ? "" : "off"}" title="${esc(m.d)}"><span aria-hidden="true">${m.e}</span><b>${esc(m.t)}</b><small>${esc(m.d)}</small></div>`).join("")}</div>
@@ -7522,7 +7750,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.14.0";
+const APP_V = "1.15.0";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
@@ -7562,6 +7790,7 @@ $("#fpPrev").innerHTML = ic("prev"); $("#fpNext").innerHTML = ic("next"); $("#fp
 $("#navSnd").innerHTML = ic("spkr") + "Calidad y bocinas" + '<i class="eq-dot" hidden></i>';
 $("#navLook").innerHTML = ic("palette") + "Apariencia";
 $("#navLog").innerHTML = ic("spark") + "Logros";
+$("#navWk").innerHTML = ic("run") + "Entrenar";
 renderSndUI();
 $("#navMix").innerHTML = ic("mix") + "Transiciones" + '<i class="eq-dot" hidden></i>';
 $("#navFx").innerHTML = ic("fx") + "Efectos" + '<i class="eq-dot" hidden></i>';
