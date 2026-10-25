@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-j73bUwG5iA+gjleTYwYbAh+FhWp/JRfplfKEDQyBtkw=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jxfql01Jzldu+LMUPpFtbsruWo8rYwETlZ//X71O98E=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -6262,11 +6262,25 @@ function singTick(){
   SING.an.getFloatTimeDomainData(SING.buf);
   const k = SING.k, n = Math.floor(SING.buf.length / k); let ms = 0; for (let i = 0; i < n; i++){ let s = 0; for (let j = 0; j < k; j++) s += SING.buf[i * k + j]; SING.dec[i] = s / k; ms += SING.dec[i] * SING.dec[i]; }
   SING.lvl += (Math.min(1, Math.sqrt(ms / n) * 12) - SING.lvl) * .35;
-  const f = yinLive(SING.dec, n, SING.rate / k), um = f > 65 && f < 1100 ? 69 + 12 * Math.log2(f / 440) : 0;
+  const f = yinLive(SING.dec, n, SING.rate / k), raw = f > 65 && f < 1100 ? 69 + 12 * Math.log2(f / 440) : 0;
+  SING.raw.push(raw); if (SING.raw.length > 3) SING.raw.shift();
+  const vs = SING.raw.filter(Boolean), um = raw && vs.length === 3 ? vs.slice().sort((a, b) => a - b)[1] : raw;
   const tm = p - SING.lat, fr = Math.round(tm / SING.mel.hop);
   SING.trail.push({ t: tm, m: um }); while (SING.trail.length && SING.trail[0].t < tm - 3) SING.trail.shift();
   const lv = SING_LV[singLv()];
-  if (um){ SING.heardAt = Date.now(); SING.heard++; }
+  if (um){ SING.heardAt = Date.now(); SING.heard++; SING.hist.push({ t: p, m: um }); }
+  while (SING.hist.length && SING.hist[0].t < p - 14) SING.hist.shift();
+  if (++SING.tick % 50 === 0 && SING.hist.length >= 40){
+    let best = SING.lat, bestR = -1, curR = 0;
+    for (let off = 0; off <= .8001; off += .02){
+      let ok = 0, cnt = 0;
+      for (const h of SING.hist){ const r = melAt(Math.round((h.t - off) / SING.mel.hop)); if (!r) continue; cnt++; if (pcDist(h.m, r) <= .5) ok++; }
+      const rate = cnt >= 20 ? ok / cnt : 0; if (Math.abs(off - SING.lat) < .011) curR = rate;
+      if (rate > bestR + .02 || (Math.abs(rate - bestR) <= .02 && Math.abs(off - SING.lat) < Math.abs(best - SING.lat))){ if (rate > bestR) bestR = rate; best = off; } // a tie keeps the one closest to now
+    }
+    if (bestR > curR + .05) SING.lat = SING.lat + (best - SING.lat) * .7; // move most of the way, so one odd passage does not throw it off
+    const dl = SING.nodes[0]; if (dl && dl.delayTime) try { dl.delayTime.setTargetAtTime(Math.min(.9, SING.lat), ctx.currentTime, .3); } catch {} // the video follows too
+  }
   if (melAt(fr)){
     SING.refN++;
     if (um){
@@ -6376,6 +6390,7 @@ function renderSingBar(){
   const msg = m => `<p class="sing-msg" role="status">${esc(m)}</p>`;
   if (st === "prep") b.innerHTML = msg(`${SING.msg || "Preparando…"} ${Math.round(SING.p * 100)} %`) + `<button type="button" class="pill" data-act="sing-close">Cancelar</button>`;
   else if (st === "ready") b.innerHTML = msg(SING.msg || "Usa audífonos: así Hum te escucha solo a ti y el video suena mejor.")
+    + `<button type="button" class="pill${store.get("singPhones", false) ? " on" : ""}" data-act="sing-phones" aria-pressed="${!!store.get("singPhones", false)}">${ic("hear")}${store.get("singPhones", false) ? "Con audífonos: sí" : "Con audífonos: no"}</button>`
     + `<div class="chips" role="group" aria-label="Dificultad">${Object.entries(SING_LV).map(([k, l]) => `<button type="button" class="chip${singLv() === k ? " on" : ""}" data-act="sing-lv" data-lv="${k}" aria-pressed="${singLv() === k}">${l.name}</button>`).join("")}</div>`
     + (window.MediaRecorder && SING.cv.captureStream ? `<button type="button" class="pill${SING.wantRec ? " on" : ""}" data-act="sing-rec" aria-pressed="${SING.wantRec}">${ic("video")}${SING.wantRec ? "Grabar video: sí" : "Grabar video: no"}</button>` : "")
     + `<button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-go">${ic("mic")}<span>Empezar</span></button>`;
@@ -6412,7 +6427,8 @@ async function openSing(){
 async function singStart(){
   const t = SING.t; if (!t) return;
   try {
-    SING.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
+    const phones = !!store.get("singPhones", false);
+    SING.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: !phones, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
   } catch { SING.st = "error"; singSay("Hum necesita tu micrófono para escucharte cantar. Permite el micrófono para este sitio y vuelve a intentarlo."); return; }
   ensureCtx();
   SING.karaWas = S.fx.kara; SING.mixWas = S.mix ? S.mix.on : null; if (S.mix) S.mix.on = false;
@@ -6426,7 +6442,7 @@ async function singStart(){
   SING.boost = ctx.createGain(); SING.boost.gain.value = 4; SING.src.connect(SING.boost); SING.boost.connect(SING.an); // only listened to (louder, to hear you well): your voice never goes to the speakers
   const tr = SING.stream.getAudioTracks()[0], inLat = (tr && tr.getSettings && tr.getSettings().latency) || .02;
   SING.lat = clamp((ctx.outputLatency || 0) + (ctx.baseLatency || 0) + inLat, .02, .6);
-  SING.hits = SING.n = SING.score = 0; SING.refN = SING.sung = 0; SING.heard = 0; SING.heardAt = 0; SING.t0 = Date.now(); SING.deaf = false; SING.lvl = 0; SING.trail = []; SING.chunks = []; SING.rec = null; SING.blob = null; SING.url = "";
+  SING.hits = SING.n = SING.score = 0; SING.refN = SING.sung = 0; SING.hist = []; SING.raw = []; SING.tick = 0; SING.heard = 0; SING.heardAt = 0; SING.t0 = Date.now(); SING.deaf = false; SING.lvl = 0; SING.trail = []; SING.chunks = []; SING.rec = null; SING.blob = null; SING.url = "";
   stat("cantar");
   window.__singing = true; try { stopWake(); } catch {} // "Ey Hum" rests while you sing, so the lyrics are never taken as orders
   try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { SING.lock = l; }).catch(() => {}); } catch {} // the screen stays on
@@ -6520,6 +6536,7 @@ document.addEventListener("click", e => {
   if (a === "sing-go") singStart();
   if (a === "sing-stop") singFinish();
   if (a === "sing-rec"){ SING.wantRec = !SING.wantRec; renderSingBar(); }
+  if (a === "sing-phones"){ store.set("singPhones", !store.get("singPhones", false)); SING.msg = store.get("singPhones", false) ? "Con audífonos, Hum escucha tu voz más limpia y se ajusta solo al retraso del Bluetooth." : "Sin audífonos, Hum quita el eco de la bocina. Canta cerca del teléfono."; renderSingBar(); }
   if (a === "sing-lv"){ store.set("singLevel", act.dataset.lv); SING.best = (store.get("singBest", {}) || {})[bestKey(SING.t.id)] || 0; SING.msg = SING.best ? `Tu récord en ${SING_LV[singLv()].name}: ${SING.best} puntos.` : SING_LV[singLv()].name === "Exigente" ? "Exigente: tienes que dar la nota casi exacta y a tiempo." : SING_LV[singLv()].name === "Fácil" ? "Fácil: Hum acepta notas cercanas. Ideal para empezar." : ""; renderSingBar(); }
   if (a === "sing-save") singSave();
   if (a === "sing-share") singShare();
@@ -7012,7 +7029,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.13.1";
+const APP_V = "1.13.2";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
