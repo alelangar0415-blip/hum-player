@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-jxfql01Jzldu+LMUPpFtbsruWo8rYwETlZ//X71O98E=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ymYIb1S1ULxgDOszTsuUndi3wr+h9B97JHZNhyDac0Y=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -197,6 +197,7 @@ h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance}
 .tl-head,.row{display:grid;grid-template-columns:32px minmax(0,4fr) minmax(0,3fr) 32px 32px 52px;align-items:center;gap:14px;padding:6px 14px;border-radius:6px}
 .tl-head{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line);border-radius:0;margin-bottom:8px;padding-block:8px}
 .row{cursor:pointer;color:var(--muted)}
+.tl .row{content-visibility:auto;contain-intrinsic-size:auto 52px}
 .row:hover,.row:focus-visible{background:var(--raise)}
 .c-n{text-align:right;font-family:var(--f-mono);font-size:13px;display:flex;justify-content:flex-end;color:var(--muted)}
 .c-n .pi{display:none;color:var(--fg)}
@@ -831,6 +832,31 @@ html.look-dark body{background:var(--bg)}
 .amb-ui{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;display:flex;gap:8px;opacity:0;transition:opacity .3s}
 .ambient.show-ui .amb-ui{opacity:1}
 .amb-ui .ib{background:rgba(0,0,0,.45);color:#fff}
+.sing-names{display:flex;align-items:center;gap:8px;width:100%;justify-content:center}
+.sing-names input{flex:1;max-width:200px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--raise);color:var(--fg);font:inherit}
+.sing-names span{color:var(--muted);font-weight:700}
+/* ---------- streak, challenges, medals ---------- */
+.log-streak{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(120deg,hsl(var(--hue,42) 60% 30% / .5),var(--raise));margin:6px 0 4px}
+.log-streak b{font:800 30px/1.1 var(--f-display)}
+.log-streak .fl{font-size:40px}
+.log-ch{display:grid;gap:10px;margin-top:8px}
+.log-ch div{padding:10px 12px;border-radius:10px;background:var(--raise)}
+.log-ch b{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.log-ch i{display:block;height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.log-ch i em{display:block;height:100%;background:var(--accent);border-radius:3px}
+.log-ch .ok{outline:1px solid var(--accent)}
+.log-md{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px}
+.log-md div{padding:10px 6px;border-radius:12px;background:var(--raise);text-align:center}
+.log-md span{font-size:30px;display:block}
+.log-md b{display:block;font-size:12px;margin-top:4px}
+.log-md small{display:block;font-size:11px;color:var(--muted);line-height:1.3;margin-top:2px}
+.log-md .off{opacity:.38;filter:grayscale(1)}
+.warm-dlg{width:min(720px,calc(100% - 24px))}
+.warm-dlg canvas{width:100%;height:auto;border-radius:12px;background:#0b0b10;display:block;margin:8px 0}
+.warm-dlg .sing-msg{font-size:15px;color:var(--fg);min-height:42px}
+.alarm-row{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.alarm-row input,.alarm-row select{height:38px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--raise);color:var(--fg);font:inherit;color-scheme:dark}
+.alarm-row .switch{margin-left:auto}
 </style>
 </head>
 <body>
@@ -846,6 +872,7 @@ html.look-dark body{background:var(--bg)}
       <button class="nav-btn" id="navFx" data-act="fx"></button>
       <button class="nav-btn" id="navSnd" data-act="snd"></button>
       <button class="nav-btn" id="navLook" data-act="look"></button>
+      <button class="nav-btn" id="navLog" data-act="logros"></button>
       <button class="nav-btn" id="navAcct" data-act="acct"></button>
       <button class="nav-btn" id="navApp" data-act="welcome"></button>
       <button class="nav-btn" id="navPro" data-act="pro"></button>
@@ -963,6 +990,10 @@ html.look-dark body{background:var(--bg)}
     <div><b>Igualar el ritmo</b><small>La canción que entra empieza a la velocidad de la anterior, con los golpes alineados y sin cambiar el tono. Después vuelve poco a poco a su propio ritmo.</small></div>
     <button type="button" class="switch" id="mixSync" role="switch" aria-checked="true" aria-label="Igualar el ritmo"></button>
   </div>
+  <div class="mix-opt">
+    <div><b>Radio al terminar</b><small>Cuando se acaba lo que escuchas, Hum sigue con canciones parecidas de tu música (mismo ánimo y ritmo parecido), sin repetir las recientes.</small></div>
+    <button type="button" class="switch" id="radioSw" role="switch" aria-checked="true" aria-label="Radio al terminar"></button>
+  </div>
   <p class="mix-note">Funciona entre tus propios archivos de audio. La app mide el tempo (BPM) de cada canción la primera vez; lo ves en el panel "Reproduciendo ahora". Si dos canciones tienen tempos muy distintos (más de un 20 %), solo se mezclan los volúmenes.</p>
   <div class="dlg-act"><button type="button" class="add-top" data-act="mix-close">Listo</button></div>
 </dialog>
@@ -1036,6 +1067,10 @@ html.look-dark body{background:var(--bg)}
   <h3 class="snd-h">Tus bocinas</h3>
   <div class="spk-grid" id="sndSpk" role="group" aria-label="Tipo de bocinas"></div>
   <div class="mix-opt" style="margin-top:14px">
+    <div><b>Volumen parejo</b><small>Todas tus canciones suenan al mismo nivel: sin saltos de volumen de una a otra. No cambia la calidad.</small></div>
+    <button type="button" class="switch" id="sndLoud" role="switch" aria-checked="true" aria-label="Volumen parejo"></button>
+  </div>
+  <div class="mix-opt">
     <div><b>Sonido más fuerte y claro</b><small>Sube el volumen que percibes y controla los picos para que no distorsione, incluso con el volumen alto.</small></div>
     <button type="button" class="switch" id="sndBoost" role="switch" aria-checked="false" aria-label="Sonido más fuerte y claro"></button>
   </div>
@@ -1178,6 +1213,8 @@ html.look-dark body{background:var(--bg)}
   <div class="sing-stage"><canvas id="singCv" width="1080" height="1920" aria-label="Tu karaoke: la melodía, tu voz, la letra y tus puntos"></canvas><video id="singVid" playsinline controls hidden></video></div>
   <div class="sing-bar" id="singBar"></div>
 </dialog>
+<dialog class="dlg warm-dlg" id="warmDlg" aria-labelledby="warmH"><h2 id="warmH">Calentamiento vocal</h2><canvas id="warmCv" width="1000" height="520" aria-label="Tu voz y la nota a seguir"></canvas><p class="sing-msg" id="warmMsg" role="status"></p><div class="dlg-act" id="warmAct"></div></dialog>
+<dialog class="dlg log-dlg" id="logDlg" aria-labelledby="logH"><div id="logBody"></div></dialog>
 <dialog class="dlg" id="sleepDlg" aria-labelledby="sleepH">
   <h2 id="sleepH">Modo dormir</h2>
   <p id="sleepState">Elige cuándo quieres que se detenga la música.</p>
@@ -1189,6 +1226,11 @@ html.look-dark body{background:var(--bg)}
     <button type="button" class="switch" id="sleepCalm" role="switch" aria-checked="true" aria-label="Pasar a música tranquila"></button>
   </div>
   <p class="mix-note">La música baja poco a poco y se detiene justo al final de una canción, no a la mitad.</p>
+  <h3 class="snd-h">Despertador</h3>
+  <div class="alarm-row"><input type="time" id="alarmTime" value="07:00" aria-label="Hora del despertador">
+    <select id="alarmList" aria-label="Qué música suena"><option value="mine">Mis canciones</option><option value="liked">Tus me gusta</option><option value="calm">Algo tranquilo</option></select>
+    <button type="button" class="switch" id="alarmSw" role="switch" aria-checked="false" aria-label="Despertador"></button></div>
+  <p class="mix-note" id="alarmNote">Tu música empieza bajito y sube poco a poco. Deja Hum abierto: en Windows basta con que esté en la bandeja; en el teléfono, deja la app abierta y conectada a la corriente.</p>
   <div class="dlg-act"><button type="button" class="pill danger" data-act="sleep-off" id="sleepOff" hidden>Apagar</button><button type="button" class="add-top" data-act="sleep-close">Listo</button></div>
 </dialog>
 <dialog class="dlg" id="tgDlg" aria-labelledby="tgH"><div id="tgBody"></div></dialog>
@@ -1239,7 +1281,7 @@ window.humStatsFilter = (type, p) => {
 };
 // which features people use (only the feature name and simple choices, never songs or personal data); at most once every 30 s each
 const statAt = {};
-function stat(name, data){ try { const now = Date.now(); if (now - (statAt[name] || 0) < 30000) return; statAt[name] = now; if (window.umami && umami.track) umami.track(name, data); } catch {} }
+function stat(name, data){ try { logEvent(name, data); } catch {} try { const now = Date.now(); if (now - (statAt[name] || 0) < 30000) return; statAt[name] = now; if (window.umami && umami.track) umami.track(name, data); } catch {} }
 // Security: Hum never runs inside another site's frame (that is how click-tricks work)
 if (window.top !== window.self){ try { window.top.location.replace(location.href); } catch {} document.documentElement.innerHTML = ""; return; }
 /* ---------- icons ---------- */
@@ -1713,6 +1755,7 @@ function next(auto){
   if (auto && S.repeat === "one"){ loadAt(0); return; }
   if (S.qi + 1 < S.queue.length) return playIndex(S.qi + 1);
   if (S.repeat === "all"){ if (S.shuffle) S.queue = shuffled(S.queue); return playIndex(0); }
+  if (auto && radioNext()) return;
   if (auto){ pause(); S.qi = 0; loadAt(0); paint(); return; }
   playIndex(0);
 }
@@ -1770,14 +1813,21 @@ function fromName(name){
   const m = base.split(/\s+[-–]\s+/);
   return m.length > 1 ? { artist: m[0].trim(), title: m.slice(1).join(" - ").trim() } : { artist: "", title: base };
 }
+const GENCV = new Set(); // songs whose drawn cover already exists
+const coverLater = t => t.user && !t.rec.pic && !GENCV.has(t.id); // drawn when its row comes into view
 function addUserTrack(rec){
   const h = hash(rec.id + rec.title);
-  const cv = rec.pic ? URL.createObjectURL(rec.pic) : drawArt(["waves","circles","grid","sun","stripes","disc"][h % 6], h % 360, h, 200).toDataURL("image/jpeg", .85);
-  const t = { id: rec.id, user: true, rec, title: rec.title, artist: rec.artist, dur: rec.dur || 0, album: { id: "mine", title: rec.album || "Mis canciones", cover: cv } };
+  let cv = rec.pic ? URL.createObjectURL(rec.pic) : null;
+  const album = { id: "mine", title: rec.album || "Mis canciones" };
+  Object.defineProperty(album, "cover", { enumerable: true, configurable: true,
+    get(){ if (!cv){ cv = drawArt(["waves","circles","grid","sun","stripes","disc"][h % 6], h % 360, h, 200).toDataURL("image/jpeg", .85); GENCV.add(rec.id); } return cv; },
+    set(v){ cv = v; } });
+  const t = { id: rec.id, user: true, rec, title: rec.title, artist: rec.artist, dur: rec.dur || 0, album };
   BYID[t.id] = t; USER.push(t.id); matchIdx = null;
   if (!rec.bpmDone) queueBpm(rec);
   if (!rec.lyrScan) queueLyrScan(rec);
   if (!rec.feel && rec.blob) queueFeel(rec);
+  if (rec.loud == null && rec.blob) queueLoud(rec);
   if (!rec.melody && rec.blob) queueMelody(rec);
   if (!rec.genreScan && rec.blob) queueGenre(rec);
   return t;
@@ -2760,6 +2810,7 @@ function renderSndUI(){
     : "Automática usa la frecuencia de tu tarjeta de sonido, que suele ser la mejor opción. 96 kHz solo ayuda si tu equipo la admite.";
   $("#sndSpk").innerHTML = Object.entries(SPK).map(([k, p]) => `<button type="button" class="spk${S.snd.spk === k ? " on" : ""}" data-spk="${k}" aria-pressed="${S.snd.spk === k}"><b>${p.name}</b><small>${p.desc}</small></button>`).join("");
   $("#sndBoost").setAttribute("aria-checked", S.snd.boost);
+  $("#sndLoud").setAttribute("aria-checked", loudOn());
   const dot = $("#navSnd .eq-dot"); if (dot) dot.hidden = S.snd.spk === "none" && !S.snd.boost;
 }
 function openSnd(){ if (S.drawer){ S.drawer = false; applySide(); } renderSndUI(); $("#sndDlg").showModal(); }
@@ -3247,13 +3298,13 @@ async function flushTrash(){
   }
 }
 
-const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone", "feel"];
+const SONG_FIELDS = ["name", "title", "artist", "album", "dur", "type", "size", "added", "lyrics", "lang", "bpm", "beat", "bpmDone", "feel", "loud"];
 function cleanSongData(d){ // a song's details that came from the sync file: only the expected kinds of values
   if (!d || typeof d !== "object") return {};
   const o = {}, num = (v, lo, hi) => v != null && isFinite(+v) ? clamp(+v, lo, hi) : undefined;
   ["name", "title", "artist", "album"].forEach(k => { if (d[k] != null) o[k] = str(d[k], 400); });
   o.dur = num(d.dur, 0, 86400); o.size = num(d.size, 0, 2e10); o.added = num(d.added, 0, 1e15);
-  o.bpm = d.bpm === null ? null : num(d.bpm, 30, 300); o.beat = num(d.beat, 0, 600);
+  o.bpm = d.bpm === null ? null : num(d.bpm, 30, 300); o.beat = num(d.beat, 0, 600); o.loud = num(d.loud, -70, 6);
   if (d.bpmDone != null) o.bpmDone = !!d.bpmDone;
   if (typeof d.type === "string" && /^[\w.+-]{1,40}\/[\w.+-]{1,60}$/.test(d.type)) o.type = d.type;
   if (typeof d.lang === "string" && /^[a-z]{2,3}$/.test(d.lang)) o.lang = d.lang;
@@ -3548,11 +3599,12 @@ function moveFile(rec, dir, left){
     rec.blob = blob;
     try {
       const tags = await readTags(rec.blob);
-      if (tags.pic){ rec.pic = tags.pic; if (t.album.cover.startsWith("blob:")) URL.revokeObjectURL(t.album.cover); t.album.cover = URL.createObjectURL(tags.pic); }
+      if (tags.pic){ rec.pic = tags.pic; const old = t.album.cover; if (old && old.startsWith("blob:")) URL.revokeObjectURL(old); t.album.cover = URL.createObjectURL(tags.pic); }
     } catch {}
     await putRec(rec);
     if (!rec.bpmDone) queueBpm(rec);
     if (!rec.feel) queueFeel(rec);
+    if (rec.loud == null) queueLoud(rec);
     if (!rec.melody) queueMelody(rec);
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
     document.querySelectorAll(`.row[data-row="${rec.id}"]`).forEach(r => { r.classList.remove("cloud-only"); const im = r.querySelector("img"); if (im) im.src = cover(t); });
@@ -4630,6 +4682,7 @@ setInterval(() => {
   const t = cur(); if (!t) return;
   const k = monthKey(), m = STATS[k] || (STATS[k] = { secs: 0, songs: {}, plays: {}, meta: {}, artists: {}, moods: {}, hours: {} });
   m.secs++; m.songs[t.id] = (m.songs[t.id] || 0) + 1;
+  try { logTick(); } catch {}
   m.meta[t.id] = [t.title, t.artist];
   if (t.artist) m.artists[t.artist] = (m.artists[t.artist] || 0) + 1;
   if (S.ctxId === "hum" && /^Modo /.test(S.humList.title)) m.moods[S.humList.title] = (m.moods[S.humList.title] || 0) + 1;
@@ -4639,6 +4692,7 @@ setInterval(() => {
 function countPlay(t){ // a song counts as played after 30 seconds of it
   const k = monthKey(), m = STATS[k]; if (!m) return;
   m.plays[t.id] = (m.plays[t.id] || 0) + 1; store.set("stats", STATS);
+  try { logEvent("song-play", { id: t.id }); } catch {}
 }
 let playWatch = { id: null, since: 0, counted: false };
 setInterval(() => {
@@ -4735,6 +4789,7 @@ function homeExtras(){
   const d = wrapData(monthKey());
   return `<div class="home-x" id="homeX">
     <button type="button" class="hx" data-act="wx-play"><span class="hx-ic">${ic("sun")}</span><span><b id="hxWx">${W.now ? `${W.now.temp}° · ${WX(W.now.code)[0]}` : "Música para tu clima"}</b><small>${W.now ? "Toca y te pongo algo para este tiempo" : "Hum mira el tiempo que hace y elige el ánimo"}</small></span></button>
+    <button type="button" class="hx" data-act="logros"><span class="hx-ic">🔥</span><span><b>${logStreak() ? `Racha de ${logStreak()} ${logStreak() === 1 ? "día" : "días"}` : "Empieza tu racha"}</b><small>${logWeekDone()} de 3 retos de la semana · ${Object.keys(LG.medals).length} medallas</small></span></button>
     <button type="button" class="hx" data-act="wrap"><span class="hx-ic">${ic("insights")}</span><span><b>Tu ${esc(monthName(monthKey()))} en música</b><small>${d ? `${hrs(d.secs)} escuchados${d.top[0] ? " · " + esc(d.top[0].title) : ""}` : "Tu resumen del mes, para compartir"}</small></span></button>
   </div>`;
 }
@@ -5625,6 +5680,7 @@ function humModes(c){
     setRun(true).then(() => { if (RUN.on) runPick(); }); reply("Modo correr: la música se adapta a tu paso."); return true;
   }
   if (/(prepara|preparame|haz|hazme)( el| un)? karaoke/.test(c) && !/cantar|puntos/.test(c)){ const t = cur(); if (!t || !t.user){ reply("El karaoke perfecto se prepara con tus propias canciones."); return true; } if (karaReady(t.id)){ setFx({ kara: true }); reply("Esta ya tiene karaoke perfecto. Lo activé."); return true; } prepQueue([t.id], true); reply("Preparo el karaoke perfecto de esta canción. Te aviso cuando esté."); return true; }
+  if (/(calentar|calienta|calentamiento)( la| mi)? voz|ejercicios? (de|para) (la )?voz/.test(c)){ openWarm(); reply("Vamos a calentar la voz. Ponte cómodo y respira."); return true; }
   if (/(modo ambiente|pantalla completa|modo fiesta visual)/.test(c)){ openAmbient(); reply("Modo ambiente. Toca la pantalla para ver los controles."); return true; }
   if (/(comparte|compartir|publica) (lo que (estoy escuchando|escucho)|esta cancion|la cancion)/.test(c)){ storyCard(); reply("Te preparo la imagen para tus historias."); return true; }
   if (/(quiero cantar|vamos a cantar|cantar y (sacar|ganar) puntos|califica(me)? (como canto|mi voz)|karaoke con puntos)/.test(c)){ openSing(); reply("¡A cantar! Usa audífonos para mejor resultado."); return true; }
@@ -5684,10 +5740,10 @@ function karaSwap(){
   if (S.playing) el.play().catch(() => {});
   applyFx(true);
 }
-function stemLevel(el){ // a karaoke version stored a little lower plays at the same loudness as your song
+function stemLevel(el){ // a karaoke version stored a little lower plays at the same loudness as your song; with "even volume", every song at the same level
   const d = decks && decks.find(x => x.el === el); if (!d || !ctx) return;
   const k = el.dataset.k === "k" && KARA[el.dataset.id], g = k && k.g > 0 ? 1 / k.g : 1;
-  d.lvl.gain.setValueAtTime(g, ctx.currentTime);
+  d.lvl.gain.setTargetAtTime(g * loudGain(BYID[el.dataset.id]), ctx.currentTime, .05);
 }
 [audio, deckB].forEach(el => el.addEventListener("loadstart", () => stemLevel(el)));
 function karaChanged(){ // karaoke turned on or off
@@ -5999,7 +6055,7 @@ function rows(list, ctxId, opts = {}){
     <div class="tl-head" aria-hidden="true"><span class="c-n">#</span><span>Título</span><span class="c-album">${opts.album === false ? "" : "Álbum"}</span><span></span><span></span><span class="c-dur">Dur.</span>${extra ? "<span></span>" : ""}</div>
     ${list.map((id, i) => { const t = BYID[id]; return `<div class="row${t.user && !t.rec.blob ? " cloud-only" : ""}${opts.sel && S.sel.has(id) ? " picked" : ""}" role="listitem" tabindex="0" data-row="${id}" data-list="${ctxId}"${opts.sel ? ` aria-selected="${S.sel.has(id)}"` : ""}>
       <span class="c-n"><span class="n">${i + 1}</span><span class="eq"><i></i><i></i><i></i></span><span class="pi">${ic("play")}</span></span>
-      <span class="c-title">${opts.cover === false ? "" : `<img src="${esc(cover(t))}" alt="" width="40" height="40">`}<span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span></span>
+      <span class="c-title">${opts.cover === false ? "" : `${coverLater(t) ? `<img src="${FB}" data-gen="${t.id}" alt="" width="40" height="40">` : `<img src="${esc(cover(t))}" alt="" width="40" height="40" loading="lazy" decoding="async">`}`}<span><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></span></span>
       <span class="c-album">${opts.album === false ? "" : esc(t.album.title)}</span>
       <button class="apl" data-apl="${id}" aria-label="Añadir ${esc(t.title)} a una playlist">${ic("plAdd")}</button>
       <button class="like" data-like="${id}"></button>
@@ -6251,6 +6307,10 @@ const SING_LV = { // how strict the points are
   normal: { name: "Normal",   full: 1.5,  half: 2.5,  win: 12, breath: 9,  curve: .6 },
   hard:   { name: "Exigente", full: .5,   half: 1,    win: 3,  breath: 5,  curve: 1 }
 };
+const singMode = () => store.get("singMode", "solo") === "battle" ? "battle" : "solo";
+const singLen = () => store.get("singLen", "full") === "min" ? "min" : "full";
+const singNames = () => { const n = store.get("singNames", null); return Array.isArray(n) && n.length === 2 ? n.map(x => str(x, 24) || "") : ["", ""]; };
+const pName = i => singNames()[i] || (i ? "Jugador 2" : "Jugador 1");
 const singLv = () => SING_LV[store.get("singLevel", "normal")] ? store.get("singLevel", "normal") : "normal";
 const bestKey = (id) => id + ":" + singLv();
 const melAt = i => SING.mel && i >= 0 && i < SING.mel.notes.length ? SING.mel.notes[i] / 2 : 0;
@@ -6258,7 +6318,7 @@ const pcDist = (a, b) => { const d = Math.abs(a - b) % 12; return Math.min(d, 12
 function singTick(){
   if (SING.st !== "sing") return;
   const t = SING.t, p = pos();
-  if (cur() !== t || !S.playing || (t.dur && p >= t.dur - .3)) return singFinish();
+  if (cur() !== t || !S.playing || (t.dur && p >= t.dur - .3) || (SING.to && p >= SING.to)) return singFinish();
   SING.an.getFloatTimeDomainData(SING.buf);
   const k = SING.k, n = Math.floor(SING.buf.length / k); let ms = 0; for (let i = 0; i < n; i++){ let s = 0; for (let j = 0; j < k; j++) s += SING.buf[i * k + j]; SING.dec[i] = s / k; ms += SING.dec[i] * SING.dec[i]; }
   SING.lvl += (Math.min(1, Math.sqrt(ms / n) * 12) - SING.lvl) * .35;
@@ -6337,6 +6397,9 @@ function singDraw(){
     x.fillStyle = "rgba(255,255,255,.15)"; x.beginPath(); x.roundRect(96, 210, 220, 10, 5); x.fill();
     x.fillStyle = SING.deaf ? "#ff8a80" : acc; x.beginPath(); x.roundRect(96, 210, Math.max(6, 220 * (SING.lvl || 0)), 10, 5); x.fill();
   }
+  if (singMode() === "battle" && !SING.challenge && (SING.st === "sing" || SING.st === "count" || SING.st === "ready")){
+    x.textAlign = "center"; x.fillStyle = acc; x.font = singFont(800, 34, "d"); x.fillText(`BATALLA · TURNO DE ${pName(SING.round).toUpperCase()}`, SW_ / 2, 990 - 40);
+  }
   // the melody lane: the singer's notes go by, your voice is the bright trail
   const L0 = 1000, LH = 380, X0 = 60, XW = 960, past = 2.5, fut = 3.5, now = X0 + XW * past / (past + fut), pps = XW / (past + fut);
   x.fillStyle = "rgba(255,255,255,.05)"; x.beginPath(); x.roundRect(X0 - 20, L0 - 20, XW + 40, LH + 40, 28); x.fill();
@@ -6366,6 +6429,28 @@ function singDraw(){
   } else if (SING.st === "sing"){ x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(600, 36); x.fillText("Canta siguiendo las barras", SW_ / 2, 1540); }
   // countdown
   if (SING.st === "count"){ x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(0, 0, SW_, SH_); x.fillStyle = "#fff"; x.font = singFont(800, 260, "d"); x.fillText(String(SING.cd), SW_ / 2, 1060); }
+  // whose turn now
+  if (SING.st === "turn"){
+    x.fillStyle = "rgba(6,6,10,.8)"; x.fillRect(0, 0, SW_, SH_); x.textAlign = "center";
+    x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(700, 40); x.fillText(pName(0), SW_ / 2, 760);
+    x.fillStyle = "#fff"; x.font = singFont(800, 220, "d"); x.fillText(String(SING.scores[0]), SW_ / 2, 980);
+    x.fillStyle = acc; x.font = singFont(800, 64, "d"); x.fillText(`Turno de ${pName(1)}`, SW_ / 2, 1160);
+  }
+  // battle result
+  if (SING.st === "battle"){
+    x.fillStyle = "rgba(6,6,10,.95)"; x.fillRect(0, 0, SW_, SH_); x.textAlign = "center";
+    const [a0, a1] = SING.scores, w = a0 === a1 ? -1 : a0 > a1 ? 0 : 1;
+    x.fillStyle = acc; x.font = singFont(800, 40); x.letterSpacing = "6px"; x.fillText("BATALLA DE CANTO", SW_ / 2, 560); x.letterSpacing = "0px";
+    [[0, 300], [1, 780]].forEach(([i, cx]) => {
+      x.fillStyle = w === i ? acc : "rgba(235,233,243,.85)"; x.font = singFont(800, 200, "d"); x.fillText(String(SING.scores[i]), cx, 900);
+      x.fillStyle = "#fff"; x.font = singFont(700, 44); x.fillText(fitText(x, pName(i), 420), cx, 990);
+      if (w === i){ x.font = singFont(800, 90); x.fillText("👑", cx, 690); }
+    });
+    x.fillStyle = "rgba(235,233,243,.5)"; x.font = singFont(800, 60, "d"); x.fillText("vs", SW_ / 2, 860);
+    x.fillStyle = "#fff"; x.font = singFont(800, 76, "d"); x.fillText(w < 0 ? "¡Empate!" : `¡Gana ${pName(w)}!`, SW_ / 2, 1160);
+    x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(600, 34); x.fillText(fitText(x, `“${t.title}” · ${t.artist}`, 960), SW_ / 2, 1240);
+    x.font = singFont(600, 26); x.fillStyle = "rgba(235,233,243,.5)"; x.fillText(`Dificultad: ${SING_LV[singLv()].name} · ${singLen() === "min" ? "1 minuto" : "canción completa"}`, SW_ / 2, 1300);
+  }
   // result
   if (SING.st === "done" || SING.st === "saving"){
     x.fillStyle = "rgba(6,6,10,.78)"; x.fillRect(0, 0, SW_, SH_);
@@ -6375,11 +6460,24 @@ function singDraw(){
     x.fillStyle = "#fff"; x.font = singFont(800, 64, "d"); x.fillText(label, SW_ / 2, 1110);
     x.fillStyle = "rgba(235,233,243,.7)"; x.font = singFont(600, 36); x.fillText(fitText(x, `“${t.title}” · ${t.artist}`, 960), SW_ / 2, 1180);
     x.font = singFont(600, 26); x.fillStyle = "rgba(235,233,243,.5)"; x.fillText(`Dificultad: ${SING_LV[singLv()].name}${SING.basic ? " · calificación aproximada (modo básico)" : ""}`, SW_ / 2, 1290);
-    if (SING.best > sc) { x.font = singFont(600, 30); x.fillText(`Tu récord en esta canción: ${SING.best}`, SW_ / 2, 1240); }
+    if (SING.best > sc && !SING.rank) { x.font = singFont(600, 30); x.fillText(`Tu récord en esta canción: ${SING.best}`, SW_ / 2, 1240); }
+    if (SING.rank){ // the challenge ranking
+      x.fillStyle = acc; x.font = singFont(800, 32); x.fillText("RANKING DEL RETO", SW_ / 2, 1380);
+      SING.rank.slice(0, 6).forEach((r, i) => { const y = 1440 + i * 56, me = r.n === (str(store.get("singMe", ""), 24) || "Yo") && r.s === sc;
+        x.textAlign = "left"; x.fillStyle = me ? acc : "#fff"; x.font = singFont(700, 36); x.fillText(`${i + 1}. ${fitText(x, r.n, 560)}`, 220, y);
+        x.textAlign = "right"; x.fillText(String(r.s), 860, y); x.textAlign = "center"; });
+    }
     x.fillStyle = "rgba(235,233,243,.55)"; x.font = singFont(600, 28); x.fillText("Hecho con Hum Player", SW_ / 2, 1830);
   }
 }
 function singLoop(){ cancelAnimationFrame(SING.raf); const go = () => { if (!$("#singDlg").open) return; singDraw(); SING.raf = requestAnimationFrame(go); }; SING.raf = requestAnimationFrame(go); }
+function singSegment(){
+  const t = SING.t, hop = SING.mel.hop, notes = SING.mel.notes; let first = 0;
+  for (let i = 0; i < notes.length; i++) if (notes[i]){ first = i * hop; break; }
+  const len = SING.challenge ? SING.challenge.m : singLen();
+  if (len === "min"){ SING.from = Math.max(0, first - 3); SING.to = Math.min((t.dur || 0) - .3, SING.from + 63); }
+  else { SING.from = 0; SING.to = (t.dur || 0) - .3; }
+}
 function singRange(){
   const v = Array.from(SING.mel.notes).filter(Boolean).map(n => n / 2).sort((a, b) => a - b);
   if (!v.length){ SING.lo = 48; SING.hi = 72; return; }
@@ -6390,14 +6488,25 @@ function renderSingBar(){
   const msg = m => `<p class="sing-msg" role="status">${esc(m)}</p>`;
   if (st === "prep") b.innerHTML = msg(`${SING.msg || "Preparando…"} ${Math.round(SING.p * 100)} %`) + `<button type="button" class="pill" data-act="sing-close">Cancelar</button>`;
   else if (st === "ready") b.innerHTML = msg(SING.msg || "Usa audífonos: así Hum te escucha solo a ti y el video suena mejor.")
+    + `<button type="button" class="pill" data-act="warm">${ic("hear")}Calentar la voz</button>`
     + `<button type="button" class="pill${store.get("singPhones", false) ? " on" : ""}" data-act="sing-phones" aria-pressed="${!!store.get("singPhones", false)}">${ic("hear")}${store.get("singPhones", false) ? "Con audífonos: sí" : "Con audífonos: no"}</button>`
+    + (SING.challenge ? "" : `<div class="chips" role="group" aria-label="Modo">${[["solo", "Solo"], ["battle", "Batalla (2 personas)"]].map(([k, n]) => `<button type="button" class="chip${singMode() === k ? " on" : ""}" data-act="sing-mode" data-v="${k}" aria-pressed="${singMode() === k}">${n}</button>`).join("")}</div>
+      <div class="chips" role="group" aria-label="Duración">${[["min", "1 minuto"], ["full", "Completa"]].map(([k, n]) => `<button type="button" class="chip${singLen() === k ? " on" : ""}" data-act="sing-len" data-v="${k}" aria-pressed="${singLen() === k}">${n}</button>`).join("")}</div>`)
+    + (singMode() === "battle" && !SING.challenge
+      ? `<div class="sing-names"><input id="singP0" maxlength="24" placeholder="Jugador 1" value="${esc(singNames()[0])}" aria-label="Nombre del jugador 1"><span>vs</span><input id="singP1" maxlength="24" placeholder="Jugador 2" value="${esc(singNames()[1])}" aria-label="Nombre del jugador 2"></div>`
+      : `<div class="sing-names"><input id="singMe" maxlength="24" placeholder="Tu nombre (para retos)" value="${esc(str(store.get("singMe", ""), 24))}" aria-label="Tu nombre"></div>`)
     + `<div class="chips" role="group" aria-label="Dificultad">${Object.entries(SING_LV).map(([k, l]) => `<button type="button" class="chip${singLv() === k ? " on" : ""}" data-act="sing-lv" data-lv="${k}" aria-pressed="${singLv() === k}">${l.name}</button>`).join("")}</div>`
-    + (window.MediaRecorder && SING.cv.captureStream ? `<button type="button" class="pill${SING.wantRec ? " on" : ""}" data-act="sing-rec" aria-pressed="${SING.wantRec}">${ic("video")}${SING.wantRec ? "Grabar video: sí" : "Grabar video: no"}</button>` : "")
+    + (window.MediaRecorder && SING.cv.captureStream && (singMode() === "solo" || SING.challenge) ? `<button type="button" class="pill${SING.wantRec ? " on" : ""}" data-act="sing-rec" aria-pressed="${SING.wantRec}">${ic("video")}${SING.wantRec ? "Grabar video: sí" : "Grabar video: no"}</button>` : "")
     + `<button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-go">${ic("mic")}<span>Empezar</span></button>`;
   else if (st === "count" || st === "sing") b.innerHTML = msg(SING.deaf ? "No te escucho bien: acerca el micrófono o canta más fuerte. Si usas audífonos Bluetooth, prueba con el micrófono del teléfono." : SING.rec ? "Grabando… canta con ganas" : "Canta con ganas") + `<button type="button" class="pill danger" data-act="sing-stop">Terminar</button>`;
   else if (st === "saving") b.innerHTML = msg("Terminando el video…");
+  else if (st === "turn") b.innerHTML = msg(`${pName(0)} sacó ${SING.scores[0]} puntos. Ahora le toca a ${pName(1)}: pásale el teléfono.`)
+    + `<button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-go">${ic("mic")}<span>Empezar turno de ${esc(pName(1))}</span></button>`;
+  else if (st === "battle") b.innerHTML = msg(SING.scores[0] === SING.scores[1] ? "¡Empate!" : `¡Gana ${SING.scores[0] > SING.scores[1] ? pName(0) : pName(1)}!`)
+    + `<button type="button" class="pill" data-act="sing-img">${ic("share")}Compartir resultado</button><button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-again">${ic("mic")}<span>Revancha</span></button>`;
   else if (st === "done") b.innerHTML = msg(SING.msg || "")
     + (SING.url ? `<button type="button" class="pill" data-act="sing-watch">${ic($("#singVid").hidden ? "video" : "mic")}${$("#singVid").hidden ? "Ver video" : "Ver puntos"}</button><button type="button" class="pill" data-act="sing-save">${ic("install")}Guardar video</button>` + (navigator.share ? `<button type="button" class="pill" data-act="sing-share">${ic("share")}Compartir</button>` : "") : "")
+    + (SING.final ? `<button type="button" class="pill" data-act="sing-reto">${ic("group")}Retar a un amigo</button>` : "")
     + `<button type="button" class="pill" data-act="sing-close">Cerrar</button><button type="button" class="add-top" data-act="sing-again">${ic("mic")}<span>Cantar otra vez</span></button>`;
   else b.innerHTML = msg(SING.msg || "") + `<button type="button" class="add-top" data-act="sing-close">Cerrar</button>`;
 }
@@ -6408,6 +6517,7 @@ async function openSing(){
   if (!t.rec.blob){ toast("Esta canción aún no está en este equipo. Ponla una vez para que se descargue."); return; }
   if ($("#fxDlg").open) $("#fxDlg").close();
   if (S.drawer){ S.drawer = false; applySide(); }
+  SING.challenge = SING.pendingReto || null; SING.pendingReto = null; SING.round = 0; SING.scores = [0, 0]; SING.rank = null;
   Object.assign(SING, { t, st: "prep", mel: null, score: 0, hits: 0, n: 0, last: 0, trail: [], msg: "", p: 0, url: "", blob: null, final: 0 });
   SING.cv = $("#singCv"); SING.x = SING.cv.getContext("2d"); $("#singVid").hidden = true; SING.cv.hidden = false;
   if (!$("#singDlg").open) $("#singDlg").showModal();
@@ -6419,7 +6529,8 @@ async function openSing(){
     if (!SING.mel.notes.some(Boolean)){ SING.st = "error"; singSay("No encontré una voz clara en esta canción para calificarla."); return; }
     SING.best = (store.get("singBest", {}) || {})[bestKey(t.id)] || 0;
     SING.basic = !!SING.mel.basic;
-    SING.st = "ready"; SING.msg = (SING.basic ? "Modo básico: esta canción no tiene karaoke con IA, así que Hum baja la voz y te califica de forma aproximada. Para la calificación más exacta, prepárala con IA en Efectos. " : "") + (SING.best ? `Tu récord: ${SING.best} puntos. ` : "") + "Usa audífonos para mejor resultado."; renderSingBar();
+    singSegment();
+    SING.st = "ready"; SING.msg = (SING.challenge ? `Reto de ${SING.challenge.e[0].n}: ${SING.challenge.e[0].s} puntos en ${SING_LV[SING.challenge.l].name}${SING.challenge.m === "min" ? ", 1 minuto" : ""}. ¡Supéralo! ` : "") + (SING.basic ? "Modo básico: esta canción no tiene karaoke con IA, así que Hum baja la voz y te califica de forma aproximada. Para la calificación más exacta, prepárala con IA en Efectos. " : "") + (SING.best ? `Tu récord: ${SING.best} puntos. ` : "") + "Usa audífonos para mejor resultado."; renderSingBar();
   } catch (e){
     SING.st = "error"; singSay(e && e.message === "nostem" ? "El karaoke con IA de esta canción no está en este equipo todavía. Ponla con karaoke una vez y vuelve a intentarlo." : "No se pudo preparar esta canción para cantar. Prueba con otra.");
   }
@@ -6435,7 +6546,7 @@ async function singStart(){
   if (!S.fx.kara) setFx({ kara: true });
   if (!SING.basic) await ensureStem(t);
   if (S.playing) pause();
-  S.qi = S.queue.indexOf(t.id) >= 0 ? S.queue.indexOf(t.id) : S.qi; loadAt(0); karaSwap();
+  S.qi = S.queue.indexOf(t.id) >= 0 ? S.queue.indexOf(t.id) : S.qi; loadAt(SING.from || 0); karaSwap();
   SING.rate = ctx.sampleRate; SING.k = Math.max(1, Math.round(SING.rate / 12000));
   SING.src = ctx.createMediaStreamSource(SING.stream);
   SING.an = ctx.createAnalyser(); SING.an.fftSize = 4096; SING.buf = new Float32Array(SING.an.fftSize); SING.dec = new Float32Array(Math.ceil(SING.an.fftSize / SING.k));
@@ -6448,7 +6559,7 @@ async function singStart(){
   try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { SING.lock = l; }).catch(() => {}); } catch {} // the screen stays on
   SING.st = "count"; renderSingBar();
   for (let c = 3; c > 0; c--){ SING.cd = c; await new Promise(r => setTimeout(r, 800)); if (SING.st !== "count") return; }
-  if (SING.wantRec) singRecStart();
+  if (SING.wantRec && (singMode() === "solo" || SING.challenge)) singRecStart();
   SING.st = "sing"; renderSingBar();
   play();
   clearInterval(SING.iv); SING.iv = setInterval(singTick, 40);
@@ -6494,11 +6605,24 @@ function singFinish(){
   const t = SING.t; if (S.playing && cur() === t) pause();
   const enough = SING.basic ? SING.refN >= 50 && SING.n >= 20 : SING.n >= 50;
   SING.final = enough ? SING.score : 0;
+  try { logEvent("sing-result", { s: SING.final, l: singLv(), b: singMode() === "battle" && !SING.challenge }); } catch {}
+  if (singMode() === "battle" && !SING.challenge){
+    SING.scores[SING.round] = SING.final;
+    if (SING.round === 0){ SING.round = 1; SING.st = "turn"; SING.msg = ""; singCleanup(); renderSingBar(); return; }
+    SING.st = "battle"; stat("batalla", { largo: singLen() }); singCleanup(); renderSingBar(); return;
+  }
   if (SING.final) stat("cantar-puntos", { rango: SING.final >= 90 ? "90-100" : SING.final >= 75 ? "75-89" : SING.final >= 55 ? "55-74" : "0-54" });
   const bk = bestKey(t.id), best = store.get("singBest", {}) || {}, prev = best[bk] || 0; SING.best = Math.max(prev, SING.final);
   if (SING.final > prev){ best[bk] = SING.final; store.set("singBest", best); }
   const judged = SING.basic ? SING.refN : SING.n, lowHear = judged >= 50 && SING.heard < judged * .08;
   SING.msg = lowHear || (!enough && SING.refN >= 50 && SING.heard < SING.refN * .08) ? "Hum casi no escuchó tu voz. Revisa que el micrófono esté permitido, acércalo o canta más fuerte, y vuelve a intentarlo." : !enough ? "Cantaste muy poquito para calificarte. Inténtalo con la canción completa." : SING.final > prev ? "¡Nuevo récord en esta canción!" : SING.final === prev && prev > 0 ? "Igualaste tu récord en esta canción." : "";
+  if (SING.challenge){
+    const c = SING.challenge, me = { n: str(store.get("singMe", ""), 24) || "Yo", s: SING.final };
+    const rows = c.e.filter(r => r.n !== me.n).concat([me]).sort((a, b) => b.s - a.s).slice(0, 10);
+    SING.rank = rows; const top = c.e.reduce((m, r) => Math.max(m, r.s), 0);
+    SING.msg = SING.final > top ? "¡Le ganaste a todos en este reto! Pásalo para que intenten superarte." : SING.final === top ? "¡Empate con el mejor del reto!" : "Todavía no ganas este reto. ¡Inténtalo otra vez!";
+    stat("reto-aceptado", { gano: SING.final > top ? "si" : "no" });
+  }
   if (SING.rec && SING.rec.state === "recording"){
     SING.st = "saving"; renderSingBar();
     setTimeout(() => { // the result stays on screen a moment in the video
@@ -6509,6 +6633,38 @@ function singFinish(){
       try { SING.rec.stop(); } catch { SING.st = "done"; singCleanup(); renderSingBar(); }
     }, 2500);
   } else { SING.st = "done"; singCleanup(); renderSingBar(); }
+}
+const b64u = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = s => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/")))));
+function retoLink(){
+  const t = SING.t, me = { n: str(store.get("singMe", ""), 24) || "Alguien", s: SING.final };
+  const prev = SING.challenge ? SING.challenge.e.filter(r => r.n !== me.n) : [];
+  const e = prev.concat([me]).sort((a, b) => b.s - a.s).slice(0, 10).map(r => [r.n, r.s]);
+  return SITE + "#reto=" + b64u({ v: 1, t: str(t.title, 120), a: str(t.artist, 120), l: singLv(), m: SING.challenge ? SING.challenge.m : singLen(), e });
+}
+async function retoShare(){
+  if (!SING.final){ toast("Canta primero para tener una puntuación."); return; }
+  if (!str(store.get("singMe", ""), 24)){ toast("Escribe tu nombre antes de retar, para que sepan quién los reta."); renderSingBar(); const i = $("#singMe"); if (i) i.focus(); return; }
+  const url = retoLink(), text = `Te reto: saqué ${SING.final} puntos cantando “${SING.t.title}” en Hum (${SING_LV[singLv()].name}). ¿Me ganas?`;
+  stat("reto-enviado");
+  if (navigator.share){ try { await navigator.share({ title: "Reto de canto en Hum", text, url }); return; } catch (e){ if (e && e.name === "AbortError") return; } }
+  try { await navigator.clipboard.writeText(text + " " + url); toast("Copié el reto: pégalo en WhatsApp o donde quieras."); } catch { prompt("Copia este enlace del reto:", url); }
+}
+const normT = x => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+function openReto(code){
+  let d; try { d = unb64u(code); } catch { toast("Ese enlace de reto no está completo."); return; }
+  if (!d || typeof d !== "object" || !Array.isArray(d.e)) { toast("Ese enlace de reto no está completo."); return; }
+  const c = { t: str(d.t, 120), a: str(d.a, 120), l: SING_LV[d.l] ? d.l : "normal", m: d.m === "min" ? "min" : "full",
+    e: d.e.slice(0, 10).filter(r => Array.isArray(r)).map(r => ({ n: str(r[0], 24) || "Alguien", s: clamp(Math.round(+r[1] || 0), 0, 100) })) };
+  if (!c.e.length){ toast("Ese enlace de reto no está completo."); return; }
+  c.e.sort((a, b) => b.s - a.s);
+  if (needPro("sing")) return;
+  const want = normT(c.t), wa = normT(c.a);
+  const id = USER.find(i => { const t = BYID[i]; return t && normT(t.title) === want && (!wa || normT(t.artist).includes(wa) || wa.includes(normT(t.artist))); });
+  const top = c.e[0];
+  if (!id){ toast(`${top.n} te retó con “${c.t}” de ${c.a}. Para aceptar, añade esa canción a tu música y abre el enlace otra vez.`); return; }
+  store.set("singLevel", c.l); SING.pendingReto = c;
+  playContext("mine", id); setTimeout(() => { if (S.playing) pause(); openSing(); }, 400);
 }
 function singName(){ return `Hum karaoke - ${SING.t ? SING.t.title : "canción"}.${/mp4/.test(SING.mime) ? "mp4" : "webm"}`.replace(/[\\/:*?"<>|]/g, ""); }
 function singSave(){ if (!SING.url) return; stat("video-karaoke-guardado"); const a = document.createElement("a"); a.href = SING.url; a.download = singName(); document.body.appendChild(a); a.click(); a.remove(); toast("Guardando tu video…"); }
@@ -6528,6 +6684,16 @@ function closeSing(){
   if ($("#singDlg").open) $("#singDlg").close();
 }
 $("#singDlg").addEventListener("cancel", e => { e.preventDefault(); closeSing(); });
+document.addEventListener("input", e => {
+  if (e.target.id === "singP0" || e.target.id === "singP1"){ const n = singNames(); n[e.target.id === "singP0" ? 0 : 1] = str(e.target.value, 24); store.set("singNames", n); }
+  if (e.target.id === "singMe") store.set("singMe", str(e.target.value, 24));
+});
+async function singImage(){ // the result on screen, as a picture to share
+  const b = await new Promise(r => SING.cv.toBlob(r, "image/png")); if (!b) return;
+  const file = new File([b], "Batalla Hum.png", { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })){ try { await navigator.share({ files: [file], title: "Batalla de canto en Hum" }); return; } catch (e){ if (e && e.name === "AbortError") return; } }
+  const u = URL.createObjectURL(b), a = document.createElement("a"); a.href = u; a.download = "Batalla Hum.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
 document.addEventListener("click", e => {
   const act = e.target.closest("[data-act]"); if (!act) return;
   const a = act.dataset.act;
@@ -6536,10 +6702,15 @@ document.addEventListener("click", e => {
   if (a === "sing-go") singStart();
   if (a === "sing-stop") singFinish();
   if (a === "sing-rec"){ SING.wantRec = !SING.wantRec; renderSingBar(); }
+  if (a === "sing-mode"){ store.set("singMode", act.dataset.v); renderSingBar(); }
+  if (a === "sing-len"){ store.set("singLen", act.dataset.v); if (SING.mel) singSegment(); renderSingBar(); }
+  if (a === "sing-reto") retoShare();
+  if (a === "sing-img") singImage();
   if (a === "sing-phones"){ store.set("singPhones", !store.get("singPhones", false)); SING.msg = store.get("singPhones", false) ? "Con audífonos, Hum escucha tu voz más limpia y se ajusta solo al retraso del Bluetooth." : "Sin audífonos, Hum quita el eco de la bocina. Canta cerca del teléfono."; renderSingBar(); }
   if (a === "sing-lv"){ store.set("singLevel", act.dataset.lv); SING.best = (store.get("singBest", {}) || {})[bestKey(SING.t.id)] || 0; SING.msg = SING.best ? `Tu récord en ${SING_LV[singLv()].name}: ${SING.best} puntos.` : SING_LV[singLv()].name === "Exigente" ? "Exigente: tienes que dar la nota casi exacta y a tiempo." : SING_LV[singLv()].name === "Fácil" ? "Fácil: Hum acepta notas cercanas. Ideal para empezar." : ""; renderSingBar(); }
   if (a === "sing-save") singSave();
   if (a === "sing-share") singShare();
+  if (a === "sing-again" && (SING.st === "battle")){ SING.round = 0; SING.scores = [0, 0]; }
   if (a === "sing-again"){ const v = $("#singVid"); v.hidden = true; SING.cv.hidden = false; if (SING.url){ URL.revokeObjectURL(SING.url); SING.url = ""; SING.blob = null; } SING.st = "ready"; SING.score = 0; SING.trail = []; SING.msg = ""; renderSingBar(); singLoop(); }
   if (a === "sing-watch"){ const v = $("#singVid"), show = v.hidden; v.hidden = !show; SING.cv.hidden = show; if (show) v.play().catch(() => {}); else v.pause(); renderSingBar(); }
 });
@@ -6643,7 +6814,319 @@ document.addEventListener("click", e => {
   if (k === "amb-pp"){ S.playing ? pause() : play(); ambUi(); }
   if (k === "amb-next"){ next(false); ambUi(); }
   if (k === "story") storyCard();
+  if (k === "logros") openLogros();
+  if (k === "log-close") $("#logDlg").close();
 });
+
+/* ---------- radio: when what you listen to ends, more of your music that sounds like it ---------- */
+const radioOn = () => store.get("radio", true) !== false;
+function radioNext(){
+  if (!radioOn()) return false;
+  const last = cur(); if (!last || !last.user) return false;
+  const recent = new Set(S.queue.slice(-40)), rs = store.get("recent", {}) || {};
+  const cands = USER.filter(id => !recent.has(id) && BYID[id] && (BYID[id].rec.blob || BYID[id].rec.cloud) && !(rs[id] && Date.now() - rs[id] < 3 * 36e5));
+  if (cands.length < 2) return false;
+  const lf = last.rec.feel || {}, lb = last.rec.bpm || 0;
+  const tempo = (a, b) => { if (!a || !b) return .5; let r = a / b; while (r > 1.4) r /= 2; while (r < .7) r *= 2; return Math.abs(1 - r) * 4; };
+  const score = id => { const r = BYID[id].rec, f2 = r.feel || {};
+    let d = Math.random() * .6;
+    if (lf.energy != null && f2.energy != null) d += Math.abs(lf.energy - f2.energy) / 6;
+    if (lf.bright != null && f2.bright != null) d += Math.abs(lf.bright - f2.bright) * 8;
+    if (lf.minor != null && f2.minor != null && lf.minor !== f2.minor) d += .5;
+    d += tempo(lb, r.bpm);
+    if (BYID[id].artist && BYID[id].artist === last.artist) d -= .15; // a little more of the same artist
+    return d; };
+  const pick = cands.map(id => [id, score(id)]).sort((a, b) => a[1] - b[1]).slice(0, 15).map(x => x[0]);
+  S.queue = S.queue.concat(pick); toast("Radio Hum: sigo con canciones parecidas a las tuyas."); stat("radio");
+  playIndex(S.qi + 1); return true;
+}
+$("#radioSw").setAttribute("aria-checked", radioOn());
+$("#radioSw").addEventListener("click", () => { store.set("radio", !radioOn()); $("#radioSw").setAttribute("aria-checked", radioOn()); });
+
+/* ---------- even volume: each song's loudness is measured once (on a phone, only while music is paused),
+   and its level is set so every song sounds equally loud. The limiter keeps the loudest moments clean. */
+const loudOn = () => store.get("evenVol", true) !== false;
+const LOUD_TARGET = -16; // dB: the level every song is brought to
+function loudGain(t){ if (!loudOn() || !t || !t.user || t.rec.loud == null) return 1; return clamp(Math.pow(10, (LOUD_TARGET - t.rec.loud) / 20), .5, 2); }
+const loudQueue = []; let loudRunning = false;
+function queueLoud(rec){ if (rec.loud != null || loudQueue.includes(rec)) return; loudQueue.push(rec); setTimeout(runLoud, 6000); }
+async function runLoud(){
+  if (loudRunning) return; loudRunning = true;
+  while (loudQueue.length){
+    const rec = loudQueue.shift();
+    if (!BYID[rec.id] || !rec.blob || rec.loud != null) continue;
+    if (bpmRunning || feelRunning){ loudQueue.push(rec); await new Promise(r => setTimeout(r, 3000)); continue; } // one heavy job at a time
+    await calm(); if (!BYID[rec.id] || !rec.blob) continue;
+    try { rec.loud = await measureLoud(rec.blob); } catch { rec.loud = null; }
+    if (rec.loud != null){ putRec(rec); try { markDirty("song:" + rec.id); } catch {} if (cur() && cur().id === rec.id) [audio, deckB].forEach(el => { if (el.dataset.id === rec.id) stemLevel(el); }); }
+    await new Promise(r => setTimeout(r, 400));
+  }
+  loudRunning = false;
+}
+async function measureLoud(blob){ // gated loudness: the average of the louder 60 % of 400 ms slices (quiet intros and silences do not count)
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC) return null;
+  const ab = await new OAC(1, 1, 8000).decodeAudioData(await blob.arrayBuffer()), n = ab.length, ch = ab.numberOfChannels, W = 3200, v = [];
+  for (let o = 0; o + W <= n; o += W){ let s = 0; for (let c = 0; c < ch; c++){ const d = ab.getChannelData(c); for (let i = o; i < o + W; i++) s += d[i] * d[i]; } v.push(s / (W * ch)); }
+  if (!v.length) return null; v.sort((a, b) => b - a);
+  const top = v.slice(0, Math.max(1, Math.round(v.length * .6))), m = top.reduce((a, b) => a + b, 0) / top.length;
+  return Math.round(10 * Math.log10(1e-10 + m) * 10) / 10;
+}
+$("#sndLoud").addEventListener("click", () => { store.set("evenVol", !loudOn()); $("#sndLoud").setAttribute("aria-checked", loudOn()); [audio, deckB].forEach(el => { if (el.dataset.id) stemLevel(el); }); toast(loudOn() ? "Volumen parejo activado." : "Volumen parejo desactivado."); });
+setTimeout(() => { USER.forEach(id => { const r = BYID[id] && BYID[id].rec; if (r && r.blob && r.loud == null) queueLoud(r); }); }, 15000);
+
+/* ---------- alarm: at the chosen time your music starts very low and rises over a minute ---------- */
+const ALARM = (() => { const a = store.get("alarm", null); return a && typeof a === "object" ? { on: !!a.on, time: /^\d\d:\d\d$/.test(a.time) ? a.time : "07:00", list: ["mine", "liked", "calm"].includes(a.list) ? a.list : "mine", last: a.last || "" } : { on: false, time: "07:00", list: "mine", last: "" }; })();
+const saveAlarm = () => store.set("alarm", ALARM);
+function paintAlarm(){ $("#alarmTime").value = ALARM.time; $("#alarmList").value = ALARM.list; $("#alarmSw").setAttribute("aria-checked", ALARM.on);
+  $("#alarmNote").textContent = ALARM.on ? `Sonará a las ${ALARM.time}. Deja Hum abierto: en Windows basta con que esté en la bandeja; en el teléfono, deja la app abierta y conectada a la corriente.` : "Tu música empieza bajito y sube poco a poco. Deja Hum abierto: en Windows basta con que esté en la bandeja; en el teléfono, deja la app abierta y conectada a la corriente."; }
+paintAlarm();
+$("#alarmSw").addEventListener("click", () => { ALARM.on = !ALARM.on; ALARM.last = ""; saveAlarm(); paintAlarm(); if (ALARM.on){ unlockBg(); toast(`Despertador a las ${ALARM.time}.`); stat("despertador"); } });
+$("#alarmTime").addEventListener("change", e => { if (/^\d\d:\d\d$/.test(e.target.value)){ ALARM.time = e.target.value; ALARM.last = ""; saveAlarm(); paintAlarm(); } });
+$("#alarmList").addEventListener("change", e => { ALARM.list = e.target.value; saveAlarm(); });
+let alarmFade = 0;
+$("#vol").addEventListener("input", () => clearInterval(alarmFade)); // you moved the volume: the alarm stops raising it
+function alarmFire(){
+  ALARM.last = dayKey(); saveAlarm();
+  const want = S.vol || .7; S.vol = .03; applyVol();
+  if (ALARM.list === "calm"){ const md = MOODS.find(x => x.title === "Modo relajado"); try { if (md) playMood(md); else playContext("mine"); } catch { playContext("mine"); } }
+  else playContext(ALARM.list === "liked" && getList("liked").tracks.length ? "liked" : "mine");
+  clearInterval(alarmFade); const t0 = Date.now();
+  alarmFade = setInterval(() => { const p = Math.min(1, (Date.now() - t0) / 60000); S.vol = .03 + (want - .03) * p; applyVol(); if (p >= 1) clearInterval(alarmFade); }, 1000);
+  toast(`☀️ Buenos días. Son las ${ALARM.time}.`); stat("despertador-sono");
+}
+setInterval(() => {
+  if (!ALARM.on) return; const now = new Date(), [h, m] = ALARM.time.split(":").map(Number);
+  if (ALARM.last === dayKey(now)) return;
+  const due = new Date(now); due.setHours(h, m, 0, 0);
+  if (now >= due && now - due < 20 * 60000) alarmFire(); // up to 20 minutes late (a sleeping phone), never hours later
+}, 15000);
+
+/* ---------- vocal warm-up: three short exercises with guide tones; nothing is recorded ----------
+   1 · hold a comfortable note (steadiness), 2 · follow a scale built on your note (tuning), 3 · a siren from low to high. */
+const WARM = { st: "idle", stream: null, src: null, an: null, buf: null, dec: null, k: 1, iv: 0, raf: 0, t0: 0, step: 0, base: 0, pts: [], res: {}, osc: null, og: null };
+const NOTE_N = ["Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+const noteName = m => NOTE_N[((Math.round(m) % 12) + 12) % 12];
+const SCALE = [0, 2, 4, 5, 7, 5, 4, 2, 0];
+function warmSay(m){ const el = $("#warmMsg"); if (el) el.textContent = m; }
+function warmButtons(html){ $("#warmAct").innerHTML = html; }
+async function openWarm(){
+  if (SING.st === "sing" || SING.st === "count") return;
+  if ($("#singDlg").open) $("#singDlg").close();
+  if (S.playing) pause();
+  if (!$("#warmDlg").open) $("#warmDlg").showModal();
+  WARM.st = "ready"; WARM.res = {}; WARM.pts = [];
+  warmSay("Tres ejercicios cortos para soltar la voz. Usa audífonos si puedes, y canta con «aaa» o «uuu», sin forzar.");
+  warmButtons(`<button type="button" class="pill" data-act="warm-close">Cerrar</button><button type="button" class="add-top" data-act="warm-go">${ic("mic")}<span>Empezar</span></button>`);
+  warmLoop();
+}
+async function warmStart(){
+  try { WARM.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true, channelCount: 1 } }); }
+  catch { warmSay("Hum necesita tu micrófono para el calentamiento. Permite el micrófono y vuelve a intentarlo."); return; }
+  ensureCtx(); if (ctx.state !== "running") await ctx.resume().catch(() => {});
+  WARM.k = Math.max(1, Math.round(ctx.sampleRate / 12000));
+  WARM.src = ctx.createMediaStreamSource(WARM.stream); const g = ctx.createGain(); g.gain.value = 4; WARM.src.connect(g); WARM.boost = g;
+  WARM.an = ctx.createAnalyser(); WARM.an.fftSize = 4096; g.connect(WARM.an);
+  WARM.buf = new Float32Array(4096); WARM.dec = new Float32Array(Math.ceil(4096 / WARM.k));
+  // a soft guide tone, only for the scale and the siren
+  WARM.osc = ctx.createOscillator(); WARM.osc.type = "triangle"; WARM.og = ctx.createGain(); WARM.og.gain.value = 0; WARM.osc.connect(WARM.og); WARM.og.connect(ctx.destination); WARM.osc.start();
+  window.__singing = true; try { stopWake(); } catch {}
+  stat("calentamiento");
+  warmStep(1);
+  clearInterval(WARM.iv); WARM.iv = setInterval(warmTick, 40);
+}
+function warmGuide(m, on){ if (!WARM.og) return; const t = ctx.currentTime; if (m) WARM.osc.frequency.setTargetAtTime(mtof(m), t, .02); WARM.og.gain.setTargetAtTime(on ? .06 : 0, t, .05); }
+function warmStep(n){
+  WARM.step = n; WARM.t0 = performance.now(); WARM.pts = [];
+  warmButtons(`<button type="button" class="pill danger" data-act="warm-stop">Terminar</button>`);
+  if (n === 1){ WARM.st = "hold"; warmGuide(0, false); warmSay("1 de 3 · Canta una nota cómoda y sostenla 5 segundos, lo más pareja que puedas."); }
+  if (n === 2){ WARM.st = "scale"; warmSay(`2 de 3 · Sigue las notas que suenan, empezando en ${noteName(WARM.base)}. Una por segundo.`); }
+  if (n === 3){ WARM.st = "siren"; warmSay("3 de 3 · Sirena: sube de grave a agudo siguiendo la línea, suave, sin cortar el sonido."); }
+}
+function warmPitch(){
+  WARM.an.getFloatTimeDomainData(WARM.buf); const k = WARM.k, n = Math.floor(4096 / k);
+  for (let i = 0; i < n; i++){ let s = 0; for (let j = 0; j < k; j++) s += WARM.buf[i * k + j]; WARM.dec[i] = s / k; }
+  const fq = yinLive(WARM.dec, n, ctx.sampleRate / k); return fq > 65 && fq < 1100 ? 69 + 12 * Math.log2(fq / 440) : 0;
+}
+function warmTarget(t){ // the note to sing at t seconds into the step
+  if (WARM.st === "scale"){ const i = Math.floor((t - 1) / 1); return t < 1 || i >= SCALE.length ? 0 : WARM.base + SCALE[i]; }
+  if (WARM.st === "siren"){ return t < 1 || t > 5 ? 0 : WARM.base - 5 + (t - 1) / 4 * 12; }
+  return 0;
+}
+function warmTick(){
+  if (!["hold", "scale", "siren"].includes(WARM.st)) return;
+  const t = (performance.now() - WARM.t0) / 1000, m = warmPitch(), tg = warmTarget(t);
+  if (WARM.st !== "hold") warmGuide(tg, !!tg);
+  WARM.pts.push({ t, m, tg }); if (WARM.pts.length > 400) WARM.pts.shift();
+  if (WARM.st === "hold"){
+    const v = WARM.pts.filter(p => p.m && p.t > .8);
+    if (t > 7 || v.length >= 110){
+      if (v.length < 25){ warmSay("No te escuché bien. Acércate al micrófono y canta una nota más fuerte."); WARM.t0 = performance.now(); WARM.pts = []; return; }
+      const ms = v.map(p => p.m).sort((a, b) => a - b), med = ms[Math.floor(ms.length / 2)];
+      const sd = Math.sqrt(v.reduce((a, p) => a + (p.m - med) ** 2, 0) / v.length) * 100; // in cents
+      WARM.base = clamp(Math.round(med), 45, 72); WARM.res.steady = clamp(Math.round(100 - sd * 1.6), 0, 100);
+      warmStep(2);
+    }
+  } else if (WARM.st === "scale" && t > 1 + SCALE.length + .4){
+    const v = WARM.pts.filter(p => p.tg && p.t - Math.floor(p.t) > .3); // the second half of each note, after you found it
+    const ok = v.filter(p => p.m && Math.abs(((p.m - p.tg) % 12 + 18) % 12 - 6) <= .5).length;
+    WARM.res.tune = v.length ? Math.round(ok / v.length * 100) : 0; warmGuide(0, false); warmStep(3);
+  } else if (WARM.st === "siren" && t > 5.6){
+    const v = WARM.pts.filter(p => p.tg); const sung = v.filter(p => p.m).length;
+    WARM.res.siren = v.length ? Math.round(sung / v.length * 100) : 0; warmGuide(0, false); warmDone();
+  }
+}
+function warmDone(){
+  WARM.st = "done"; warmCleanup();
+  const r = WARM.res, avg = Math.round(((r.steady || 0) + (r.tune || 0) + (r.siren || 0)) / 3);
+  const tip = (r.tune || 0) < 50 ? "Consejo: escucha la nota guía un instante antes de cantarla, y canta más suave." : (r.steady || 0) < 60 ? "Consejo: respira profundo y suelta el aire despacio para que la nota no tiemble." : "¡Tu voz está lista! Ahora a cantar.";
+  warmSay(`Estabilidad ${r.steady || 0} % · Afinación ${r.tune || 0} % · Sirena ${r.siren || 0} %. ${tip}`);
+  warmButtons(`<button type="button" class="pill" data-act="warm-close">Cerrar</button><button type="button" class="pill" data-act="warm-go">Repetir</button><button type="button" class="add-top" data-act="warm-sing">${ic("mic")}<span>Ir a cantar</span></button>`);
+  try { stat("calentamiento-fin", { nivel: avg >= 75 ? "alto" : avg >= 50 ? "medio" : "bajo" }); } catch {}
+}
+function warmCleanup(){
+  clearInterval(WARM.iv);
+  try { WARM.og && WARM.og.gain.setTargetAtTime(0, ctx.currentTime, .03); } catch {}
+  const o = WARM.osc; if (o) setTimeout(() => { try { o.stop(); o.disconnect(); } catch {} }, 200); WARM.osc = WARM.og = null;
+  try { WARM.src && WARM.src.disconnect(); WARM.boost && WARM.boost.disconnect(); } catch {}
+  if (WARM.stream){ WARM.stream.getTracks().forEach(t => t.stop()); WARM.stream = null; }
+  if (window.__singing && SING.st !== "sing" && SING.st !== "count"){ window.__singing = false; try { startWake(); } catch {} }
+}
+function warmLoop(){ cancelAnimationFrame(WARM.raf); const go = () => { if (!$("#warmDlg").open) return; warmDraw(); WARM.raf = requestAnimationFrame(go); }; WARM.raf = requestAnimationFrame(go); }
+function warmDraw(){
+  const cv = $("#warmCv"), x = cv.getContext("2d"), W = cv.width, H = cv.height, acc = LOOKACC || "#f2b544";
+  x.fillStyle = "#0b0b10"; x.fillRect(0, 0, W, H);
+  const pts = WARM.pts, t = pts.length ? pts[pts.length - 1].t : 0, base = WARM.base || 57, lo = base - 9, hi = base + 10;
+  const yOf = m => H - 40 - (m - lo) / (hi - lo) * (H - 80), xOf = tt => W - 60 - (t - tt) * 180;
+  x.strokeStyle = "rgba(255,255,255,.06)"; x.lineWidth = 1;
+  for (let m = Math.ceil(lo); m <= hi; m++){ const y = yOf(m); x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); if (m % 12 === base % 12){ x.fillStyle = "rgba(235,233,243,.35)"; x.font = singFont(600, 18); x.fillText(noteName(m), 8, y - 4); } }
+  // the targets
+  x.fillStyle = "rgba(255,255,255,.45)";
+  for (const p of pts){ if (!p.tg) continue; const px = xOf(p.t); if (px < 0) continue; x.fillRect(px - 2, yOf(p.tg) - 7, 5, 14); }
+  // your voice
+  x.fillStyle = acc; x.shadowColor = acc; x.shadowBlur = 12;
+  for (const p of pts){ if (!p.m) continue; const px = xOf(p.t); if (px < 0) continue; let m = p.m; const ref = p.tg || base; m += 12 * Math.round((ref - m) / 12); x.beginPath(); x.arc(px, yOf(m), 6, 0, 7); x.fill(); }
+  x.shadowBlur = 0;
+  const last = pts.length ? pts[pts.length - 1] : null;
+  x.textAlign = "right"; x.fillStyle = "#fff"; x.font = singFont(800, 46, "d"); x.fillText(last && last.m ? noteName(last.m) : "—", W - 20, 56); x.textAlign = "left";
+  if (WARM.st === "hold"){ const p = Math.min(1, pts.filter(q => q.m && q.t > .8).length / 110); x.fillStyle = "rgba(255,255,255,.12)"; x.fillRect(20, H - 18, W - 40, 8); x.fillStyle = acc; x.fillRect(20, H - 18, (W - 40) * p, 8); }
+}
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]"); if (!a) return; const k = a.dataset.act;
+  if (k === "warm") openWarm();
+  if (k === "warm-go"){ WARM.res = {}; warmStart(); }
+  if (k === "warm-stop"){ WARM.st = "ready"; warmCleanup(); warmSay("Calentamiento detenido."); warmButtons(`<button type="button" class="pill" data-act="warm-close">Cerrar</button><button type="button" class="add-top" data-act="warm-go">${ic("mic")}<span>Empezar</span></button>`); }
+  if (k === "warm-close"){ WARM.st = "idle"; warmCleanup(); $("#warmDlg").close(); }
+  if (k === "warm-sing"){ WARM.st = "idle"; warmCleanup(); $("#warmDlg").close(); openSing(); }
+});
+$("#warmDlg").addEventListener("close", () => { if (WARM.st !== "idle"){ WARM.st = "idle"; warmCleanup(); } cancelAnimationFrame(WARM.raf); });
+
+/* ---------- your streak, weekly challenges and medals (kept on this device) ----------
+   A day counts for the streak with 3 minutes of music. Each week brings 3 challenges (the same for everyone that
+   week); medals are for good moments: first song sung, a 7-day streak, a perfect 100… */
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function weekKey(d = new Date()){ const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return dayKey(x); }
+const LG = (() => { const g = store.get("logros", null); return g && typeof g === "object" && !Array.isArray(g) ? g : {}; })();
+LG.days = LG.days && typeof LG.days === "object" ? LG.days : {}; LG.medals = LG.medals && typeof LG.medals === "object" ? LG.medals : {};
+LG.c = LG.c && typeof LG.c === "object" ? LG.c : {}; LG.w = LG.w && typeof LG.w === "object" ? LG.w : {};
+let lgDirty = 0; const saveLG = () => store.set("logros", LG);
+const WEEK_POOL = [
+  { id: "listen", t: "Escucha 2 horas de música", goal: 7200, unit: "h" },
+  { id: "sing", t: "Canta 3 canciones", goal: 3 },
+  { id: "s80", t: "Saca 80 o más cantando", goal: 1 },
+  { id: "hard", t: "Supera 70 en Exigente", goal: 1 },
+  { id: "battle", t: "Haz una batalla de canto", goal: 1 },
+  { id: "reto", t: "Reta a un amigo", goal: 1 },
+  { id: "amb", t: "Usa el modo ambiente", goal: 1 },
+  { id: "songs", t: "Escucha 10 canciones distintas", goal: 10 },
+  { id: "share", t: "Comparte lo que escuchas", goal: 1 },
+  { id: "days", t: "Escucha música 5 días", goal: 5 }
+];
+const MEDALS = [
+  { id: "first", e: "🎧", t: "Primer paso", d: "Escucha tu primera canción" },
+  { id: "st3", e: "🔥", t: "En racha", d: "3 días seguidos" },
+  { id: "st7", e: "🔥", t: "Semana de fuego", d: "7 días seguidos" },
+  { id: "st30", e: "🌋", t: "Imparable", d: "30 días seguidos" },
+  { id: "h10", e: "🎶", t: "Melómano", d: "10 horas de música" },
+  { id: "sing1", e: "🎤", t: "Primera vez", d: "Canta tu primera canción" },
+  { id: "sing10", e: "🎙️", t: "Fan del karaoke", d: "Canta 10 canciones" },
+  { id: "s90", e: "⭐", t: "Estrella", d: "Saca 90 o más" },
+  { id: "s100", e: "💯", t: "Perfecto", d: "Saca 100 puntos" },
+  { id: "hard80", e: "🏔️", t: "Exigente", d: "80 o más en Exigente" },
+  { id: "battle", e: "⚔️", t: "A la batalla", d: "Haz una batalla de canto" },
+  { id: "reto", e: "📨", t: "Retador", d: "Reta a un amigo" },
+  { id: "week", e: "🏆", t: "Semana completa", d: "Cumple los 3 retos de una semana" }
+];
+function weekPick(wk = weekKey()){ // 3 challenges for this week, the same for everyone
+  let h = 0; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const out = []; for (let k = 0; out.length < 3 && k < 30; k++){ const c = WEEK_POOL[(h + k * 7) % WEEK_POOL.length]; if (!out.includes(c)) out.push(c); }
+  return out;
+}
+function weekState(){ const wk = weekKey(); if (LG.w.k !== wk) LG.w = { k: wk, p: {}, songs: [], done: {} }; return LG.w; }
+function logStreak(){
+  let n = 0; const d = new Date(); if ((LG.days[dayKey(d)] || 0) < 180) d.setDate(d.getDate() - 1);
+  for (let i = 0; i < 400; i++){ if ((LG.days[dayKey(d)] || 0) >= 180){ n++; d.setDate(d.getDate() - 1); } else break; }
+  return n;
+}
+function logWeekDays(){ const w = weekKey(); return Object.keys(LG.days).filter(k => k >= w && LG.days[k] >= 180).length; }
+function weekProgress(c){
+  const w = weekState();
+  if (c.id === "days") return logWeekDays();
+  if (c.id === "songs") return w.songs.length;
+  return w.p[c.id] || 0;
+}
+function logWeekDone(){ return weekPick().filter(c => weekProgress(c) >= c.goal).length; }
+function medal(id){
+  if (LG.medals[id]) return; const m = MEDALS.find(x => x.id === id); if (!m) return;
+  LG.medals[id] = Date.now(); saveLG(); try { stat("medalla", { id }); } catch {}
+  medalNew.push(m); clearTimeout(medalNew.t); medalNew.t = setTimeout(() => { // several at once: one message for all
+    const l = medalNew.splice(0); toast(l.length === 1 ? `${l[0].e} Nueva medalla: ${l[0].t}` : `🏅 ${l.length} medallas nuevas: ${l.map(x => x.t).join(", ")}`); try { paintHomeExtras(); } catch {}
+  }, 60);
+}
+const medalNew = [];
+function logCheck(){
+  const w = weekState(), st = logStreak();
+  weekPick().forEach(c => { if (!w.done[c.id] && weekProgress(c) >= c.goal){ w.done[c.id] = 1; saveLG(); toast(`✅ Reto semanal cumplido: ${c.t}`); try { paintHomeExtras(); } catch {} } });
+  if (weekPick().every(c => w.done[c.id])) medal("week");
+  if (st >= 3) medal("st3"); if (st >= 7) medal("st7"); if (st >= 30) medal("st30");
+  if ((LG.c.secs || 0) >= 36000) medal("h10");
+}
+function logTick(){ // one second of music
+  const d = dayKey(); LG.days[d] = (LG.days[d] || 0) + 1; LG.c.secs = (LG.c.secs || 0) + 1;
+  const w = weekState(); w.p.listen = (w.p.listen || 0) + 1;
+  if (LG.days[d] === 180 || LG.c.secs % 600 === 0){ logCheck(); try { paintHomeExtras(); } catch {} }
+  if (++lgDirty >= 30){ lgDirty = 0; const keys = Object.keys(LG.days); if (keys.length > 420) keys.sort().slice(0, keys.length - 400).forEach(k => delete LG.days[k]); saveLG(); }
+}
+function logEvent(name, data){
+  const w = weekState(), add = id => { w.p[id] = (w.p[id] || 0) + 1; };
+  if (name === "song-play"){ if (!LG.medals.first) medal("first"); if (data && data.id && !w.songs.includes(data.id) && w.songs.length < 60) w.songs.push(data.id); }
+  else if (name === "sing-result" && data && data.s > 0){
+    add("sing"); LG.c.sung = (LG.c.sung || 0) + 1;
+    if (data.s >= 80) add("s80"); if (data.l === "hard" && data.s > 70) add("hard");
+    medal("sing1"); if (LG.c.sung >= 10) medal("sing10"); if (data.s >= 90) medal("s90"); if (data.s >= 100) medal("s100"); if (data.l === "hard" && data.s >= 80) medal("hard80");
+  }
+  else if (name === "batalla"){ add("battle"); medal("battle"); }
+  else if (name === "reto-enviado"){ add("reto"); medal("reto"); }
+  else if (name === "modo-ambiente") add("amb");
+  else if (name === "compartir-cancion") add("share");
+  else return;
+  saveLG(); logCheck();
+}
+function openLogros(){
+  if (S.drawer){ S.drawer = false; applySide(); }
+  const st = logStreak(), w = weekState(), today = LG.days[dayKey()] || 0;
+  $("#logBody").innerHTML = `<h2 id="logH">Tus logros</h2>
+    <div class="log-streak"><span class="fl" aria-hidden="true">🔥</span><div><b>${st ? `${st} ${st === 1 ? "día" : "días"} seguidos` : "Sin racha todavía"}</b>
+      <small>${today >= 180 ? "Hoy ya cuenta. ¡Vuelve mañana!" : `Escucha ${Math.ceil((180 - today) / 60)} min más hoy para ${st ? "seguir tu racha" : "empezarla"}.`}</small></div></div>
+    <h3 class="snd-h">Retos de esta semana</h3>
+    <div class="log-ch">${weekPick().map(c => { const p = Math.min(c.goal, weekProgress(c)), pct = Math.round(p / c.goal * 100);
+      return `<div class="${p >= c.goal ? "ok" : ""}"><b><span>${p >= c.goal ? "✅ " : ""}${esc(c.t)}</span><small>${c.unit === "h" ? `${(p / 3600).toFixed(1)} de 2 h` : `${p} de ${c.goal}`}</small></b><i><em style="width:${pct}%"></em></i></div>`; }).join("")}</div>
+    <p class="mix-note">Los retos cambian cada lunes.</p>
+    <h3 class="snd-h">Medallas · ${Object.keys(LG.medals).length} de ${MEDALS.length}</h3>
+    <div class="log-md">${MEDALS.map(m => `<div class="${LG.medals[m.id] ? "" : "off"}" title="${esc(m.d)}"><span aria-hidden="true">${m.e}</span><b>${esc(m.t)}</b><small>${esc(m.d)}</small></div>`).join("")}</div>
+    <div class="dlg-act"><button type="button" class="add-top" data-act="log-close">Listo</button></div>`;
+  if (!$("#logDlg").open) $("#logDlg").showModal();
+  try { stat("ver-logros"); } catch {}
+}
 
 /* ---------- your look (this device only) ----------
    Color: a few to pick from, any color you like, "automatic" (each song's cover colors) or the colors of your photo.
@@ -6771,24 +7254,34 @@ function renderLook(){
 function openLook(){ if (S.drawer){ S.drawer = false; applySide(); } renderLook(); if (!$("#lookDlg").open) $("#lookDlg").showModal(); }
 applyLook();
 
+/* ---------- covers drawn only when their row is about to be seen ---------- */
+if ("IntersectionObserver" in window){
+  const genIO = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const im = e.target; genIO.unobserve(im); const t = BYID[im.dataset.gen]; if (t) im.src = cover(t); im.removeAttribute("data-gen"); }), { rootMargin: "300px 0px" });
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; (n.matches && n.matches("img[data-gen]") ? [n] : n.querySelectorAll ? n.querySelectorAll("img[data-gen]") : []).forEach(im => genIO.observe(im)); }))).observe(document.body, { childList: true, subtree: true });
+} else setInterval(() => document.querySelectorAll("img[data-gen]").forEach(im => { const t = BYID[im.dataset.gen]; if (t) im.src = cover(t); im.removeAttribute("data-gen"); }), 1500); // old browsers: fill them in a moment
+
 /* ---------- visualizer + progress loop ---------- */
 const viz = $("#viz"), vx = viz.getContext("2d"), freq = new Uint8Array(64);
 const css = getComputedStyle(document.documentElement);
 const ACC = css.getPropertyValue("--accent").trim() || "#f2b544", DIM = css.getPropertyValue("--line").trim() || "#2c2e3c";
 let idle = 0;
+// the page only changes when something on it really changes (the bar moves in steps of 0.1 %, the clock each second)
+const FR = { fp: -1, fpT: "", b: -1, bT: "", n: 0, el: null };
 function frame(){
-  if ($("#lyrDlg").open || !$("#fp").hidden) syncLyrics();
-  const t = cur();
-  if (t && !$("#fp").hidden && !S.fpDragging){
-    const p = pos(), s = $("#fpSeek"), pct = t.dur ? p / t.dur * 100 : 0;
-    s.value = Math.round(pct * 10); s.style.setProperty("--pct", pct + "%"); $("#fpCur").textContent = fmt(p);
-  }
+  const E = FR.el || (FR.el = { fp: $("#fp"), fpSeek: $("#fpSeek"), fpCur: $("#fpCur"), seek: $("#seek"), tCur: $("#tCur"), lyr: $("#lyrDlg") });
+  const fpOpen = !E.fp.hidden;
+  if (E.lyr.open || fpOpen) syncLyrics();
+  const t = cur(), p = t ? pos() : 0, pct = t && t.dur ? p / t.dur * 100 : 0, pv = Math.round(pct * 10), tx = t ? fmt(p) : "";
+  if (t && fpOpen && !S.fpDragging){
+    if (pv !== FR.fp){ FR.fp = pv; E.fpSeek.value = pv; E.fpSeek.style.setProperty("--pct", pv / 10 + "%"); }
+    if (tx !== FR.fpT){ FR.fpT = tx; E.fpCur.textContent = tx; }
+  } else FR.fp = -1, FR.fpT = "";
   if (t && !S.dragging){
-    const p = pos(), s = $("#seek"), pct = t.dur ? p / t.dur * 100 : 0;
-    s.value = Math.round(pct * 10); s.style.setProperty("--pct", pct + "%");
-    $("#tCur").textContent = fmt(p);
-  }
-  if (S.npOpen && viz.offsetParent){
+    if (pv !== FR.b){ FR.b = pv; E.seek.value = pv; E.seek.style.setProperty("--pct", pv / 10 + "%"); }
+    if (tx !== FR.bT){ FR.bT = tx; E.tCur.textContent = tx; }
+  } else FR.b = -1;
+  FR.n++;
+  if (S.npOpen && (S.playing || FR.n % 4 === 0) && viz.offsetParent){ // paused: the gentle idle wave is drawn 4 times slower
     const dpr = window.devicePixelRatio || 1, w = viz.clientWidth, h = viz.clientHeight;
     if (viz.width !== Math.round(w * dpr)){ viz.width = Math.round(w * dpr); viz.height = Math.round(h * dpr); }
     vx.setTransform(dpr, 0, 0, dpr, 0, 0); vx.clearRect(0, 0, w, h);
@@ -7029,7 +7522,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.13.2";
+const APP_V = "1.14.0";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
@@ -7068,6 +7561,7 @@ if (!store.get("welcomed", false)) openWelcome();
 $("#fpPrev").innerHTML = ic("prev"); $("#fpNext").innerHTML = ic("next"); $("#fpShuf").innerHTML = ic("shuffle");
 $("#navSnd").innerHTML = ic("spkr") + "Calidad y bocinas" + '<i class="eq-dot" hidden></i>';
 $("#navLook").innerHTML = ic("palette") + "Apariencia";
+$("#navLog").innerHTML = ic("spark") + "Logros";
 renderSndUI();
 $("#navMix").innerHTML = ic("mix") + "Transiciones" + '<i class="eq-dot" hidden></i>';
 $("#navFx").innerHTML = ic("fx") + "Efectos" + '<i class="eq-dot" hidden></i>';
@@ -7104,6 +7598,9 @@ Promise.all([
   // opened from a shared-playlist link
   const shared = (location.hash.match(/lista=([\w-]{10,200})/) || [])[1];
   if (shared){ history.replaceState(null, "", location.pathname + location.search); openShared(shared).then(id => { if (id) go({ type: "list", id }); }); }
+  // opened from a singing challenge link
+  const reto = (location.hash.match(/reto=([\w-]{20,1600})/) || [])[1];
+  if (reto){ history.replaceState(null, "", location.pathname + location.search); setTimeout(() => openReto(reto), 800); }
   // opened from a "listen together" link
   const together = (location.hash.match(/juntos=([\w-]{10,200})/) || [])[1];
   if (together){ history.replaceState(null, "", location.pathname + location.search); tgJoin(together); }
