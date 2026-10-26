@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aATb/Y5GPRA3N+2ziaViD4gmGg9l5c7kiZLFILVHpjo=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Pbz9JDNQnIbMkoyqTMWVviyI73TKeYvVGO1oQgrKe/A=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -544,6 +544,8 @@ input[type=range].vs::-moz-range-thumb{width:18px;height:18px}
 .g-btn:hover{background:#f3f4f6}
 .g-btn .g-logo{width:20px;height:20px}
 .top-acct.on{color:var(--accent)}
+.top-acct{position:relative}
+.top-acct.need::after{content:"";position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 2px var(--bg)}
 .nav-btn .sync-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.3}}
 .row.cloud-only img{opacity:.6}
@@ -3485,7 +3487,11 @@ async function doSync(){
   if (!navigator.onLine){ paintAcct(); return; }
   if (!tokenOk()){
     // the Windows app keeps a long-lived session and renews it quietly; the web needs a tap
-    if (!(desk && desk.google)){ sync.needAuth = true; paintAcct(); return; }
+    if (!(desk && desk.google)){
+      sync.needAuth = true; paintAcct();
+      if (!sync.told && Object.keys(sync.dirty).length){ sync.told = true; toast("Tienes cambios por guardar en tu Drive. Toca tu cuenta y «Reconectar» para sincronizar."); }
+      return;
+    }
     try { await askToken(""); } catch { sync.needAuth = true; paintAcct(); return; }
   }
   if (sync.busy){ sync.again = true; return; }
@@ -3754,6 +3760,7 @@ function needFile(t, sec){
   if (!S.acct) return stop(`“${t.title}” está en tu Google Drive. Inicia sesión con Google para escucharla aquí.`);
   if (!t.rec.cloud){ scheduleSync(500); return stop(`“${t.title}” aún se está subiendo desde tu otro dispositivo. Prueba en un momento.`); }
   if (!tokenOk()){ // this runs inside the tap on play, so Google may reconnect right away
+    toast(`“${t.title}” está solo en tu Drive: Google se abre un momento para bajarla.`);
     askToken("").then(() => needFile(t, sec)).catch(() => stop("Vuelve a conectar con Google para descargar esta canción."));
     return;
   }
@@ -3935,7 +3942,7 @@ function openAcct(){
 function paintAcct(){
   const busy = !!S.acct && (sync.busy || !!xfer.label), need = !!S.acct && sync.needAuth && !tokenOk();
   $("#navAcct").innerHTML = ic("user") + (S.acct ? "Tu cuenta" : "Iniciar sesión") + (busy || need ? '<i class="sync-dot" aria-hidden="true"></i>' : "");
-  const tb = $("#acctTop"); tb.classList.toggle("on", !!S.acct);
+  const tb = $("#acctTop"); tb.classList.toggle("on", !!S.acct); tb.classList.toggle("need", need);
   const lbl = S.acct ? `Tu cuenta: ${S.acct.email}` : "Iniciar sesión con Google"; tb.setAttribute("aria-label", lbl); tb.title = lbl;
   if ($("#acctDlg").open && S.acct){ const el = $("#acctSt"); if (el) el.innerHTML = stHTML(acctStatus()); }
 }
@@ -3946,12 +3953,12 @@ function startSync(){
   document.addEventListener("visibilitychange", () => { if (!document.hidden && S.acct && Date.now() - sync.last > 10000) doSync(); });
   window.addEventListener("online", () => { paintAcct(); if (S.acct) doSync(); });
   window.addEventListener("offline", paintAcct);
-  // Google tokens last about an hour: when one runs out, the next tap on a button reconnects
-  // (at most every 5 minutes, so a closed window never keeps popping up)
+  // Google tokens last about an hour. The Windows app renews them quietly on the next tap. On a phone or the web
+  // renewing opens a Google window, so it never happens on its own: the account icon shows a dot and you tap Reconectar.
   document.addEventListener("click", e => {
     if (!S.acct || tokenOk() || !sync.needAuth || tokenWait || Date.now() - sync.authTried < 300000) return;
     if (!e.target.closest("button,[data-act],[data-row],[data-playlist]") || e.target.closest("[data-act=acct-out],[data-act=acct-reconnect],[data-act=acct-google]")) return;
-    if (!desk && !getTokenClient()) return;
+    if (!(desk && desk.google)) return;
     sync.authTried = Date.now();
     askToken("").then(() => doSync()).catch(() => paintAcct());
   }, true);
@@ -7877,7 +7884,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.16.0";
+const APP_V = "1.16.1";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
