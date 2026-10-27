@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Pbz9JDNQnIbMkoyqTMWVviyI73TKeYvVGO1oQgrKe/A=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1hgUqFXbrduZ1FZCX02UOOzbWJqLk7gRc8nE4r9dU78=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -939,6 +939,14 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
 .fp-pp{box-shadow:0 10px 30px rgba(0,0,0,.4)}
 /* bottom tabs (phones) */
 .tabs{display:none}
+.tl.rm .row[data-list=mine]{position:relative;touch-action:pan-y}
+.tl.rm .row.swiping{background:linear-gradient(270deg,hsl(0 72% 46%) 0,hsl(0 72% 46%) calc(-1 * var(--sx,0px) + 12px),transparent calc(-1 * var(--sx,0px) + 12px));transition:none}
+.tl.rm .row.swiping>*{transform:translateX(var(--sx,0px))}
+.tl.rm .row.swiping::after{content:"Borrar";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#fff;font-weight:800;font-size:13px;opacity:.6}
+.tl.rm .row.swiping.go::after{opacity:1}
+.sel-bar [data-act=sel-del]:not([disabled]){color:var(--danger);border-color:var(--danger)}
+.toast.undo{display:flex;align-items:center;gap:14px;padding:8px 8px 8px 18px}
+.toast.undo button{flex:none;height:32px;padding:0 14px;border-radius:999px;background:var(--bg);color:var(--fg);font-weight:800;font-size:13px}
 .wk{background:linear-gradient(180deg,hsl(var(--amb,42) 40% 18%),var(--bg) 340px)}
 @media (max-width:760px){
   .app,.app:not(.np-open){grid-template-areas:"main" "bar" "tabs";grid-template-rows:minmax(0,1fr) auto auto;padding:0;gap:0}
@@ -1915,7 +1923,7 @@ function toggleLike(id){
 
 /* ---------- your own songs: kept in this browser (IndexedDB), never uploaded ---------- */
 let dbp = null, toastT = 0, addCount = 0; S.saveFailed = false;
-function toast(msg){ if (!msg) return; const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 4500); }
+function toast(msg){ if (!msg) return; const el = $("#toast"); el.classList.remove("undo"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 4500); }
 function idb(){
   if (dbp) return dbp;
   dbp = new Promise((res, rej) => {
@@ -2071,9 +2079,10 @@ async function addFiles(files, target){
   const lrcMap = new Map();
   for (const f of lrcs){ try { lrcMap.set(baseKey(f.name), await f.text()); } catch {} }
   toast(list.length === 1 ? "Añadiendo 1 canción…" : `Añadiendo ${list.length} canciones…`);
-  let ok = 0, firstId = null, withLyrics = 0; const bad = [];
+  let ok = 0, firstId = null, withLyrics = 0; const bad = [], dup = [];
   for (const f of list){
     try {
+      if (USER.some(id => BYID[id] && BYID[id].rec.name === f.name && BYID[id].rec.size === f.size)){ dup.push(f.name); continue; } // the very same file
       const dur = await probe(f);
       const tags = await readTags(f).catch(() => ({}));
       const nm = fromName(f.name);
@@ -2082,6 +2091,7 @@ async function addFiles(files, target){
         dur, type: f.type || MIME[EXT(f.name)] || "", size: f.size, added: Date.now() + (addCount++), u: Date.now(), genre: tags.genre || "", genreScan: true, blob: f, pic: tags.pic || null, lyrScan: true };
       const L = lyricsFromTags(tags) || (lrcMap.has(baseKey(f.name)) ? lyricsFromText(lrcMap.get(baseKey(f.name)), "lrc") : null);
       if (L){ rec.lyrics = L; withLyrics++; }
+      if (findDup(rec)){ dup.push(f.name); if (L) withLyrics--; continue; } // same song you already have
       try { await idbReq("readwrite", s => s.put(rec)); } catch { S.saveFailed = true; }
       addUserTrack(rec); ok++; if (!firstId) firstId = rec.id; markDirty("song:" + rec.id);
     } catch { bad.push(f.name); }
@@ -2089,6 +2099,7 @@ async function addFiles(files, target){
   if (ok && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   const tp = target && IMPORTED[target.pl];
   if (tp && firstId && tp.items[target.i]){ tp.items[target.i].link = firstId; touchPl(tp); }
+  if (!ok && dup.length && !bad.length){ toast(dup.length === 1 ? "Ya tienes esa canción: no se duplicó." : `Ya tienes esas ${dup.length} canciones: no se duplicaron.`); return; }
   renderLib();
   const onImp = S.view.type === "list" && IMPORTED[S.view.id];
   if (onImp || (S.view.type === "list" && S.view.id === "mine")) rerender(); else go({ type: "list", id: "mine" });
@@ -2096,10 +2107,54 @@ async function addFiles(files, target){
   let msg = ok ? (ok === 1 ? "Añadida 1 canción a Mis canciones." : `Añadidas ${ok} canciones a Mis canciones.`) : "";
   if (ok && onImp){ const l = getList(S.view.id); msg += ` Ahora tienes ${l.tracks.length} de ${l.items.length} en esta playlist.`; }
   if (withLyrics) msg += withLyrics === 1 ? " 1 trae su letra." : ` ${withLyrics} traen su letra.`;
+  if (dup.length) msg += dup.length === 1 ? " 1 ya la tenías y no se duplicó." : ` ${dup.length} ya las tenías y no se duplicaron.`;
   if (bad.length) msg += ` No se pudo leer: ${bad.slice(0, 2).join(", ")}${bad.length > 2 ? "…" : ""}`;
   if (S.saveFailed && ok) msg += " Este navegador no deja guardarlas: desaparecerán al recargar.";
   toast(msg.trim());
 }
+// the same song: same title and artist (ignoring "remastered", "feat." and the like) and about the same length
+const dupKey = r => norm(r.title) + "|" + norm(r.artist);
+function findDup(rec){
+  const k = dupKey(rec);
+  for (const id of USER){ const o = BYID[id] && BYID[id].rec; if (!o || o.id === rec.id) continue;
+    if (o.name === rec.name && o.size === rec.size) return o;
+    if (dupKey(o) === k && Math.abs((o.dur || 0) - (rec.dur || 0)) <= 2) return o; }
+  return null;
+}
+// songs you have twice: the one you added first stays
+function dupIds(){
+  const seen = new Map(), out = [];
+  USER.filter(id => BYID[id]).sort((a, b) => (BYID[a].rec.added || 0) - (BYID[b].rec.added || 0)).forEach(id => {
+    const r = BYID[id].rec, k = dupKey(r), had = seen.get(k) || [];
+    if (had.some(o => Math.abs((o.dur || 0) - (r.dur || 0)) <= 2 || (o.name === r.name && o.size === r.size))) out.push(id); else { had.push(r); seen.set(k, had); }
+  });
+  return out;
+}
+// delete forever, with a few seconds to undo: the songs disappear at once and are really deleted when the time is up
+S.pendDel = new Set(); let pendT = 0;
+function delSongs(ids, msg){
+  ids = ids.filter(id => BYID[id] && BYID[id].user && !S.pendDel.has(id)); if (!ids.length) return;
+  commitDel(); // an earlier batch still waiting is deleted now
+  ids.forEach(id => S.pendDel.add(id));
+  const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y;
+  const where = S.acct ? " de aquí y de tu Drive" : "";
+  const el = $("#toast");
+  el.innerHTML = `<span>${esc(msg || (ids.length === 1 ? `Borraste «${BYID[ids[0]].title}»${where}` : `Borraste ${ids.length} canciones${where}`))}</span><button type="button" data-act="del-undo">Deshacer</button>`;
+  el.classList.add("undo"); el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; el.classList.remove("undo"); }, 6000);
+  clearTimeout(pendT); pendT = setTimeout(commitDel, 6000);
+}
+async function commitDel(){
+  clearTimeout(pendT); if (!S.pendDel.size) return;
+  const ids = [...S.pendDel]; S.pendDel.clear();
+  for (const id of ids) await removeSong(id, { quiet: true });
+  if ($("#libDlg").open) renderLibDlg();
+}
+function undoDel(){
+  clearTimeout(pendT); S.pendDel.clear(); const el = $("#toast"); el.hidden = true; el.classList.remove("undo");
+  const m = $("#main"), y = m.scrollTop; renderView(); m.scrollTop = y; toast("Listo, no se borró nada.");
+}
+window.addEventListener("pagehide", commitDel);
+document.addEventListener("visibilitychange", () => { if (document.hidden) commitDel(); });
 async function removeSong(id, opts = {}){
   const t = BYID[id]; if (!t || !t.user) return;
   const wasCur = cur() && cur().id === id, wasPlaying = S.playing;
@@ -4943,15 +4998,17 @@ function renderLibDlg(){
     <div class="mix-opt"><div><b>Música de ejemplo</b><small>Los álbumes y playlists que trae la app (Low Tide Hours, Concentración nocturna…). Si la quitas, solo verás tu música.</small></div>
       <button type="button" class="switch" data-act="demo-toggle" role="switch" aria-checked="${!demoOff()}" aria-label="Música de ejemplo"></button></div>
     <div class="lib-del">
+      ${(n => delRow("dups", "Quitar canciones repetidas", n ? `${n === 1 ? "1 canción repetida" : n + " canciones repetidas"}: se queda la que añadiste primero` : "No tienes canciones repetidas", n))(dupIds().length)}
       ${delRow("songs", "Borrar todas mis canciones", nc(USER.length), USER.length)}
       ${delRow("pls", "Borrar todas mis playlists", `${pls} ${pls === 1 ? "playlist" : "playlists"}`, pls)}
       ${delRow("likes", "Quitar todos los me gusta", nc(liked), liked)}
     </div>
-    <p class="mix-note">${S.acct ? "Tienes la sesión iniciada: lo que borres también se borra de tu Google Drive y de tus otros dispositivos." : "Se borra de este dispositivo."} Para borrar solo algunas canciones, entra a Mis canciones y pulsa “Seleccionar”.</p>`;
+    <p class="mix-note">${S.acct ? "Tienes la sesión iniciada: lo que borres también se borra de tu Google Drive y de tus otros dispositivos." : "Se borra de este dispositivo."} Para borrar solo algunas, en Mis canciones toca la papelera, desliza la canción a la izquierda o mantén el dedo encima para elegir varias.</p>`;
 }
 async function libDelete(k){
   if (S.libArm !== k){ S.libArm = k; renderLibDlg(); setTimeout(() => { if (S.libArm === k){ S.libArm = null; if ($("#libDlg").open) renderLibDlg(); } }, 4000); return; }
   S.libArm = null;
+  if (k === "dups"){ const ids = dupIds(); for (const id of ids) await removeSong(id, { quiet: true }); toast(ids.length === 1 ? "Quitaste 1 canción repetida." : `Quitaste ${ids.length} canciones repetidas.`); }
   if (k === "songs"){ const ids = USER.slice(); for (const id of ids) await removeSong(id, { quiet: true }); toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`); }
   if (k === "pls"){ const ids = IMP_ORDER.slice(); ids.forEach(id => { dropPl(id); tomb("pl:" + id); if (S.ctxId === id) S.ctxId = null; }); toast(ids.length === 1 ? "Borraste 1 playlist." : `Borraste ${ids.length} playlists.`); }
   if (k === "likes"){ const now = Date.now(); [...S.liked].forEach(id => { S.liked.delete(id); S.likedU[id] = now; markDirty("like:" + id); }); store.set("liked", []); store.set("likedU", S.likedU); toast("Quitaste todos los me gusta."); }
@@ -4978,18 +5035,15 @@ function toggleSel(id, row){ S.sel.has(id) ? S.sel.delete(id) : S.sel.add(id); r
 function paintSelBar(){
   const b = $("#selBar"); if (!b) return;
   b.querySelector("b").textContent = S.sel.size === 1 ? "1 seleccionada" : `${S.sel.size} seleccionadas`;
-  const d = b.querySelector("[data-act=sel-del]"); d.disabled = !S.sel.size; d.textContent = S.libArm === "sel" ? "Pulsa otra vez" : "Borrar"; d.classList.toggle("armed", S.libArm === "sel");
+  const d = b.querySelector("[data-act=sel-del]"); d.disabled = !S.sel.size; d.textContent = "Borrar para siempre";
 }
-async function selDelete(){
+function selDelete(){
   if (!S.sel.size) return;
-  if (S.libArm !== "sel"){ S.libArm = "sel"; paintSelBar(); setTimeout(() => { if (S.libArm === "sel"){ S.libArm = null; paintSelBar(); } }, 4000); return; }
-  S.libArm = null; const ids = [...S.sel];
-  for (const id of ids) await removeSong(id, { quiet: true });
-  S.selMode = false; S.sel.clear(); rerender(); renderLib(); paint();
-  toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`);
+  const ids = [...S.sel]; S.selMode = false; S.sel.clear(); S.libArm = null;
+  delSongs(ids);
 }
 const selBar = () => `<div class="sel-bar" id="selBar"><b>${S.sel.size === 1 ? "1 seleccionada" : `${S.sel.size} seleccionadas`}</b>
-  <button type="button" class="pill" data-act="sel-all">Todas</button><button type="button" class="pill danger" data-act="sel-del"${S.sel.size ? "" : " disabled"}>Borrar</button><button type="button" class="add-top" data-act="sel-done">Listo</button></div>`;
+  <button type="button" class="pill" data-act="sel-all">Todas</button><button type="button" class="pill danger" data-act="sel-del"${S.sel.size ? "" : " disabled"}>Borrar para siempre</button><button type="button" class="add-top" data-act="sel-done">Listo</button></div>`;
 
 /* ---------- genres: what kind of music each of your songs is ----------
    From the genre saved inside the file, a list of well-known artists, and words in the lyrics. */
@@ -6183,6 +6237,7 @@ function likeBtn(b){
   b.setAttribute("aria-pressed", on);
 }
 function rows(list, ctxId, opts = {}){
+  if (S.pendDel && S.pendDel.size) list = list.filter(id => !S.pendDel.has(id));
   if (!list.length) return "";
   const extra = opts.rm || opts.unpl;
   return `<div class="tl${extra ? " rm" : ""}${opts.sel ? " selecting" : ""}" role="list"${opts.sel ? ' aria-multiselectable="true"' : ""}>
@@ -6193,7 +6248,7 @@ function rows(list, ctxId, opts = {}){
       <span class="c-album">${opts.album === false ? "" : esc(t.album.title)}</span>
       <button class="apl" data-apl="${id}" aria-label="Añadir ${esc(t.title)} a una playlist">${ic("plAdd")}</button>
       <button class="like" data-like="${id}"></button>
-      <span class="c-dur">${fmt(t.dur)}</span>${opts.rm ? `<button class="rmv" data-rm="${id}" aria-label="Quitar ${esc(t.title)} de Mis canciones">${ic("trash")}</button>`
+      <span class="c-dur">${fmt(t.dur)}</span>${opts.rm ? `<button class="rmv" data-rm="${id}" aria-label="Borrar para siempre ${esc(t.title)}" title="Borrar para siempre">${ic("trash")}</button>`
         : opts.unpl ? `<button class="rmv" data-unpl="${id}" aria-label="Quitar ${esc(t.title)} de esta playlist">${ic("close")}</button>` : ""}</div>`; }).join("")}
   </div>`;
 }
@@ -7687,7 +7742,7 @@ document.addEventListener("click", e => {
   const el = e.target.closest("[data-eql]");
   if (el){ S.eq.level = el.dataset.eql; if (!S.eq.auto) setAuto(true); else { applyEq(); renderEqAuto(); } return; }
   const rm = e.target.closest("[data-rm]");
-  if (rm){ e.stopPropagation(); removeSong(rm.dataset.rm); return; }
+  if (rm){ e.stopPropagation(); delSongs([rm.dataset.rm]); return; }
   const apl = e.target.closest("[data-apl]");
   if (apl){ e.stopPropagation(); openApl(apl.dataset.apl); return; }
   const aplTo = e.target.closest("[data-aplto]");
@@ -7764,6 +7819,7 @@ document.addEventListener("click", e => {
     if (a === "lib-del") libDelete(act.dataset.k);
     if (a === "demo-toggle") toggleDemo();
     if (a === "sel-mode") setSelMode(true);
+    if (a === "del-undo") undoDel();
     if (a === "sel-done") setSelMode(false);
     if (a === "sel-all"){ USER.forEach(id => S.sel.add(id)); rerender(); }
     if (a === "sel-del") selDelete();
@@ -7868,6 +7924,44 @@ document.addEventListener("dragover", e => { if (hasFiles(e)) e.preventDefault()
 document.addEventListener("dragleave", e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#drop").hidden = true; });
 document.addEventListener("drop", e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; $("#drop").hidden = true; addFiles(e.dataTransfer.files); });
 
+/* ---------- quick delete: swipe a song to the left, or hold your finger on it to pick several ---------- */
+{
+  let sw = null, lp = 0, eatClick = 0;
+  const mineRow = e => { const r = e.target.closest(".tl.rm .row[data-list=mine]"); return r && !e.target.closest("button") ? r : null; };
+  document.addEventListener("pointerdown", e => {
+    const r = mineRow(e); if (!r || (e.pointerType === "mouse" && e.button !== 0)) return;
+    sw = { r, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId };
+    clearTimeout(lp);
+    lp = setTimeout(() => { // held still: choose several
+      if (!sw || sw.on) return; const id = sw.r.dataset.row; sw = null; eatClick = Date.now() + 700;
+      if (navigator.vibrate) try { navigator.vibrate(15); } catch {}
+      if (!S.selMode){ S.selMode = true; S.sel.clear(); }
+      S.sel.add(id); const m = $("#main"), y = m.scrollTop; rerender(); m.scrollTop = y;
+    }, 520);
+  }, { passive: true });
+  document.addEventListener("pointermove", e => {
+    if (!sw || e.pointerId !== sw.id) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+    if (!sw.on){
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(lp);
+      if (S.selMode || Math.abs(dy) > 12 || dx > 0) { if (Math.abs(dy) > 12 || dx > 12) sw = null; return; }
+      if (dx < -14 && Math.abs(dx) > Math.abs(dy) * 1.5){ sw.on = true; sw.r.classList.add("swiping"); }
+      else return;
+    }
+    sw.dx = Math.min(0, dx); sw.r.style.setProperty("--sx", sw.dx + "px");
+    sw.r.classList.toggle("go", -sw.dx > sw.r.offsetWidth * .35);
+  }, { passive: true });
+  const end = () => {
+    clearTimeout(lp); if (!sw) return; const { r, on, dx } = sw; sw = null; if (!on) return;
+    eatClick = Date.now() + 400;
+    if (-dx > r.offsetWidth * .35){ r.style.setProperty("--sx", -r.offsetWidth + "px"); setTimeout(() => delSongs([r.dataset.row]), 160); }
+    else { r.classList.remove("swiping", "go"); r.style.removeProperty("--sx"); }
+  };
+  document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
+  document.addEventListener("click", e => { if (Date.now() < eatClick && e.target.closest(".tl .row")){ e.stopPropagation(); e.preventDefault(); } }, true);
+  document.addEventListener("contextmenu", e => { if (e.target.closest(".tl.rm .row[data-list=mine]") && matchMedia("(pointer:coarse)").matches) e.preventDefault(); });
+}
+
 /* ---------- boot ---------- */
 $("#brandMark").innerHTML = ic("wave");
 $("#navHome").innerHTML = ic("home") + "Inicio";
@@ -7884,7 +7978,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.16.1";
+const APP_V = "1.17.0";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
