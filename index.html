@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-1hgUqFXbrduZ1FZCX02UOOzbWJqLk7gRc8nE4r9dU78=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-11D3GljQ5JrqIcWPCYp1Wki/XBkCPfVxthVGEiPTZcE=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1797,7 +1797,7 @@ function playFail(e){
   }
   const ext = EXT(t.rec.name), more = S.playing && S.qi + 1 < S.queue.length;
   toast(`“${t.title}” no se puede reproducir en este dispositivo${ext ? ` (archivo ${ext})` : ""}.${more ? " Pasando a la siguiente." : ""}`);
-  if (more) playIndex(S.qi + 1); else pause();
+  if (more){ markWhy("falla"); playIndex(S.qi + 1); } else pause();
 }
 function loadAt(sec){
   const t = cur(); sec = clamp(sec, 0, t.dur || 0);
@@ -1869,7 +1869,27 @@ function pause(){
   });
 });
 const toggle = () => S.playing ? pause() : play();
-function playIndex(i){ S.qi = i; loadAt(0); if (!S.playing) play(); else paint(); }
+const SKIP = [];
+function markWhy(w){ S.skipWhy = w; S.skipWhyAt = Date.now(); }
+document.addEventListener("pointerdown", () => { S.lastTap = Date.now(); }, true);
+document.addEventListener("keydown", () => { S.lastTap = Date.now(); }, true);
+function playIndex(i){
+  const why = Date.now() - (S.skipWhyAt || 0) < 3000 ? S.skipWhy : "auto"; S.skipWhy = "";
+  const t0 = cur(), ended = t0 && t0.dur > 0 && pos() >= t0.dur - 3; // the last song really finished: a normal change
+  const short = S.songAt && Date.now() - S.songAt < 20000, byHand = (Date.now() - (S.lastTap || 0) < 1500 || why === "remoto") && why !== "voz"; // buttons on headphones and speakers are you too
+  if (short && !byHand && !ended){
+    SKIP.push({ at: Date.now(), why }); while (SKIP.length && Date.now() - SKIP[0].at > 45000) SKIP.shift();
+    if (SKIP.length >= 3){
+      const w = SKIP.map(x => x.why), n = k => w.filter(x => x === k).length;
+      SKIP.length = 0; S.songAt = Date.now(); pause();
+      toast(n("voz") && n("voz") >= n("falla") ? "Pausé: Hum estaba oyendo «siguiente» en la música. Desactiva «Ey Hum» siempre o baja el volumen de la bocina."
+        : n("falla") ? "Pausé: varias canciones seguidas no se pudieron leer. Revisa que los archivos estén bien."
+        : "Pausé: las canciones se estaban cambiando solas. Toca ▶ para seguir.");
+      return;
+    }
+  } else if (byHand) SKIP.length = 0;
+  S.qi = i; S.songAt = Date.now(); loadAt(0); if (!S.playing) play(); else paint();
+}
 function playContext(listId, startId){
   if (startId && !pro()){ startId = null; S.shuffle = true; freeNote("pick"); }
   else if (!pro()) S.shuffle = true;
@@ -4053,7 +4073,9 @@ function setupMediaSession(){
   if (!MS) return;
   const on = (a, f) => { try { MS.setActionHandler(a, f); } catch {} };
   on("play", () => play()); on("pause", () => pause()); on("stop", () => pause());
-  on("previoustrack", () => prev()); on("nexttrack", () => next(false));
+  // one press = one song: repeats that arrive less than 1.2 s after a song change are ignored
+  const once = f2 => () => { if (Date.now() - (S.songAt || 0) < 1200) return; markWhy("remoto"); f2(); };
+  on("previoustrack", once(prev)); on("nexttrack", once(() => next(false)));
   on("seekto", d => { if (d && isFinite(d.seekTime)){ loadAt(d.seekTime); paint(); } });
   on("seekbackward", d => { loadAt(Math.max(0, pos() - ((d && d.seekOffset) || 10))); paint(); });
   on("seekforward", d => { loadAt(pos() + ((d && d.seekOffset) || 10)); paint(); });
@@ -4188,7 +4210,7 @@ const canListen = canWebSpeech || canWhisper;
 const canWake = canWebSpeech && !isMobile; // phones beep every time listening restarts, so there it is tap-to-talk
 const H = { listening: false, rec: null, wakeOn: canWake && !!store.get("humWake", false), wakeRec: null, armedUntil: 0, byWake: false, closeT: 0, mediaRec: null };
 const nrm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[¿?¡!.,;:"“”«»()]/g, " ").replace(/\s+/g, " ").trim();
-const WAKE = /\b(ey|hey|hei|ei|oye|ok|okey|okay|hola|e)\s+(hum|jum|jam|gum|um|hom|hun|jun|hump|humm)\b/;
+const WAKE = /\b(ey|hey|hei|ei|oye|okey|okay)\s+(hum|jum|humm)\b/;
 
 // --- moods: each one says what kind of sound fits it (0..1 values, relative to your own library)
 const midTempo = x => 1 - Math.abs(x - .6) * 1.6;
@@ -4439,7 +4461,7 @@ function setListening(on){
   if (on){ $("#humStatus").textContent = "Te escucho…"; $("#humHeard").textContent = ""; }
 }
 function setThinking(on){ $("#hum").classList.toggle("thinking", on); }
-function heard(text, voice){ H.viaVoice = !!voice; $("#humHeard").textContent = `«${text.trim()}»`; runCommand(text); }
+function heard(text, voice){ if (!(S.skipWhy === "voz" && Date.now() - (S.skipWhyAt || 0) < 3000)) S.lastTap = Date.now(); H.viaVoice = !!voice; $("#humHeard").textContent = `«${text.trim()}»`; runCommand(text); }
 function listenOnce(){
   if (H.rec){ try { H.rec.stop(); } catch {} return; }
   if (H.mediaRec){ H.mediaRec.stop(); return; }
@@ -4470,9 +4492,9 @@ function startWake(){
       if (!res.isFinal) continue;
       if (w){
         const rest = n.slice(w.index + w[0].length).trim();
-        if (rest){ H.armedUntil = 0; duck(false); heard(rest, true); }
+        if (rest){ H.armedUntil = 0; duck(false); markWhy("voz"); heard(rest, true); }
         else { H.armedUntil = Date.now() + 8000; $("#humStatus").textContent = "Dime…"; }
-      } else if (Date.now() < H.armedUntil){ H.armedUntil = 0; duck(false); heard(txt, true); }
+      } else if (Date.now() < H.armedUntil){ H.armedUntil = 0; duck(false); markWhy("voz"); heard(txt, true); }
     }
   };
   r.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed"){ H.wakeOn = false; store.set("humWake", false); paintHum(); toast("Hum necesita permiso para usar el micrófono."); } };
@@ -7978,7 +8000,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.17.0";
+const APP_V = "1.17.1";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
