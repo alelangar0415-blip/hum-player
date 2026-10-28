@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-11D3GljQ5JrqIcWPCYp1Wki/XBkCPfVxthVGEiPTZcE=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-w3AUJmgAVDmESnBTsH4mi/rndbxoDWK03gZHy3K36CI=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,10 +17,26 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Hum Player</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
+/* the app's fonts travel with it: the screen never waits for another site to show up */
+/* latin-ext */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 500; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 500; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 800; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-ext-0.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 800; font-stretch: 100%; font-display: swap; src: url(fonts/BricolageGrotesque-latin-1.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/Figtree-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/Figtree-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/Figtree-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/Figtree-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/Figtree-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/Figtree-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/Figtree-latin-ext-2.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/Figtree-latin-3.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/JetBrainsMono-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/JetBrainsMono-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* latin-ext */ @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/JetBrainsMono-latin-ext-4.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* latin */ @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/JetBrainsMono-latin-5.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 /* Layout: three rounded panes (library | current view | now playing) on a dark ground, transport bar docked below */
 :root{
   --bg:#0d0e13;
@@ -939,12 +955,77 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
 .fp-pp{box-shadow:0 10px 30px rgba(0,0,0,.4)}
 /* bottom tabs (phones) */
 .tabs{display:none}
+/* style from a phrase */
+.vibe{margin:6px 0 4px;padding:14px;border-radius:16px;background:linear-gradient(135deg,hsl(var(--hue,42) 60% 30% / .45),hsl(calc(var(--hue,42) + 60) 50% 25% / .3));border:1px solid rgba(255,255,255,.08)}
+.vibe>b{display:flex;align-items:center;gap:8px;font-size:15px}
+.vibe>b svg{width:18px;height:18px;color:var(--accent)}
+.vibe-form{display:flex;gap:8px;margin:10px 0 8px}
+.dlg .vibe-form input{flex:1;min-width:0;height:42px;border-radius:999px;padding:0 16px}
+.vibe-form .add-top{margin:0;height:42px}
+.vibe-ideas{display:flex;flex-wrap:wrap;gap:6px}
+.vibe-ideas .chip{height:28px;padding:0 11px;font-size:12px}
+/* the big cover: shapes and the spinning vinyl */
+.fp-disc{display:contents}
+html.art-square .fp-art{border-radius:6px}
+html.art-circle .fp-art{border-radius:50%}
+html.art-vinyl .fp-disc{display:grid;place-items:center;align-self:center;width:min(100%,400px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,#0b0b0e 0 3.5%,transparent 3.6%),repeating-radial-gradient(circle,#141418 0 1.5px,#1d1d23 2px 3.5px),#141418;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,255,255,.05),inset 0 0 60px rgba(0,0,0,.6);animation:vinyl 7s linear infinite;animation-play-state:paused;position:relative}
+html.art-vinyl .fp-disc::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 12%,rgba(255,255,255,.07) 16%,transparent 22% 62%,rgba(255,255,255,.05) 66%,transparent 72%);pointer-events:none}
+html.art-vinyl .fp-art{width:40%;border-radius:50%;box-shadow:0 0 0 3px #0b0b0e;-webkit-mask:radial-gradient(circle,transparent 0 6%,#000 6.5%);mask:radial-gradient(circle,transparent 0 6%,#000 6.5%)}
+html.art-vinyl.is-playing .fp-disc{animation-play-state:running}
+@keyframes vinyl{to{transform:rotate(1turn)}}
+/* the background that beats */
+#pulse{position:fixed;left:-20%;right:-20%;bottom:-35%;height:90%;z-index:-1;pointer-events:none;opacity:0;display:none;will-change:opacity,transform;
+  background:radial-gradient(closest-side,hsl(var(--amb,42) 85% 55% / .55),hsl(calc(var(--amb,42) + 40) 80% 50% / .18) 55%,transparent);transform-origin:50% 100%}
+html.pulse-on #pulse{display:block}
+html.pulse-on .main{isolation:isolate;clip-path:inset(0 round 16px)}
+@media (max-width:760px){ html.pulse-on .main{clip-path:none} }
+/* skin: neon */
+html.skin-neon{--bg:#050508;--panel:#0b0b12;--raise:#14141f;--line:#262636}
+html.skin-neon .main{background:linear-gradient(180deg,hsl(var(--amb,42) 50% 10%) 0,var(--panel) 300px) local}
+html.skin-neon .greet,html.skin-neon .hero h1,html.skin-neon .fp-meta h2{background:none;color:var(--fg);text-shadow:0 0 18px var(--accent),0 0 2px var(--accent)}
+html.skin-neon .pp,html.skin-neon .fab{box-shadow:0 0 22px var(--accent),0 0 3px var(--accent)}
+html.skin-neon .fab,html.skin-neon .hx-ic,html.skin-neon .brand-mark{background:var(--accent);color:var(--accent-ink)}
+html.skin-neon .tile,html.skin-neon .hx,html.skin-neon .card:hover,html.skin-neon .banner{border:1px solid var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 0 14px color-mix(in srgb,var(--accent) 12%,transparent)}
+html.skin-neon .banner{background:var(--raise)}
+html.skin-neon input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--accent) var(--pct),var(--line) var(--pct));box-shadow:0 0 10px color-mix(in srgb,var(--accent) 60%,transparent)}
+html.skin-neon .tab.on{color:var(--accent);text-shadow:0 0 10px var(--accent)}
+html.skin-neon .bar{border:1px solid color-mix(in srgb,var(--accent) 55%,transparent)}
+html.skin-neon .eyebrow,html.skin-neon .shelf-h{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em}
+/* skin: minimal */
+html.skin-minimal{--panel:#101014;--raise:#18181d;--line:#26262d}
+html.skin-minimal .main,html.skin-minimal .dlg{background:var(--panel)}
+html.skin-minimal .greet{background:none;color:var(--fg)}
+html.skin-minimal .banner,html.skin-minimal .hx,html.skin-minimal .tile{background:var(--raise);border:0;box-shadow:none}
+html.skin-minimal .banner::after{display:none}
+html.skin-minimal .hx-ic,html.skin-minimal .brand-mark{background:var(--fg);color:var(--bg);box-shadow:none}
+html.skin-minimal .fab,html.skin-minimal .pp{box-shadow:none}
+html.skin-minimal .fp-bg{display:none}
+html.skin-minimal .hero{background:var(--raise)}
+html.skin-minimal .pane,html.skin-minimal .tile,html.skin-minimal .hx,html.skin-minimal .card-art img,html.skin-minimal .fp-art{border-radius:8px}
+@media (max-width:760px){ html.skin-minimal .bar{background:var(--raise);box-shadow:none} }
+/* skin: retro Y2K */
+html.skin-retro .greet,html.skin-retro .hero h1,html.skin-retro .fp-meta h2{background:linear-gradient(180deg,#fff 0%,#c9c6d6 45%,#7d7a8c 52%,#f1eff7 100%);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic}
+html.skin-retro .tile,html.skin-retro .hx,html.skin-retro .banner{border-radius:22px;border:2px solid rgba(255,255,255,.18)}
+html.skin-retro .hx-ic,html.skin-retro .brand-mark,html.skin-retro .fab{background:linear-gradient(180deg,#fff,var(--accent) 55%,color-mix(in srgb,var(--accent) 60%,#000));color:#111}
+html.skin-retro .pp{background:linear-gradient(180deg,#fff,#cfcbe0);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 4px 14px rgba(0,0,0,.4)}
+html.skin-retro body::before{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@media (prefers-reduced-motion:reduce){ html.art-vinyl .fp-disc{animation:none} #pulse{display:none!important} }
 .tl.rm .row[data-list=mine]{position:relative;touch-action:pan-y}
 .tl.rm .row.swiping{background:linear-gradient(270deg,hsl(0 72% 46%) 0,hsl(0 72% 46%) calc(-1 * var(--sx,0px) + 12px),transparent calc(-1 * var(--sx,0px) + 12px));transition:none}
 .tl.rm .row.swiping>*{transform:translateX(var(--sx,0px))}
 .tl.rm .row.swiping::after{content:"Borrar";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#fff;font-weight:800;font-size:13px;opacity:.6}
 .tl.rm .row.swiping.go::after{opacity:1}
 .sel-bar [data-act=sel-del]:not([disabled]){color:var(--danger);border-color:var(--danger)}
+.sync-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bar-h,96px) + 14px);z-index:58;display:flex;align-items:center;gap:8px;max-width:calc(100% - 24px);
+  padding:6px 6px 6px 14px;border-radius:999px;background:var(--panel);border:1px solid hsl(var(--amb,42) 60% 55% / .45);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13px;font-weight:600}
+.sync-bar span{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync-bar span svg{width:16px;height:16px;color:var(--accent);flex:none}
+.sync-bar>button:not(.ib){flex:none;height:32px;padding:0 14px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:800}
+.sync-bar .ib{width:30px;height:30px}
+@media (max-width:760px){ .sync-bar{bottom:calc(150px + env(safe-area-inset-bottom,0px))} }
 .toast.undo{display:flex;align-items:center;gap:14px;padding:8px 8px 8px 18px}
 .toast.undo button{flex:none;height:32px;padding:0 14px;border-radius:999px;background:var(--bg);color:var(--fg);font-weight:800;font-size:13px}
 .wk{background:linear-gradient(180deg,hsl(var(--amb,42) 40% 18%),var(--bg) 340px)}
@@ -1006,6 +1087,7 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
   </aside>
 
   <main class="pane main" id="main">
+    <div id="pulse" aria-hidden="true"></div>
     <div class="topbar">
       <button class="ib menu-ib" data-act="menu" aria-label="Mostrar u ocultar el menú" aria-controls="side" aria-expanded="true" id="menuBtn"></button>
       <button class="ib home-ib" data-act="home" aria-label="Inicio" id="homeIb"></button>
@@ -1159,7 +1241,7 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
       <span id="fpCtx"></span>
       <button type="button" class="ib" data-act="fp-queue" aria-label="Ver la cola" id="fpQueue"></button>
     </div>
-    <img class="fp-art" id="fpArt" alt="">
+    <div class="fp-disc" id="fpDisc"><img class="fp-art" id="fpArt" alt=""></div>
     <div class="fp-meta"><div><h2 id="fpTitle"></h2><p id="fpArtist"></p></div><button type="button" class="apl" id="fpApl" aria-label="Añadir a una playlist"></button><button type="button" class="like" id="fpLike" aria-label="Me gusta"></button></div>
     <div class="fp-seek">
       <input type="range" id="fpSeek" min="0" max="1000" value="0" step="1" aria-label="Posición en la canción">
@@ -1405,6 +1487,14 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
 <script defer src="stats.js" data-website-id="be7a51a6-ab9b-4c9e-84e9-861779097249" data-exclude-search="true" data-exclude-hash="true" data-do-not-track="true" data-domains="alelangar0415-blip.github.io,app" data-before-send="humStatsFilter"></script>
 <script>
 (() => {
+// older iPhones (before iOS 16) cannot draw rounded boxes on images: teach them, so share images still work
+if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r){
+    r = Math.max(0, Math.min(+(Array.isArray(r) ? r[0] : r) || 0, Math.abs(w) / 2, Math.abs(h) / 2));
+    this.moveTo(x + r, y); this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); return this;
+  };
+}
 // Anonymous visit counter (stats.js): only counts are sent. The page title is always "Hum" (never the song playing),
 // and each visit says only where Hum is used: the web, the app added to the home screen, or the Windows app.
 window.humStatsFilter = (type, p) => {
@@ -1944,14 +2034,26 @@ function toggleLike(id){
 /* ---------- your own songs: kept in this browser (IndexedDB), never uploaded ---------- */
 let dbp = null, toastT = 0, addCount = 0; S.saveFailed = false;
 function toast(msg){ if (!msg) return; const el = $("#toast"); el.classList.remove("undo"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 4500); }
+// the phone's storage sometimes doesn't answer the first time the app opens (a known iPhone problem):
+// if it takes more than 2.5 s, ask again, up to 3 times, so your songs always show up
 function idb(){
   if (dbp) return dbp;
-  dbp = new Promise((res, rej) => {
+  const once = () => new Promise((res, rej) => {
     try { const r = indexedDB.open("hum-library", 3);
       r.onupgradeneeded = () => { const d = r.result;
         ["songs", "playlists", "covers"].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: "id" }); }); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("blocked"));
     } catch (e){ rej(e); }
+  });
+  dbp = new Promise((res, rej) => {
+    let tries = 0, done = false;
+    const go = () => {
+      tries++;
+      const t = setTimeout(() => { if (!done && tries < 3) go(); else if (!done){ done = true; dbp = null; rej(new Error("timeout")); } }, 2500);
+      once().then(d => { clearTimeout(t); if (done){ try { d.close(); } catch {} return; } done = true; res(d); })
+        .catch(e => { clearTimeout(t); if (done) return; if (tries < 3) setTimeout(go, 300); else { done = true; dbp = null; rej(e); } });
+    };
+    go();
   });
   return dbp;
 }
@@ -1978,7 +2080,7 @@ function addUserTrack(rec){
     get(){ if (!cv){ cv = drawArt(["waves","circles","grid","sun","stripes","disc"][h % 6], h % 360, h, 200).toDataURL("image/jpeg", .85); GENCV.add(rec.id); } return cv; },
     set(v){ cv = v; } });
   const t = { id: rec.id, user: true, rec, title: rec.title, artist: rec.artist, dur: rec.dur || 0, album };
-  BYID[t.id] = t; USER.push(t.id); matchIdx = null;
+  const had = !!(BYID[t.id] && BYID[t.id].user); BYID[t.id] = t; if (!had) USER.push(t.id); matchIdx = null; // a song is listed once, even if it arrives twice
   if (!rec.bpmDone) queueBpm(rec);
   if (!rec.lyrScan) queueLyrScan(rec);
   if (!rec.feel && rec.blob) queueFeel(rec);
@@ -2166,7 +2268,7 @@ function delSongs(ids, msg){
 async function commitDel(){
   clearTimeout(pendT); if (!S.pendDel.size) return;
   const ids = [...S.pendDel]; S.pendDel.clear();
-  for (const id of ids) await removeSong(id, { quiet: true });
+  await removeMany(ids);
   if ($("#libDlg").open) renderLibDlg();
 }
 function undoDel(){
@@ -2175,6 +2277,31 @@ function undoDel(){
 }
 window.addEventListener("pagehide", commitDel);
 document.addEventListener("visibilitychange", () => { if (document.hidden) commitDel(); });
+// many songs at once (signing out, deleting all, repeats): one pass, one screen update
+async function removeMany(ids, opts = {}){
+  ids = [...new Set(ids)].filter(id => BYID[id] && BYID[id].user); if (!ids.length) return 0;
+  const gone = new Set(ids), c = cur(), wasCur = !!(c && gone.has(c.id)), wasPlaying = S.playing;
+  if (wasCur){ cancelMix(); audio.pause(); audio.removeAttribute("src"); audio.load(); audio.dataset.id = ""; bgOn = false; bgEl.pause(); bgEl.dataset.id = ""; S.playing = false; clearInterval(timer); }
+  const curId = c && !wasCur ? c.id : null;
+  S.queue = S.queue.filter(x => !gone.has(x)); S.ctxList = S.ctxList.filter(x => !gone.has(x));
+  S.qi = curId ? Math.max(0, S.queue.indexOf(curId)) : clamp(S.qi, 0, Math.max(0, S.queue.length - 1));
+  if (!S.queue.length){ S.ctxId = "focus"; S.ctxList = PL.focus.tracks.slice(); S.queue = S.ctxList.slice(); S.qi = 0; }
+  for (let i = USER.length - 1; i >= 0; i--) if (gone.has(USER[i])) USER.splice(i, 1);
+  let likes = false;
+  for (const id of ids){
+    const t = BYID[id]; if (!t) continue; delete BYID[id];
+    if (S.liked.delete(id)) likes = true;
+    if (t.url) URL.revokeObjectURL(t.url);
+    if (t.rec.pic){ const u = t.album.cover; if (u && u.startsWith("blob:")) URL.revokeObjectURL(u); } // its own picture (drawn covers are not files)
+    try { karaForget(id, !!opts.remote); } catch {}
+    if (!opts.remote){ trashFile(t.rec.cloud); tomb("song:" + id); }
+  }
+  matchIdx = null; if (likes) store.set("liked", [...S.liked]);
+  try { await idbReq("readwrite", s => { ids.forEach(id => s.delete(id)); return null; }); } catch {}
+  if (wasCur){ loadAt(0); if (wasPlaying) play(); }
+  const m = $("#main"), y = m.scrollTop; if (S.view.type === "list" && !getList.ok(S.view.id)) go({ type: "home" }); else { renderView(); m.scrollTop = y; } renderLib(); paint();
+  return ids.length;
+}
 async function removeSong(id, opts = {}){
   const t = BYID[id]; if (!t || !t.user) return;
   const wasCur = cur() && cur().id === id, wasPlaying = S.playing;
@@ -2868,8 +2995,12 @@ function startBg(){
   bgEl.muted = false; bgEl.src = srcFor(t); bgEl.dataset.id = t.id; bgEl.dataset.k = srcKind(t);
   try { bgEl.currentTime = at; } catch {}
   const r = fxRate(); bgEl.preservesPitch = bgEl.mozPreservesPitch = bgEl.webkitPreservesPitch = S.fx.mode === "off"; bgEl.defaultPlaybackRate = bgEl.playbackRate = r;
-  bgVol(); audio.pause();
-  bgEl.play().catch(() => { bgOn = false; S.resumeOnShow = true; });
+  bgVol();
+  bgEl.play().then(() => {
+    if (!bgOn) return;
+    try { if (audio.dataset.id === t.id && !audio.paused && Math.abs(audio.currentTime - bgEl.currentTime) > .3) bgEl.currentTime = audio.currentTime; } catch {}
+    audio.pause();
+  }).catch(() => { bgOn = false; if (audio.paused) S.resumeOnShow = true; }); // the full player keeps going if the phone said no
   return true;
 }
 function backFromBg(){ // back in the app: the full sound (equalizer, effects) takes over from the same second
@@ -2914,6 +3045,12 @@ setInterval(() => { // the song is "playing" but its time stands still
   if (bgStall >= 3){ bgStall = 0; startBg(); }
 }, 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden && bgOn) backFromBg(); });
+// with the screen off the phone may put the sound engine to sleep and freeze the app, which left the notification
+// showing the song moving with pause not answering. The plain player is the one phones handle best in the background.
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden || !S.playing || !bgCan()) return;
+  setTimeout(() => { if (document.hidden && S.playing && !bgOn) startBg(); }, 250);
+});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden || !S.resumeOnShow) return;
   S.resumeOnShow = false;
@@ -3149,7 +3286,7 @@ function chunksToLyrics(chunks){
     const text = (c.text || "").replace(/[♪♫]/g, "").trim();
     const [s, e] = c.timestamp || [];
     if (!text || junk.test(text) || !isFinite(s)) continue;
-    const parts = text.split(/(?<=[.!?;,])\s+/).filter(Boolean), end = isFinite(e) ? e : s + 3, step = (end - s) / parts.length;
+    const parts = text.replace(/([.!?;,])\s+/g, "$1\u0001").split("\u0001").filter(Boolean), end = isFinite(e) ? e : s + 3, step = (end - s) / parts.length;
     parts.forEach((p, i) => lines.push({ t: s + i * step, text: p.replace(/,$/, "") }));
   }
   const clean = lines.filter((l, i) => !(i >= 2 && l.text === lines[i - 1].text && l.text === lines[i - 2].text)); // AI sometimes loops
@@ -3580,11 +3717,13 @@ async function doSync(){
     const R = sync.remote.items; let push = false;
     const email = S.acct.email;
     // never mix accounts: what belongs to another Google account leaves this device instead of going into this one
+    const other = [];
     for (const id of USER.slice()){
       const rec = BYID[id].rec, inLib = !!R["song:" + id];
-      if ((rec.owner && rec.owner !== email) || (!rec.owner && rec.cloud && !inLib)){ delete sync.dirty["song:" + id]; await removeSong(id, { remote: true }); changed = true; }
+      if ((rec.owner && rec.owner !== email) || (!rec.owner && rec.cloud && !inLib)){ delete sync.dirty["song:" + id]; other.push(id); }
       else if (!rec.owner){ rec.owner = email; putRec(rec); }
     }
+    if (other.length){ await removeMany(other, { remote: true }); changed = true; }
     for (const id of IMP_ORDER.slice()){
       const p = IMPORTED[id];
       if (p.acct && p.acct !== email){ delete sync.dirty["pl:" + id]; dropPl(id); if (S.ctxId === id) S.ctxId = null; changed = true; }
@@ -3733,14 +3872,16 @@ async function runTransfers(){
       const cov = Object.keys(COVER_V).find(id => !COVER_V[id].del && !COVER_V[id].up && !xfer.failed.has("c:" + id));
       const ups = recs.filter(r => r.blob && !r.cloud && !xfer.failed.has(r.id));
       const onlyDrive = keepMode() === "drive", pre = onlyDrive ? nextNeeded() : null;
-      const downs = onlyDrive ? [] : recs.filter(r => !r.blob && r.cloud && !xfer.failed.has(r.id));
+      // songs coming up in what you're listening to come down first
+      const rank = r => { const i = S.queue.indexOf(r.id); return i < 0 ? 1e6 : (i - S.qi + S.queue.length) % S.queue.length; };
+      const downs = onlyDrive ? [] : recs.filter(r => !r.blob && r.cloud && !xfer.failed.has(r.id)).sort((a, b) => rank(a) - rank(b));
       if (w && !w.blob && w.cloud && !xfer.failed.has(w.id)) await moveFile(w, "down", 1);
       else if (cov) await moveCover(cov);
       else if (ups.length) await moveFile(ups[0], "up", ups.length);
       else if (pre) await moveFile(pre, "down", 1); // the next song in line, so it plays with no wait
       else if (downs.length){
-        await moveFile(downs[0], "down", downs.length);
-        if (PHONE && S.playing) await new Promise(r => setTimeout(r, 4000)); // gentle on a phone that is playing
+        await Promise.all(downs.slice(0, 2).map(r => moveFile(r, "down", downs.length))); // two at a time
+        if (PHONE && S.playing) await new Promise(r => setTimeout(r, 800)); // a breath for a phone that is playing
       }
       else break;
       if (onlyDrive) trimCache();
@@ -3872,7 +4013,7 @@ async function signOut(){
   if (desk && desk.googleSignOut) desk.googleSignOut().catch(() => {});
   // this account's music leaves this device: it stays in that Google Drive and comes back when you sign in again
   const songs = USER.filter(id => { const r = BYID[id].rec; return r.owner ? r.owner === email : !!(r.cloud || R["song:" + id]); });
-  for (const id of songs) await removeSong(id, { remote: true });
+  await removeMany(songs, { remote: true });
   const pls = IMP_ORDER.filter(id => IMPORTED[id].acct ? IMPORTED[id].acct === email : !!R["pl:" + id]);
   pls.forEach(id => { dropPl(id); if (S.ctxId === id) S.ctxId = null; });
   if (pls.length){ renderLib(); if (S.view.type === "list" && !getList.ok(S.view.id)) go({ type: "home" }); else rerender(); }
@@ -4014,7 +4155,18 @@ function openAcct(){
   renderAcct(); if (!$("#acctDlg").open) $("#acctDlg").showModal();
   if (S.acct && tokenOk()){ loadMe(); doSync(); }
 }
+function paintSyncBar(){
+  let b = $("#syncBar");
+  const need = !!S.acct && !tokenOk() && navigator.onLine && !(desk && desk.google) && !S.syncBarOff;
+  const recs = need ? USER.map(id => BYID[id] && BYID[id].rec).filter(Boolean) : [];
+  const up = recs.filter(r => r.blob && !r.cloud).length, down = keepMode() === "drive" ? 0 : recs.filter(r => !r.blob && r.cloud).length;
+  if (!need || !(up + down)){ if (b) b.remove(); return; }
+  if (!b){ b = document.createElement("div"); b.id = "syncBar"; b.className = "sync-bar"; b.setAttribute("role", "status"); document.body.appendChild(b); }
+  const txt = down && up ? `Faltan ${nc(down)} por bajar y ${nc(up)} por subir` : down ? `Faltan ${nc(down)} por bajar` : `Faltan ${nc(up)} por subir a tu Drive`;
+  b.innerHTML = `<span>${ic("sync")}${esc(txt)}</span><button type="button" data-act="acct-reconnect">Continuar</button><button type="button" class="ib" data-act="syncbar-off" aria-label="Ocultar">${ic("close")}</button>`;
+}
 function paintAcct(){
+  try { paintSyncBar(); } catch {}
   const busy = !!S.acct && (sync.busy || !!xfer.label), need = !!S.acct && sync.needAuth && !tokenOk();
   $("#navAcct").innerHTML = ic("user") + (S.acct ? "Tu cuenta" : "Iniciar sesión") + (busy || need ? '<i class="sync-dot" aria-hidden="true"></i>' : "");
   const tb = $("#acctTop"); tb.classList.toggle("on", !!S.acct); tb.classList.toggle("need", need);
@@ -5030,8 +5182,8 @@ function renderLibDlg(){
 async function libDelete(k){
   if (S.libArm !== k){ S.libArm = k; renderLibDlg(); setTimeout(() => { if (S.libArm === k){ S.libArm = null; if ($("#libDlg").open) renderLibDlg(); } }, 4000); return; }
   S.libArm = null;
-  if (k === "dups"){ const ids = dupIds(); for (const id of ids) await removeSong(id, { quiet: true }); toast(ids.length === 1 ? "Quitaste 1 canción repetida." : `Quitaste ${ids.length} canciones repetidas.`); }
-  if (k === "songs"){ const ids = USER.slice(); for (const id of ids) await removeSong(id, { quiet: true }); toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`); }
+  if (k === "dups"){ const ids = dupIds(); await removeMany(ids); toast(ids.length === 1 ? "Quitaste 1 canción repetida." : `Quitaste ${ids.length} canciones repetidas.`); }
+  if (k === "songs"){ const ids = USER.slice(); await removeMany(ids); toast(ids.length === 1 ? "Borraste 1 canción." : `Borraste ${ids.length} canciones.`); }
   if (k === "pls"){ const ids = IMP_ORDER.slice(); ids.forEach(id => { dropPl(id); tomb("pl:" + id); if (S.ctxId === id) S.ctxId = null; }); toast(ids.length === 1 ? "Borraste 1 playlist." : `Borraste ${ids.length} playlists.`); }
   if (k === "likes"){ const now = Date.now(); [...S.liked].forEach(id => { S.liked.delete(id); S.likedU[id] = now; markDirty("like:" + id); }); store.set("liked", []); store.set("likedU", S.likedU); toast("Quitaste todos los me gusta."); }
   if (S.view.type === "list" && !getList.ok(S.view.id)) go({ type: "home" }); else rerender();
@@ -6401,7 +6553,7 @@ function paint(){
   $("#npLyr").innerHTML = ic("mic") + (t.user && t.rec.lyrics ? "Ver letra" : "Letra");
   if ($("#lyrDlg").open && lyrFor !== t.id){ lyrFor = t.id; S.lyrEdit = false; renderLyrics(); }
   if ($("#sndDlg").open) renderSndUI();
-  $("#app").classList.toggle("playing", S.playing);
+  $("#app").classList.toggle("playing", S.playing); document.documentElement.classList.toggle("is-playing", S.playing);
   $("#bArt").src = cover(t); $("#bTitle").textContent = t.title; $("#bArtist").textContent = t.artist;
   $("#bLike").dataset.like = t.id; likeBtn($("#bLike")); $("#fpApl").dataset.apl = t.id;
   $("#pp").innerHTML = ic(S.playing ? "pause" : "play"); $("#pp").setAttribute("aria-label", S.playing ? "Pausar" : "Reproducir");
@@ -7141,7 +7293,8 @@ setInterval(() => {
    you train (the music keeps going); if the screen does go off, that stretch is counted in a straight line when you
    come back. The shared picture leaves out the start and the end of the route, so nobody sees where you live. */
 const WK = { st: "idle", type: "run", pts: [], dist: 0, t0: 0, pausedAt: 0, paused: 0, splits: [], lastSplitT: 0, songs: {}, kmSongs: [{}], watch: null, iv: 0, lock: null, cur: null, err: "", arm: false, view: null };
-const WK_T = { run: { n: "Correr", v: "Carrera", max: 9, step: 1 }, walk: { n: "Caminar", v: "Caminata", max: 4.5, step: 1 }, bike: { n: "Bici", v: "Rodada", max: 25, step: 5 } };
+// max: fastest believable speed (m/s); q: how quickly the way you move can change (for smoothing the GPS)
+const WK_T = { run: { n: "Correr", v: "Carrera", max: 9, step: 1, q: 3.5 }, walk: { n: "Caminar", v: "Caminata", max: 4.5, step: 1, q: 2.5 }, bike: { n: "Bici", v: "Rodada", max: 25, step: 5, q: 7 } };
 const wkHist = () => { const h = store.get("workouts", []); return Array.isArray(h) ? h : []; };
 function hav(a, b){ const R2 = 6371000, r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r, x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dn / 2) ** 2; return 2 * R2 * Math.asin(Math.sqrt(x)); }
 const wkSecs = () => WK.t0 ? Math.max(0, ((WK.st === "paused" ? WK.pausedAt : Date.now()) - WK.t0 - WK.paused) / 1000) : 0;
@@ -7207,17 +7360,27 @@ async function wkStart(){
   clearInterval(WK.iv); WK.iv = setInterval(wkTick, 1000);
   stat("entrenar", { tipo: WK.type });
 }
+/* GPS readings wobble a few metres around where you really are. Adding up every wobble made the kilometres too many
+   (even standing still) and the pace wrong. Now each reading is blended in by how precise it is (a Kalman filter),
+   distance counts only when you really moved past the GPS margin, and if the phone says you're not moving, or you
+   stayed inside a small circle for 12 s, nothing is added. Tested with simulated walks, runs and rides: within a few %. */
+function wkReset(pt){ WK.K = pt ? { lat: pt.lat, lon: pt.lon, v: pt.acc * pt.acc, t: pt.t } : null; WK.A = pt ? { lat: pt.lat, lon: pt.lon, t: pt.t } : null; WK.H = []; }
 function wkPos(p){
-  const c = p.coords, pt = { lat: c.latitude, lon: c.longitude, acc: c.accuracy || 99, t: p.timestamp || Date.now() };
+  const c = p.coords, pt = { lat: c.latitude, lon: c.longitude, acc: c.accuracy || 99, t: p.timestamp || Date.now(), spd: c.speed };
   const g = $("#wkGps"); if (g) g.textContent = pt.acc <= 15 ? "Buena" : pt.acc <= 35 ? "Media" : "Débil";
-  if (WK.st === "wait"){ if (pt.acc > 50) return; WK.st = "on"; WK.t0 = Date.now(); WK.lastSplitT = 0; WK.pts = [pt]; renderWk(); humSay("Empezamos. ¡A darle!"); return; }
+  if (WK.st === "wait"){ if (pt.acc > 50) return; WK.st = "on"; WK.t0 = Date.now(); WK.lastSplitT = 0; WK.pts = [pt]; wkReset(pt); renderWk(); humSay("Empezamos. ¡A darle!"); return; }
   if (WK.st !== "on"){ WK.cur = pt; return; }
   if (pt.acc > 35) return;
-  const last = WK.pts[WK.pts.length - 1]; if (!last){ WK.pts.push(pt); return; }
-  const d = hav(last, pt), dt = Math.max(.5, (pt.t - last.t) / 1000), max = WK_T[WK.type].max;
-  if (d < Math.max(4, pt.acc * .5)) return; // standing still or GPS wobble
-  if (d / dt > max * 1.6 && dt < 60) return; // a jump the body cannot do: a GPS glitch
-  WK.pts.push(pt); WK.dist += d;
+  if (!WK.K){ wkReset(pt); WK.pts.push(pt); return; }
+  const K = WK.K, T = WK_T[WK.type], dt = Math.max(.2, (pt.t - K.t) / 1000);
+  if (hav(K, pt) / dt > T.max * 1.6 && dt < 60) return; // a jump the body cannot do: a GPS glitch
+  K.v += dt * T.q * T.q; const kg = K.v / (K.v + pt.acc * pt.acc);
+  K.lat += kg * (pt.lat - K.lat); K.lon += kg * (pt.lon - K.lon); K.v *= 1 - kg; K.t = pt.t;
+  if (pt.spd != null && pt.spd >= 0 && pt.spd < .35) return; // the phone itself says you're not moving
+  const H = WK.H; H.push({ lat: K.lat, lon: K.lon, t: pt.t }); while (H.length && pt.t - H[0].t > 12000) H.shift();
+  if (H.length > 2 && pt.t - H[0].t >= 9600 && hav(H[0], K) < Math.max(6, Math.min(pt.acc, 25) * .9)) return; // still in the same spot
+  const d = hav(WK.A, K); if (d < Math.max(3, Math.min(pt.acc, 25) * .5)) return; // within the GPS margin
+  WK.A = { lat: K.lat, lon: K.lon, t: pt.t }; WK.pts.push({ lat: K.lat, lon: K.lon, acc: pt.acc, t: pt.t }); WK.dist += d;
   const step = WK_T[WK.type].step * 1000;
   while (WK.dist >= (WK.splits.length + 1) * step){
     const now = wkSecs(); WK.splits.push(Math.round(now - WK.lastSplitT)); WK.lastSplitT = now; WK.kmSongs.push({});
@@ -7319,7 +7482,7 @@ document.addEventListener("click", e => {
   if (k === "wk-type"){ WK.type = a.dataset.v; renderWk(); }
   if (k === "wk-start") wkStart();
   if (k === "wk-pause"){ WK.st = "paused"; WK.pausedAt = Date.now(); renderWk(); }
-  if (k === "wk-resume"){ WK.paused += Date.now() - WK.pausedAt; WK.st = "on"; if (WK.cur) WK.pts.push(WK.cur); renderWk(); }
+  if (k === "wk-resume"){ WK.paused += Date.now() - WK.pausedAt; WK.st = "on"; if (WK.cur){ WK.pts.push(WK.cur); wkReset(WK.cur); } else wkReset(null); renderWk(); }
   if (k === "wk-stop"){ if (!WK.arm){ WK.arm = true; renderWk(); setTimeout(() => { WK.arm = false; if (WK.st === "on" || WK.st === "paused") renderWk(); }, 4000); return; } WK.arm = false; if (WK.st === "paused") WK.paused += Date.now() - WK.pausedAt; wkEnd(false); }
   if (k === "wk-share") wkShare();
   if (k === "wk-back"){ WK.st = "ready"; WK.view = null; renderWk(); }
@@ -7569,7 +7732,7 @@ function openLogros(){
    Color: a few to pick from, any color you like, "automatic" (each song's cover colors) or the colors of your photo.
    Background: plain dark, the glow of the song (as before), the song's cover blurred, or your own photo.
    The mini player on a PC and the picture on the lock screen can follow it too. */
-const LOOK_DEF = { color: "amber", custom: "#f2b544", bg: "glow", dim: .72, mini: "theme", lock: "cover" };
+const LOOK_DEF = { color: "amber", custom: "#f2b544", bg: "glow", dim: .72, mini: "theme", lock: "cover", skin: "orig", art: "round", pulse: false, vibe: "" };
 let LOOK = { ...LOOK_DEF, ...((store.get("look", {}) || {})) }, lookPhoto = "", lookFor = null, LOOKACC = "";
 try { lookPhoto = localStorage.getItem("hum:lookPhoto") || ""; } catch {}
 if (!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(lookPhoto)) lookPhoto = "";
@@ -7605,6 +7768,9 @@ function applyLook(){
   const t = cur(), img = bg === "photo" ? lookPhoto : bg === "cover" && t ? cover(t) : "";
   root.classList.toggle("look-img", !!img); root.classList.toggle("look-cover", bg === "cover" && !!img); root.classList.toggle("look-dark", bg === "dark");
   const el = $("#lookBg"); if (el) el.style.backgroundImage = img ? cssUrl(img) : "none";
+  ["orig", "neon", "minimal", "retro"].forEach(k => root.classList.toggle("skin-" + k, (LOOK.skin || "orig") === k));
+  ["square", "round", "circle", "vinyl"].forEach(k => root.classList.toggle("art-" + k, (LOOK.art || "round") === k));
+  root.classList.toggle("pulse-on", !!LOOK.pulse);
   if (miniWin && !miniWin.closed) lookMini(miniWin, t);
 }
 function lookMini(w, t){
@@ -7664,18 +7830,67 @@ $("#lookFile").addEventListener("change", e => {
   im.onerror = () => { URL.revokeObjectURL(u); toast("No se pudo abrir esa imagen."); };
   im.src = u;
 });
+document.addEventListener("submit", e => { if (e.target.id === "vibeForm"){ e.preventDefault(); applyVibe($("#vibeIn").value); } });
 document.addEventListener("input", e => {
   if (e.target.id === "lookPick"){ LOOK.custom = e.target.value; LOOK.color = "custom"; applyLook(); clearTimeout(saveLook.t); saveLook.t = setTimeout(saveLook, 300); }
   if (e.target.id === "lookDim"){ LOOK.dim = +e.target.value / 100; applyLook(); const o = $("#lookDimOut"); if (o) o.textContent = e.target.value + " %"; clearTimeout(saveLook.t); saveLook.t = setTimeout(() => store.set("look", LOOK), 300); }
 });
 function saveLook(){ stat("apariencia", { color: LOOK.color === "custom" || LOOK.color === "photo" ? LOOK.color : "lista", fondo: LOOK.bg }); store.set("look", LOOK); artCache.clear(); msFor = null; applyLook(); try { paintMediaSession(); } catch {} if ($("#lookDlg").open) renderLook(); }
 function resetLook(){ LOOK = { ...LOOK_DEF }; lookPhoto = ""; try { localStorage.removeItem("hum:lookPhoto"); } catch {} saveLook(); toast("Volviste al estilo original de Hum."); }
+/* ---------- your style from a phrase ----------
+   Write a vibe ("atardecer en la playa", "noche neón", "rosa pastel") and Hum makes a whole style from it: color,
+   skin, cover shape, background and whether the glow beats with the music. It reads the words; it works offline. */
+const VIBE_WORDS = [
+  [/fuego|llama|rojo|pasion|sangre/, { h: 4 }], [/trap|drill|calle/, { h: 356, skin: "neon", pulse: true }],
+  [/naranja|mandarina|otono|otoño/, { h: 24, skin: "retro" }], [/atardecer|ocaso|sunset/, { h: 18, bg: "glow", pulse: true }],
+  [/oro|dorad|lujo|elegan/, { h: 43, skin: "minimal", bg: "dark" }], [/amarill|sol\b|verano|limon/, { h: 50 }],
+  [/lima|acido/, { h: 84, skin: "neon" }], [/verde|bosque|selva|naturaleza|planta/, { h: 135 }], [/menta|fresco/, { h: 158 }],
+  [/turquesa|caribe|laguna/, { h: 176 }], [/mar\b|playa|oceano|olas|surf/, { h: 192, pulse: true }], [/cielo|nube|aire/, { h: 205 }],
+  [/azul|invierno|hielo|frio/, { h: 214 }], [/noche|luna|nocturn|estrella/, { h: 232, bg: "dark" }],
+  [/galaxia|espacio|cosmo|universo/, { h: 255, bg: "cover", pulse: true }], [/violeta|morado|purpura/, { h: 270 }],
+  [/lila|lavanda|sueño|sueno/, { h: 282, pastel: true }], [/rosa|chicle|barbie/, { h: 330 }], [/amor|romant|corazon|cita/, { h: 342 }],
+  [/fresa|cereza/, { h: 350 }], [/pastel|suave|tierno|kawaii|cute/, { pastel: true }],
+  [/neon|cyber|futur|gamer|rave/, { skin: "neon", pulse: true }], [/cyberpunk/, { h: 300, skin: "neon" }],
+  [/vaporwave|y2k|2000|cromo/, { h: 300, skin: "retro" }], [/retro|vintage|80s|90s|cassette|casete/, { skin: "retro" }],
+  [/lofi|lo-fi|estudiar|tranqui|chill|relaj|calma/, { h: 265, skin: "retro", art: "vinyl", pulse: false }],
+  [/minimal|limpio|simple|blanco y negro|serio/, { skin: "minimal", bg: "dark", pulse: false }], [/negro|oscuro|dark|goth/, { bg: "dark" }],
+  [/vinilo|disco|dj|tornamesa|acetato/, { art: "vinyl" }], [/fiesta|party|perreo|reggaeton|antro|baile/, { skin: "neon", pulse: true }],
+  [/corrido|belic|tumbad|sierreñ|sierren/, { h: 30, skin: "retro", art: "square" }], [/triste|melanc|lluvia|llorar/, { h: 222, skin: "minimal", pulse: false }],
+  [/portada|album|difumin/, { bg: "cover" }], [/circul|redond/, { art: "circle" }], [/cuadrad/, { art: "square" }]
+];
+const VIBE_IDEAS = ["atardecer en la playa", "noche neón", "rosa pastel", "lofi para estudiar", "oro y negro", "galaxia", "fiesta", "bosque tranqui"];
+function vibeStyle(text){
+  const n = (text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const o = { skin: "orig", art: "round", bg: "glow", pulse: false }; let h = null, hit = 0;
+  for (const [re, v] of VIBE_WORDS) if (re.test(n)){ hit++; if (v.h != null && h == null) h = v.h; Object.keys(v).forEach(k => { if (k !== "h") o[k] = v[k]; }); }
+  if (h == null){ let x = 0; for (const c of n) x = (x * 31 + c.charCodeAt(0)) % 360; h = hit ? 39 : x; if (!hit) o.skin = ["orig", "neon", "retro", "minimal"][x % 4]; }
+  return { ...o, color: hslHex(h, o.pastel ? 72 : o.skin === "neon" ? 95 : 80, o.pastel ? 78 : o.skin === "neon" ? 60 : 62), hit };
+}
+function applyVibe(text){
+  text = String(text || "").trim().slice(0, 60); if (!text){ toast("Escribe cómo quieres que se vea, por ejemplo «noche neón»."); return; }
+  const v = vibeStyle(text);
+  Object.assign(LOOK, { color: "custom", custom: v.color, skin: v.skin, art: v.art, pulse: v.pulse, vibe: text });
+  if (!(LOOK.bg === "photo" && lookPhoto)) LOOK.bg = v.bg;
+  saveLook(); stat("estilo-frase", { coincidencias: v.hit ? "si" : "no" });
+  toast(`Listo: tu estilo «${text}».`);
+}
 function renderLook(){
   const opt = (attr, cur2, list) => list.map(([k, n, d]) => `<button type="button" class="spk${cur2 === k ? " on" : ""}" data-${attr}="${k}" aria-pressed="${cur2 === k}"><b>${n}</b>${d ? `<small>${d}</small>` : ""}</button>`).join("");
   const named = LOOK.color === "custom" ? "Tu color" : LOOK.color === "photo" ? "Colores de tu foto" : (LOOK_COLORS.find(c => c[0] === LOOK.color) || [0, ""])[1];
   const img = LOOK.bg === "cover" || (LOOK.bg === "photo" && lookPhoto);
   $("#lookBody").innerHTML = `<h2 id="lookH">Apariencia</h2>
     <p>Hazla tuya. Estos ajustes son solo de este dispositivo.</p>
+    <div class="vibe">
+      <b>${ic("spark")}Crea tu estilo con una frase</b>
+      <form class="vibe-form" id="vibeForm"><input id="vibeIn" maxlength="60" placeholder="Ej.: atardecer en la playa" value="${esc(LOOK.vibe || "")}" aria-label="Describe tu estilo" autocomplete="off"><button type="submit" class="add-top">Crear</button></form>
+      <div class="vibe-ideas">${VIBE_IDEAS.map(v => `<button type="button" class="chip" data-vibe="${esc(v)}">${esc(v)}</button>`).join("")}</div>
+    </div>
+    <h3 class="snd-h">Estilo</h3>
+    <div class="spk-grid skin-grid" role="group" aria-label="Estilo">${opt("lookskin", LOOK.skin || "orig", [["orig", "Original", "El de siempre: suave, con el color de cada canción."], ["neon", "Neón", "Luces que brillan sobre negro."], ["minimal", "Minimal", "Limpio y plano, sin brillos."], ["retro", "Retro Y2K", "Cromo, grano y bordes gorditos."]])}</div>
+    <h3 class="snd-h">Portada en grande</h3>
+    <div class="spk-grid" role="group" aria-label="Forma de la portada">${opt("lookart", LOOK.art || "round", [["square", "Cuadrada"], ["round", "Redondeada"], ["circle", "Círculo"], ["vinyl", "Vinilo que gira", "Da vueltas mientras suena."]])}</div>
+    <div class="mix-opt" style="margin-top:10px"><div><b>Fondo que late con la música</b><small>El brillo del fondo se mueve con los bajos de lo que suena.</small></div>
+      <button type="button" class="switch" data-act="look-pulse" role="switch" aria-checked="${!!LOOK.pulse}" aria-label="Fondo que late con la música"></button></div>
     <h3 class="snd-h">Color</h3>
     <div class="look-sw" role="group" aria-label="Color de la app">${LOOK_COLORS.map(([k, n, h]) => `<button type="button" class="${k === "auto" ? "auto" : ""}${LOOK.color === k ? " on" : ""}" data-lookc="${k}" aria-label="${n}" title="${n}" aria-pressed="${LOOK.color === k}"${h != null ? ` style="background:${k === "amber" ? "#f2b544" : hslHex(h, 80, 62)}"` : ""}></button>`).join("")}
       <label class="${LOOK.color === "custom" ? "on" : ""}" title="Elegir cualquier color" style="background:${LOOK.color === "custom" ? LOOK.custom : "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)"}">${ic("palette")}<input type="color" id="lookPick" value="${LOOK.custom}" aria-label="Elegir cualquier color"></label></div>
@@ -7704,7 +7919,22 @@ const ACC = css.getPropertyValue("--accent").trim() || "#f2b544", DIM = css.getP
 let idle = 0;
 // the page only changes when something on it really changes (the bar moves in steps of 0.1 %, the clock each second)
 const FR = { fp: -1, fpT: "", b: -1, bT: "", n: 0, el: null };
+const PULSE = { el: null, v: 0, f: null, n: 0 };
+function pulseTick(){
+  if (!LOOK.pulse) return;
+  const el = PULSE.el || (PULSE.el = $("#pulse")); if (!el) return;
+  if (++PULSE.n % 2) return; // every other frame is plenty
+  let target = .12;
+  if (S.playing && analyser && !document.hidden){
+    const f = PULSE.f || (PULSE.f = new Uint8Array(analyser.frequencyBinCount)); analyser.getByteFrequencyData(f);
+    let b = 0; for (let i = 1; i < 6; i++) b += f[i]; b /= 5 * 255; target = .12 + Math.pow(b, 1.6) * .75;
+  }
+  PULSE.v += (target - PULSE.v) * (target > PULSE.v ? .55 : .12); // quick rise, slow fall, like a speaker
+  el.style.opacity = PULSE.v.toFixed(3); el.style.transform = `scale(${(1 + PULSE.v * .12).toFixed(3)})`;
+  const fb = PULSE.fb || (PULSE.fb = $("#fpBg")); if (fb && !$("#fp").hidden) fb.style.opacity = (.7 + PULSE.v * .4).toFixed(3); // the big player beats too
+}
 function frame(){
+  pulseTick();
   const E = FR.el || (FR.el = { fp: $("#fp"), fpSeek: $("#fpSeek"), fpCur: $("#fpCur"), seek: $("#seek"), tCur: $("#tCur"), lyr: $("#lyrDlg") });
   const fpOpen = !E.fp.hidden;
   if (E.lyr.open || fpOpen) syncLyrics();
@@ -7774,6 +8004,9 @@ document.addEventListener("click", e => {
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
   const kp = e.target.closest("[data-keep]"); if (kp){ setKeep(kp.dataset.keep); return; }
+  const vb = e.target.closest("[data-vibe]"); if (vb){ applyVibe(vb.dataset.vibe); return; }
+  const sk = e.target.closest("[data-lookskin],[data-lookart]");
+  if (sk){ if (sk.dataset.lookskin) LOOK.skin = sk.dataset.lookskin; if (sk.dataset.lookart) LOOK.art = sk.dataset.lookart; LOOK.vibe = ""; saveLook(); return; }
   const lk = e.target.closest("[data-lookc],[data-lookbg],[data-lookmini],[data-looklock]");
   if (lk){ const d = lk.dataset; if (d.lookc) LOOK.color = d.lookc; if (d.lookbg){ if (d.lookbg === "photo" && !lookPhoto){ $("#lookFile").click(); return; } LOOK.bg = d.lookbg; } if (d.lookmini) LOOK.mini = d.lookmini; if (d.looklock) LOOK.lock = d.looklock; saveLook(); return; }
   const fm = e.target.closest("[data-fxmode]");
@@ -7813,6 +8046,7 @@ document.addEventListener("click", e => {
     if (a === "look-close") $("#lookDlg").close();
     if (a === "look-photo") $("#lookFile").click();
     if (a === "look-reset") resetLook();
+    if (a === "look-pulse"){ LOOK.pulse = !LOOK.pulse; saveLook(); }
     if (a === "snd-close") $("#sndDlg").close();
     if (a === "snd-reload") location.reload();
     if (a === "mix") openMix();
@@ -7842,6 +8076,7 @@ document.addEventListener("click", e => {
     if (a === "demo-toggle") toggleDemo();
     if (a === "sel-mode") setSelMode(true);
     if (a === "del-undo") undoDel();
+    if (a === "syncbar-off"){ S.syncBarOff = true; paintSyncBar(); }
     if (a === "sel-done") setSelMode(false);
     if (a === "sel-all"){ USER.forEach(id => S.sel.add(id)); rerender(); }
     if (a === "sel-del") selDelete();
@@ -7946,6 +8181,28 @@ document.addEventListener("dragover", e => { if (hasFiles(e)) e.preventDefault()
 document.addEventListener("dragleave", e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#drop").hidden = true; });
 document.addEventListener("drop", e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; $("#drop").hidden = true; addFiles(e.dataTransfer.files); });
 
+/* ---------- the back arrow on phones ----------
+   Back closes the big player, a window, the menu or Hum's panel, then goes back to Inicio. On Inicio it does not close
+   Hum (that would stop your music): a note says to use the phone's home button; a second back within 3 s does close it. */
+if (PHONE){
+  let backArmed = 0;
+  const arm = () => { try { history.pushState({ hum: 1 }, ""); } catch {} };
+  if (!(history.state && history.state.hum)) arm();
+  window.addEventListener("popstate", () => {
+    const open = [...document.querySelectorAll("dialog[open]")].pop();
+    if (open){ open.close(); arm(); return; }
+    if (!$("#fp").hidden){ closeFp(); arm(); return; }
+    const wk = $("#wk"); if (wk && !wk.hidden){ closeWorkout(); arm(); return; }
+    if (!$("#hum").hidden){ closeHum(); arm(); return; }
+    if (S.drawer){ S.drawer = false; applySide(); arm(); return; }
+    if (S.selMode){ setSelMode(false); arm(); return; }
+    if (S.view.type !== "home"){ go({ type: "home" }); arm(); return; }
+    if (Date.now() - backArmed < 3000) { history.back(); return; } // second back: leave
+    backArmed = Date.now(); arm();
+    toast(S.playing ? "Para salir sin cortar tu música, usa el botón de inicio del teléfono. Atrás otra vez cierra Hum." : "Toca atrás otra vez para cerrar Hum.");
+  });
+}
+
 /* ---------- quick delete: swipe a song to the left, or hold your finger on it to pick several ---------- */
 {
   let sw = null, lp = 0, eatClick = 0;
@@ -8000,7 +8257,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.17.1";
+const APP_V = "1.18.0";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
