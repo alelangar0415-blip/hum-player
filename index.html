@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PYwBimaaKLfxHRnrN9Zas6Iw13kDT78xXnEupKAqKvg=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ympz+7W3FVDmOBGZe0X+WAWWb5hh60XJfNWmkDrS65I=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1490,6 +1490,12 @@ html.skin-retro body::before{content:"";position:fixed;inset:0;z-index:100;point
 <script defer src="stats.js" data-website-id="be7a51a6-ab9b-4c9e-84e9-861779097249" data-exclude-search="true" data-exclude-hash="true" data-do-not-track="true" data-domains="alelangar0415-blip.github.io,app" data-before-send="humStatsFilter"></script>
 <script>
 (() => {
+// Hum never runs inside another website's page: a site could hide it there and trick your taps (clickjacking)
+if (window.top !== window.self){
+  try { window.top.location.replace(window.self.location.href); } catch {}
+  document.documentElement.innerHTML = '<body style="background:#0d0e13;color:#eceaf3;font:16px system-ui;padding:24px">Abre Hum en su propia página: <a style="color:#f2b544" href="https://alelangar0415-blip.github.io/hum-player/" target="_top">alelangar0415-blip.github.io/hum-player</a></body>';
+  return;
+}
 // older iPhones (before iOS 16) cannot draw rounded boxes on images: teach them, so share images still work
 if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect){
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r){
@@ -8275,7 +8281,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.18.1";
+const APP_V = "1.18.2";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
