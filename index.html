@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-w3AUJmgAVDmESnBTsH4mi/rndbxoDWK03gZHy3K36CI=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PYwBimaaKLfxHRnrN9Zas6Iw13kDT78xXnEupKAqKvg=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -955,6 +955,7 @@ button:active,.tile:active,.card:active,.hx:active,.lib-item:active{transform:sc
 .fp-pp{box-shadow:0 10px 30px rgba(0,0,0,.4)}
 /* bottom tabs (phones) */
 .tabs{display:none}
+#sndBg{margin-bottom:12px}
 /* style from a phrase */
 .vibe{margin:6px 0 4px;padding:14px;border-radius:16px;background:linear-gradient(135deg,hsl(var(--hue,42) 60% 30% / .45),hsl(calc(var(--hue,42) + 60) 50% 25% / .3));border:1px solid rgba(255,255,255,.08)}
 .vibe>b{display:flex;align-items:center;gap:8px;font-size:15px}
@@ -1284,6 +1285,8 @@ html.skin-retro body::before{content:"";position:fixed;inset:0;z-index:100;point
     <div><b>Volumen parejo</b><small>Todas tus canciones suenan al mismo nivel: sin saltos de volumen de una a otra. No cambia la calidad.</small></div>
     <button type="button" class="switch" id="sndLoud" role="switch" aria-checked="true" aria-label="Volumen parejo"></button>
   </div>
+  <h3 class="snd-h">Con la app cerrada o la pantalla apagada</h3>
+  <div class="spk-grid" id="sndBg" role="group" aria-label="Sonido con la app cerrada"></div>
   <div class="mix-opt">
     <div><b>Sonido más fuerte y claro</b><small>Sube el volumen que percibes y controla los picos para que no distorsione, incluso con el volumen alto.</small></div>
     <button type="button" class="switch" id="sndBoost" role="switch" aria-checked="false" aria-label="Sonido más fuerte y claro"></button>
@@ -2981,7 +2984,7 @@ setInterval(() => {
    phone always lets play (the equalizer and effects rest while the screen is off), and the full sound comes back
    when you return to the app. */
 const bgCan = () => isMobile && !desk;
-const bgVol = () => { bgEl.volume = S.muted ? 0 : clamp(S.vol * S.vol * sleepK, 0, 1); };
+const bgVol = () => { bgEl.volume = S.muted ? 0 : clamp(S.vol * S.vol * sleepK * Math.min(1, loudGain(cur())), 0, 1); };
 function unlockBg(){ // runs on a tap: phones only let a player start later if it already played once from a tap
   if (bgUnlocked || bgOn || !bgCan()) return;
   bgUnlocked = true; bgEl.muted = true; bgEl.src = keep.src;
@@ -3028,6 +3031,7 @@ function watchCtx(){
   ctx.addEventListener("statechange", () => {
     if (!document.hidden || !S.playing || ctx.state === "running") return;
     if (!justOff(4000) && audio.paused) return;
+    bgFlaky();
     ctx.resume().catch(() => {});
     setTimeout(() => { if (document.hidden && S.playing && ctx.state !== "running") startBg(); }, 700);
   });
@@ -3042,13 +3046,20 @@ setInterval(() => { // the song is "playing" but its time stands still
   if (!document.hidden || !S.playing || bgOn || !bgCan() || !t || !t.user || mix || audio.dataset.id !== t.id || audio.paused){ bgStall = 0; bgLastT = -1; return; }
   const ct = audio.currentTime, d = isFinite(audio.duration) ? audio.duration : t.dur;
   bgStall = ct === bgLastT && d - ct > 2 ? bgStall + 1 : 0; bgLastT = ct;
-  if (bgStall >= 3){ bgStall = 0; startBg(); }
+  if (bgStall >= 3){ bgStall = 0; bgFlaky(); startBg(); }
 }, 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden && bgOn) backFromBg(); });
 // with the screen off the phone may put the sound engine to sleep and freeze the app, which left the notification
 // showing the song moving with pause not answering. The plain player is the one phones handle best in the background.
+/* With the app closed, Hum keeps its full sound (equalizer, your ear, headphones, effects, even volume).
+   Some phones put that sound engine to sleep in the background, which used to leave the notification frozen. When
+   Hum sees that happen once on a phone, it remembers, and on that phone the song goes to the phone's plain player as
+   soon as you leave the app (sound settings rest while it's closed). In "Calidad y bocinas" you can choose. */
+const bgMode = () => { const m = store.get("bgMode", "auto"); return m === "same" || m === "safe" ? m : "auto"; };
+const bgSafe = () => bgMode() === "safe" || (bgMode() === "auto" && !!store.get("bgFlaky", false));
+function bgFlaky(){ if (!store.get("bgFlaky", false)){ store.set("bgFlaky", true); try { stat("fondo-inestable"); } catch {} } }
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden || !S.playing || !bgCan()) return;
+  if (!document.hidden || !S.playing || !bgCan() || !bgSafe()) return;
   setTimeout(() => { if (document.hidden && S.playing && !bgOn) startBg(); }, 250);
 });
 document.addEventListener("visibilitychange", () => {
@@ -3150,6 +3161,11 @@ function renderSndUI(){
   $("#sndSpk").innerHTML = Object.entries(SPK).map(([k, p]) => `<button type="button" class="spk${S.snd.spk === k ? " on" : ""}" data-spk="${k}" aria-pressed="${S.snd.spk === k}"><b>${p.name}</b><small>${p.desc}</small></button>`).join("");
   $("#sndBoost").setAttribute("aria-checked", S.snd.boost);
   $("#sndLoud").setAttribute("aria-checked", loudOn());
+  const bm = bgMode(), learned = !!store.get("bgFlaky", false);
+  $("#sndBg").innerHTML = [["auto", "Automático", learned ? "En este teléfono Hum usa el modo seguro: aquí Android duerme el sonido de las apps." : "Suena igual que en la app. Si tu teléfono duerme el sonido, Hum pasa solo al modo seguro."],
+    ["same", "Mismo sonido siempre", "Ecualizador, tu oído y efectos siguen sonando con la app cerrada."],
+    ["safe", "Modo seguro", "La canción pasa al reproductor del teléfono: nunca se traba, pero el ecualizador descansa."]]
+    .map(([k, n, d]) => `<button type="button" class="spk${bm === k ? " on" : ""}" data-bgmode="${k}" aria-pressed="${bm === k}"><b>${n}</b><small>${d}</small></button>`).join("");
   const dot = $("#navSnd .eq-dot"); if (dot) dot.hidden = S.snd.spk === "none" && !S.snd.boost;
 }
 function openSnd(){ if (S.drawer){ S.drawer = false; applySide(); } renderSndUI(); $("#sndDlg").showModal(); }
@@ -8003,6 +8019,8 @@ document.addEventListener("click", e => {
   if (pa){ toggleInPl(S.pickPl, pa.dataset.pickadd, true); pa.setAttribute("aria-pressed", IMPORTED[S.pickPl] ? plHas(IMPORTED[S.pickPl], pa.dataset.pickadd) : false); return; }
   const un = e.target.closest("[data-unpl]");
   if (un){ e.stopPropagation(); toggleInPl(S.view.id, un.dataset.unpl); return; }
+  const bgm = e.target.closest("[data-bgmode]");
+  if (bgm){ store.set("bgMode", bgm.dataset.bgmode); if (bgm.dataset.bgmode === "same") store.set("bgFlaky", false); renderSndUI(); toast(bgm.dataset.bgmode === "safe" ? "Listo: al salir de la app, la música pasa al reproductor del teléfono." : "Listo: la música suena igual con la app cerrada."); return; }
   const kp = e.target.closest("[data-keep]"); if (kp){ setKeep(kp.dataset.keep); return; }
   const vb = e.target.closest("[data-vibe]"); if (vb){ applyVibe(vb.dataset.vibe); return; }
   const sk = e.target.closest("[data-lookskin],[data-lookart]");
@@ -8257,7 +8275,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.18.0";
+const APP_V = "1.18.1";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
