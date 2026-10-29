@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <!-- Security: code may only come from this app, Google sign-in and the lyrics-AI library; no other site can run code here -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-gw136ArxwHj0Al+vxSoR4J7rDOSZc63/1cFfGkS3tPY=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://ntfy.sh https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-knbtbXnSJmzPDkbA8I+rDxiHDPQShC42lAuMAkAtUDg=' 'wasm-unsafe-eval' blob: https://accounts.google.com/gsi/client https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/; connect-src 'self' blob: data: https://ntfy.sh https://lrclib.net https://api.lemonsqueezy.com https://gateway.umami.is https://api.open-meteo.com https://www.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2 https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/ https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/ https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/ https://huggingface.co https://*.huggingface.co https://*.hf.co; img-src 'self' data: blob: https:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1874,6 +1874,7 @@ const sub = l => l.mine ? `Tu playlist · ${nc(l.tracks.length)}` : l.imported ?
 let ctx = null, master, analyser, noiseBuf, bus = null, timer = null, startTime = 0, nextStep = 0;
 // Two "decks" for your own files, so one song can fade into the next. `audio` is always the one you hear as current.
 let audio = new Audio(); audio.preload = "auto";
+const deckA = audio;
 const deckB = new Audio(); deckB.preload = "auto";
 const keep = new Audio(); keep.loop = true; keep.src = URL.createObjectURL(silentWav(8));
 // plan B for phones whose screen-off stops the sound engine: a plain player (no equalizer) the phone always lets play
@@ -2065,7 +2066,7 @@ async function play(){
   const fresh = ensureCtx();
   S.playing = true;
   if (fresh) watchCtx();
-  unlockBg();
+  unlockBg(); unlockDecks();
   try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {} // iPhone: music, not a sound effect
   // start the sound right away, while the tap still counts: phones (iPhone above all) block it if we wait first
   if (t.user){
@@ -2214,6 +2215,22 @@ function fromName(name){
   return m.length > 1 ? { artist: m[0].trim(), title: m.slice(1).join(" - ").trim() } : { artist: "", title: base };
 }
 const GENCV = new Set(); // songs whose drawn cover already exists
+// a song's own picture changed (read from its file): show it everywhere it appears
+function setPic(t, pic){
+  const old = t.album.cover; t.rec.pic = pic; t.album.cover = URL.createObjectURL(pic); GENCV.delete(t.id);
+  if (old && old.startsWith("blob:")) setTimeout(() => URL.revokeObjectURL(old), 4000);
+  document.querySelectorAll(`.row[data-row="${t.id}"]`).forEach(r => { const im = r.querySelector("img"); if (im){ im.removeAttribute("data-gen"); im.src = cover(t); } });
+  if (cur() === t){ try { msFor = null; } catch {} paint(); }
+}
+// a picture inside a file that can't be shown: use the drawn cover instead of a broken image
+document.addEventListener("error", e => {
+  const im = e.target; if (!im || im.tagName !== "IMG" || !String(im.src).startsWith("blob:")) return;
+  const bad = im.src, t = USER.map(id => BYID[id]).find(x => x && x.rec.pic && x.album.cover === bad); if (!t) return;
+  t.rec.pic = null; t.rec.picBad = 1; t.album.cover = null; putRec(t.rec).catch(() => {});
+  setTimeout(() => URL.revokeObjectURL(bad), 4000);
+  document.querySelectorAll("img").forEach(x => { if (x.src === bad) x.src = cover(t); });
+  if (cur() === t){ try { msFor = null; } catch {} paint(); }
+}, true);
 const coverLater = t => t.user && !t.rec.pic && !GENCV.has(t.id); // drawn when its row comes into view
 function addUserTrack(rec){
   const h = hash(rec.id + rec.title);
@@ -2257,19 +2274,46 @@ function txt(d){
   return s.split("\0")[0].trim();
 }
 const syncsafe = (b, i) => (b[i] & 0x7f) << 21 | (b[i + 1] & 0x7f) << 14 | (b[i + 2] & 0x7f) << 7 | (b[i + 3] & 0x7f);
+// the cover's real type, read from its first bytes (files often label it wrong); null = not an image
+function imgType(d, i = 0){
+  if (d[i] === 0xFF && d[i + 1] === 0xD8) return "image/jpeg";
+  if (d[i] === 0x89 && d[i + 1] === 0x50 && d[i + 2] === 0x4E && d[i + 3] === 0x47) return "image/png";
+  if (d[i] === 0x47 && d[i + 1] === 0x49 && d[i + 2] === 0x46) return "image/gif";
+  if (d[i] === 0x52 && d[i + 1] === 0x49 && d[i + 2] === 0x46 && d[i + 3] === 0x46 && d[i + 8] === 0x57 && d[i + 9] === 0x45) return "image/webp";
+  if (d[i] === 0x42 && d[i + 1] === 0x4D) return "image/bmp";
+  return null;
+}
+const picOf = (d, i) => { const ty = i < d.length - 8 && imgType(d, i); return ty ? new Blob([d.slice(i)], { type: ty }) : null; };
+const u32 = (b, i) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
+const u32le = (b, i) => (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0;
+const utf8 = b => { try { return new TextDecoder("utf-8").decode(b).replace(/\0+$/g, "").trim(); } catch { return ""; } };
+function deunsync(d){ const o = new Uint8Array(d.length); let j = 0; for (let i = 0; i < d.length; i++){ o[j++] = d[i]; if (d[i] === 0xFF && d[i + 1] === 0) i++; } return o.subarray(0, j); }
 async function readTags(file){
-  const head = new Uint8Array(await file.slice(0, 10).arrayBuffer());
-  if (head.length < 10 || head[0] !== 0x49 || head[1] !== 0x44 || head[2] !== 0x33) return {};
-  const ver = head[3]; if (ver < 3 || ver > 4) return {};
-  const b = new Uint8Array(await file.slice(10, 10 + Math.min(syncsafe(head, 6), 12e6)).arrayBuffer());
-  const out = {}; let p = 0;
-  if (head[5] & 0x40) p = ver === 4 ? syncsafe(b, 0) : (((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0) + 4;
-  while (p + 10 <= b.length){
-    const id = String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
-    if (!/^[A-Z0-9]{4}$/.test(id)) break;
-    const fs = ver === 4 ? syncsafe(b, p + 4) : (((b[p + 4] << 24) | (b[p + 5] << 16) | (b[p + 6] << 8) | b[p + 7]) >>> 0);
-    if (!fs || p + 10 + fs > b.length) break;
-    const d = b.subarray(p + 10, p + 10 + fs); p += 10 + fs;
+  const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  if (head.length >= 10 && head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) return readId3(file, head);
+  if (head.length >= 8 && head[4] === 0x66 && head[5] === 0x74 && head[6] === 0x79 && head[7] === 0x70) return readMp4(file).catch(() => ({})); // M4A, MP4, AAC from iTunes
+  if (head.length >= 4 && head[0] === 0x66 && head[1] === 0x4C && head[2] === 0x61 && head[3] === 0x43) return readFlac(file).catch(() => ({}));
+  return {};
+}
+async function readId3(file, head){
+  const ver = head[3]; if (ver < 2 || ver > 4) return {};
+  let b = new Uint8Array(await file.slice(10, 10 + Math.min(syncsafe(head, 6), 12e6)).arrayBuffer());
+  const unsync = !!(head[5] & 0x80), v22 = ver === 2;
+  if (unsync && ver < 4) b = deunsync(b); // the whole tag was written with 0x00 after every 0xFF: undo it, or the cover is a broken image
+  const out = {}; let p = 0, picType = -1;
+  if (!v22 && head[5] & 0x40) p = ver === 4 ? syncsafe(b, 0) : u32(b, 0) + 4;
+  const NAME = { TT2: "TIT2", TP1: "TPE1", TAL: "TALB", TCO: "TCON", ULT: "USLT", SLT: "SYLT", PIC: "APIC" };
+  const hl = v22 ? 6 : 10;
+  while (p + hl <= b.length){
+    let id = String.fromCharCode(b[p], b[p + 1], b[p + 2]) + (v22 ? "" : String.fromCharCode(b[p + 3]));
+    if (!(v22 ? /^[A-Z0-9]{3}$/ : /^[A-Z0-9]{4}$/).test(id)) break;
+    const fs = v22 ? (b[p + 3] << 16) | (b[p + 4] << 8) | b[p + 5] : ver === 4 ? syncsafe(b, p + 4) : u32(b, p + 4);
+    if (!fs || p + hl + fs > b.length) break;
+    let d = b.subarray(p + hl, p + hl + fs); const fl = v22 ? 0 : b[p + 9]; p += hl + fs;
+    if (v22) id = NAME[id] || "";
+    else if (ver === 3){ if (fl & 0xC0) continue; if (fl & 0x20) d = d.subarray(1); } // compressed or encrypted: skip; grouping byte
+    else { if (fl & 0x0C) continue; if (fl & 0x40) d = d.subarray(1); if (fl & 0x01) d = d.subarray(4); if (fl & 0x02 || unsync) d = deunsync(d); }
+    if (!d.length) continue;
     if (id === "TIT2") out.title = txt(d);
     else if (id === "TPE1") out.artist = txt(d);
     else if (id === "TALB") out.album = txt(d);
@@ -2284,20 +2328,83 @@ async function readTags(file){
       while (i < d.length){
         const end = findTerm(d, i, enc), text = decodeStr(d.subarray(i, end), enc);
         i = end + (wide ? 2 : 1); if (i + 4 > d.length) break;
-        const ts = ((d[i] << 24) | (d[i + 1] << 16) | (d[i + 2] << 8) | d[i + 3]) >>> 0; i += 4;
+        const ts = u32(d, i); i += 4;
         if (fmt === 2) lines.push({ t: ts / 1000, text: text.replace(/^[\r\n]+/, "").trim() });
       }
       if (lines.length >= 3) out.synced = lines.sort((a, b) => a.t - b.t);
     }
-    else if (id === "APIC" && !out.pic){
-      const enc = d[0]; let i = 1; while (i < d.length && d[i] !== 0) i++;
-      let mime = latin1(d.subarray(1, i)).toLowerCase() || "image/jpeg";
-      if (!mime.includes("/")) mime = "image/" + (mime === "jpg" ? "jpeg" : mime);
-      i += 2;
-      if (enc === 1 || enc === 2){ while (i + 1 < d.length && !(d[i] === 0 && d[i + 1] === 0)) i += 2; i += 2; }
-      else { while (i < d.length && d[i] !== 0) i++; i++; }
-      if (i < d.length) out.pic = new Blob([d.slice(i)], { type: mime });
+    else if (id === "APIC" && picType !== 3){ // the front cover wins over other pictures
+      const enc = d[0]; let i;
+      if (v22) i = 4; else { i = 1; while (i < d.length && d[i] !== 0) i++; i++; }
+      const kind = d[i]; i++;
+      i = skipStr(d, i, enc);
+      const pic = picOf(d, i);
+      if (pic && (!out.pic || kind === 3)){ out.pic = pic; picType = kind; }
     }
+  }
+  return out;
+}
+async function readMp4(file){
+  const rd = async (o, n) => new Uint8Array(await file.slice(o, o + n).arrayBuffer());
+  let o = 0, moov = null;
+  for (let k = 0; k < 64 && o + 8 <= file.size; k++){ // the song's info box can be at the start or at the very end
+    const h = await rd(o, 16); let n = u32(h, 0); const ty = latin1(h.subarray(4, 8));
+    if (n === 1) n = u32(h, 8) * 4294967296 + u32(h, 12); else if (n === 0) n = file.size - o;
+    if (n < 8) break;
+    if (ty === "moov"){ if (n > 64e6) return {}; moov = await rd(o, n); break; }
+    o += n;
+  }
+  if (!moov) return {};
+  const kids = (s, e, f) => { for (let q = s; q + 8 <= e;){ let n = u32(moov, q); if (n === 0) n = e - q; if (n < 8 || q + n > e) break; f(latin1(moov.subarray(q + 4, q + 8)), q + 8, q + n); q += n; } };
+  let ilst = null;
+  const walk = (s, e, depth) => kids(s, e, (ty, a, z) => {
+    if (ilst) return;
+    if (ty === "ilst"){ ilst = [a, z]; return; }
+    if (depth < 5 && (ty === "moov" || ty === "udta" || ty === "meta")) walk(ty === "meta" && latin1(moov.subarray(a + 4, a + 8)) !== "hdlr" ? a + 4 : a, z, depth + 1);
+  });
+  walk(0, moov.length, 0);
+  if (!ilst) return {};
+  const out = {};
+  kids(ilst[0], ilst[1], (name, a, z) => kids(a, z, (ty, da, dz) => {
+    if (ty !== "data" || dz - da < 8) return;
+    const v = moov.subarray(da + 8, dz);
+    if (name === "©nam") out.title = utf8(v);
+    else if (name === "©ART" || (name === "aART" && !out.artist)) out.artist = utf8(v);
+    else if (name === "©alb") out.album = utf8(v);
+    else if (name === "©gen") out.genre = utf8(v).slice(0, 60);
+    else if (name === "gnre" && v.length >= 2 && !out.genre) out.genre = ID3G[((v[0] << 8) | v[1]) - 1] || "";
+    else if (name === "©lyr") out.lyrics = utf8(v);
+    else if (name === "covr" && !out.pic) out.pic = picOf(v, 0);
+  }));
+  return out;
+}
+async function readFlac(file){
+  const rd = async (o, n) => new Uint8Array(await file.slice(o, o + n).arrayBuffer());
+  const out = {}; let o = 4;
+  for (let k = 0; k < 64; k++){
+    const h = await rd(o, 4); if (h.length < 4) break;
+    const last = h[0] & 0x80, ty = h[0] & 0x7F, n = (h[1] << 16) | (h[2] << 8) | h[3];
+    if ((ty === 4 || ty === 6) && n < 16e6){
+      const b = await rd(o + 4, n);
+      if (ty === 4){ // the song's words: TITLE=…, ARTIST=…
+        let q = 4 + u32le(b, 0); const cnt = u32le(b, q); q += 4;
+        for (let c = 0; c < cnt && q + 4 <= b.length; c++){
+          const len = u32le(b, q); q += 4; const kv = utf8(b.subarray(q, q + len)); q += len;
+          const e = kv.indexOf("="); if (e < 1) continue;
+          const key = kv.slice(0, e).toUpperCase(), val = kv.slice(e + 1).trim(); if (!val) continue;
+          if (key === "TITLE" && !out.title) out.title = val;
+          else if (key === "ARTIST" && !out.artist) out.artist = val;
+          else if (key === "ALBUM" && !out.album) out.album = val;
+          else if (key === "GENRE" && !out.genre) out.genre = val.slice(0, 60);
+          else if ((key === "LYRICS" || key === "UNSYNCEDLYRICS") && !out.lyrics) out.lyrics = val;
+        }
+      } else { // a picture
+        const kind = u32(b, 0); let q = 4; q += 4 + u32(b, q); q += 4 + u32(b, q); q += 16; const len = u32(b, q); q += 4;
+        const pic = q + len <= b.length ? picOf(b.subarray(q, q + len), 0) : null;
+        if (pic && (!out.pic || kind === 3)) out.pic = pic;
+      }
+    }
+    o += 4 + n; if (last) break;
   }
   return out;
 }
@@ -3081,7 +3188,7 @@ async function analyzeFeel(blob){
 /* ---------- DJ transitions: the next song fades in, optionally at the same tempo, then glides back to its own ---------- */
 const mixSaved = store.get("mix", null);
 S.mix = { on: !!(mixSaved && mixSaved.on), secs: mixSaved && isFinite(mixSaved.secs) ? clamp(Math.round(+mixSaved.secs), 2, 16) : 8, sync: !mixSaved || mixSaved.sync !== false };
-let mix = null, glide = null, mixBusy = false, mixFailed = null;
+let mix = null, glide = null, mixBusy = false, mixFailed = null, mixBlocked = false;
 const deckOf = el => decks ? decks.find(d => d.el === el) : null;
 function deckGain(el, v){ const d = deckOf(el); if (d && ctx){ d.g.gain.cancelScheduledValues(ctx.currentTime); d.g.gain.setValueAtTime(v, ctx.currentTime); } }
 function cancelMix(){
@@ -3093,17 +3200,30 @@ function upcoming(){
   if (S.qi + 1 < S.queue.length) return S.qi + 1;
   return S.repeat === "all" && S.queue.length > 1 ? 0 : -1;
 }
-const once = (el, ok, bad) => new Promise((res, rej) => {
-  const done = f => () => { el.removeEventListener(ok, a); el.removeEventListener(bad, b); f(); };
+const once = (el, ok, bad, ms = 0) => new Promise((res, rej) => {
+  let to = 0;
+  const done = f => () => { clearTimeout(to); el.removeEventListener(ok, a); el.removeEventListener(bad, b); f(); };
   const a = done(res), b = done(rej); el.addEventListener(ok, a); el.addEventListener(bad, b);
+  if (ms) to = setTimeout(done(() => rej(new Error("timeout"))), ms);
 });
+const within = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+// phones (iPhone above all) only let a player start on its own if it already played once from a tap:
+// the second player gets that tap too, silently, so the mix into the next song is allowed
+let deckUnlocked = false;
+function unlockDecks(){
+  if (deckUnlocked || mix || mixBusy || !decks) return;
+  const el = audio === deckA ? deckB : deckA; if (!el.paused) return;
+  deckUnlocked = true; mixBlocked = false;
+  el.muted = true; el.src = keep.src; el.dataset.id = ""; el.dataset.k = "";
+  el.play().then(() => { if (!el.dataset.id){ el.pause(); el.muted = false; } }).catch(() => { deckUnlocked = false; if (!el.dataset.id) el.muted = false; });
+}
 async function startMix(t, nt, ni, fade){
   const from = audio, inc = decks[0].el === from ? decks[1].el : decks[0].el;
-  inc.pause(); deckGain(inc, 0);
+  inc.pause(); inc.muted = false; deckGain(inc, 0);
   inc.src = srcFor(nt); inc.dataset.id = nt.id; inc.dataset.k = srcKind(nt);
   inc.preservesPitch = inc.mozPreservesPitch = inc.webkitPreservesPitch = S.fx.mode === "off"; // speed changes keep the key (unless slowed / sped up is on)
-  await once(inc, "loadedmetadata", "error");
-  if (!S.playing || audio !== from || cur() !== t) return; // something changed while loading
+  await once(inc, "loadedmetadata", "error", 5000); // a file that never answers can't hold the song hostage
+  if (!S.playing || audio !== from || cur() !== t){ deckGain(inc, 1); return; } // something changed while loading
   let r = fxRate(), startAt = 0;
   if (S.mix.sync && t.rec.bpm && nt.rec.bpm){
     const bOut = t.rec.bpm * from.playbackRate;
@@ -3118,23 +3238,26 @@ async function startMix(t, nt, ni, fade){
   }
   try { inc.currentTime = startAt; } catch {}
   inc.playbackRate = r;
+  // the new song starts silent; the fade begins only once it really plays, so the current song never dips for nothing
+  try { await within(inc.play(), 4000); }
+  catch (e){ inc.pause(); deckGain(inc, 1); deckGain(from, 1); if (e && e.name === "NotAllowedError") mixBlocked = true; throw e; }
+  // the old song ended (and the app already moved on) while the new one was starting: drop this mix
+  if (audio !== from || cur() !== t || !S.playing){ inc.pause(); deckGain(inc, 1); deckGain(from, 1); return; }
   const N = 64, up = new Float32Array(N), dn = new Float32Array(N);
   for (let i = 0; i < N; i++){ const x = i / (N - 1); up[i] = Math.sin(x * Math.PI / 2); dn[i] = Math.cos(x * Math.PI / 2); }
   const gi = deckOf(inc).g.gain, go = deckOf(from).g.gain, now = ctx.currentTime;
   gi.cancelScheduledValues(now); go.cancelScheduledValues(now);
   gi.setValueAtTime(0, now); go.setValueAtTime(1, now);
-  gi.setValueCurveAtTime(up, now + .05, fade); go.setValueCurveAtTime(dn, now + .05, fade);
-  try { await inc.play(); } catch { deckGain(from, 1); deckGain(inc, 1); inc.pause(); return; }
-  // the old song ended (and the app already moved on) while the new one was starting: drop this mix
-  if (audio !== from || cur() !== t){ inc.pause(); deckGain(inc, 1); deckGain(from, 1); return; }
-  mix = { from, r, end: now + .05 + fade };
+  gi.setValueCurveAtTime(up, now + .02, fade); go.setValueCurveAtTime(dn, now + .02, fade);
+  mix = { from, r, end: now + .02 + fade, wall: performance.now() + (fade + 1.5) * 1000 };
   glide = null; audio = inc; S.qi = ni; S.autoNext = Date.now(); paint();
 }
 async function mixTick(){
   if (!ctx || !decks) return;
   const now = ctx.currentTime;
-  if (mix && now >= mix.end){
-    mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = fxRate();
+  // the mix is over: on time, or by the clock if the sound engine stood still (the phone paused it), or the old song simply ended
+  if (mix && (now >= mix.end || performance.now() > mix.wall || mix.from.ended)){
+    mix.from.pause(); deckGain(mix.from, 1); mix.from.playbackRate = fxRate(); deckGain(audio, 1);
     if (Math.abs(mix.r - fxRate()) > .002) glide = { start: now, dur: Math.max(8, S.mix.secs * 1.5), r: mix.r };
     mix = null;
   }
@@ -3144,7 +3267,7 @@ async function mixTick(){
     if (x >= 1){ audio.playbackRate = fxRate(); glide = null; }
     paintTempo();
   }
-  if (bgOn || (S.sleep && S.sleep.stopAtEnd) || mix || mixBusy || !S.mix.on || !S.playing) return;
+  if (bgOn || (S.sleep && S.sleep.stopAtEnd) || mix || mixBusy || mixBlocked || !S.mix.on || !S.playing || document.hidden && bgSafe()) return;
   const t = cur(); if (!t || !t.user || !(t.dur > 0)) return;
   const remain = (t.dur - audio.currentTime) / (audio.playbackRate || 1);
   if (remain > S.mix.secs + .15 || remain < 1.2) return;
@@ -3152,23 +3275,39 @@ async function mixTick(){
   const nt = BYID[S.queue[ni]]; if (!nt || !nt.user || !nt.rec.blob || nt.id === t.id || mixFailed === t.id) return;
   mixBusy = true;
   try { await startMix(t, nt, ni, Math.max(1, Math.min(S.mix.secs, remain - .2, (nt.dur || 60) / 2))); }
-  catch { mixFailed = t.id; } // that file could not be read: let this song end normally
+  catch { mixFailed = t.id; } // that file could not be read or start in time: this song ends normally, the next ones mix again
   finally { mixBusy = false; }
 }
 setInterval(mixTick, 100);
 // Safety net for moving on to the next song. Some files never send the "ended" signal (often MP3s
 // whose length is written wrong in the file: they freeze in their last second), and a song can end
 // right while a DJ mix is starting. Once a second: if the song is at its end and nothing moved, go on.
-let endAt = -1, endStuck = 0;
+// With the app open, a song that stands still in the middle (the file stalled, or something paused it) is nudged
+// back into motion; if it can't move, it's treated as a song that can't be read.
+let endAt = -1, endStuck = 0, stallAt = -1, stallN = 0, pausedN = 0;
 setInterval(() => {
-  const t = cur();
-  if (!S.playing || !t || !t.user || bgOn || mix || mixBusy || !t.rec.blob || audio.dataset.id !== t.id){ endStuck = 0; return; }
-  if (audio.ended){ endStuck = 0; next(true); return; }
-  const d = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : t.dur;
-  if (d > 0 && d - audio.currentTime < 1.5){
-    endStuck = audio.currentTime === endAt ? endStuck + 1 : 0; endAt = audio.currentTime;
+  const t = cur(), el = bgOn ? bgEl : audio;
+  if (!S.playing || !t || !t.user || mix || mixBusy || !t.rec.blob || el.dataset.id !== t.id){ endStuck = stallN = pausedN = 0; return; }
+  if (el.ended){ endStuck = 0; next(true); return; }
+  const d = isFinite(el.duration) && el.duration > 0 ? el.duration : t.dur, ct = el.currentTime;
+  if (d > 0 && d - ct < 1.5){
+    endStuck = ct === endAt ? endStuck + 1 : 0; endAt = ct; stallN = pausedN = 0;
     if (endStuck >= 3){ endStuck = 0; next(true); }
-  } else endStuck = 0;
+    return;
+  }
+  endStuck = 0;
+  if (bgOn || document.hidden){ stallN = pausedN = 0; return; } // with the screen off, the plain-player watchers take care
+  if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {}); // "playing" but the sound engine is asleep
+  if (el.paused){
+    pausedN++; stallN = 0;
+    if (pausedN === 2) el.play().catch(playFail);
+    else if (pausedN >= 6){ pausedN = 0; S.playing = false; clearInterval(timer); paint(); } // it won't start: show it as paused, ▶ works
+    return;
+  }
+  pausedN = 0;
+  stallN = ct === stallAt ? stallN + 1 : 0; stallAt = ct;
+  if (stallN === 4){ try { el.currentTime = ct + .05; } catch {} el.play().catch(() => {}); }
+  else if (stallN >= 9){ stallN = 0; playFail({ name: "MediaError" }); }
 }, 1000);
 /* ---------- screen off on phones: the music keeps going ----------
    Some phones (iPhone above all, and some Android ones) stop the app's sound engine when the screen turns off,
@@ -4275,7 +4414,7 @@ function moveFile(rec, dir, left){
     rec.blob = blob;
     try {
       const tags = await readTags(rec.blob);
-      if (tags.pic){ rec.pic = tags.pic; const old = t.album.cover; if (old && old.startsWith("blob:")) URL.revokeObjectURL(old); t.album.cover = URL.createObjectURL(tags.pic); }
+      if (tags.pic) setPic(t, tags.pic);
     } catch {}
     await putRec(rec);
     if (!rec.bpmDone) queueBpm(rec);
@@ -8627,6 +8766,17 @@ function renderLook(){
 function openLook(){ if (S.drawer){ S.drawer = false; applySide(); } renderLook(); if (!$("#lookDlg").open) $("#lookDlg").showModal(); }
 applyLook();
 
+/* ---------- covers the old reader missed (M4A, FLAC, older MP3 tags): read once, quietly, a song at a time ---------- */
+setTimeout(async function picPass(){
+  const todo = USER.map(id => BYID[id]).filter(t => t && t.rec.blob && !t.rec.pic && !t.rec.picBad && (t.rec.picScan || 0) < 2);
+  for (const t of todo){
+    if (!BYID[t.id] || !t.rec.blob) continue;
+    try { const tags = await readTags(t.rec.blob); if (tags.pic && !t.rec.pic) setPic(t, tags.pic); } catch {}
+    t.rec.picScan = 2; putRec(t.rec).catch(() => {});
+    await new Promise(r => setTimeout(r, 250));
+  }
+}, 9000);
+
 /* ---------- covers drawn only when their row is about to be seen ---------- */
 if ("IntersectionObserver" in window){
   const genIO = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const im = e.target; genIO.unobserve(im); const t = BYID[im.dataset.gen]; if (t) im.src = cover(t); im.removeAttribute("data-gen"); }), { rootMargin: "300px 0px" });
@@ -9194,7 +9344,7 @@ window.addEventListener("appinstalled", () => { installEvt = null; try { window.
 /* ---------- always the newest Hum ----------
    Hum asks the site for a new version when it opens, when you come back to it and every 30 minutes. If one arrives
    while you are listening, a small notice offers to update (it never reloads by itself, so your song is not cut). */
-const APP_V = "1.19.0";
+const APP_V = "1.19.1";
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   let hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {

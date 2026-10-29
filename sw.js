@@ -1,7 +1,7 @@
 // Keeps the app working offline: the page is fetched fresh when online and
 // served from cache when not; fonts and cover images are cached as they load.
 // Paths are relative so the app works both at a site's root and in a sub-folder (GitHub Pages).
-const CACHE = "hum-v43";
+const CACHE = "hum-v44";
 const HOME = new URL("./", self.location).href;
 const FONTS = ["BricolageGrotesque-latin-1", "BricolageGrotesque-latin-ext-0", "Figtree-latin-3", "Figtree-latin-ext-2", "JetBrainsMono-latin-5", "JetBrainsMono-latin-ext-4"].map(n => "fonts/" + n + ".woff2");
 const SHELL = ["./", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "i18n/en.json", "vendor/qrcode.js", ...FONTS].map(p => new URL(p, self.location).href);
